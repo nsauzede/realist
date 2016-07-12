@@ -3,6 +3,8 @@ TARGET=realist
 CXXFLAGS=-Wall -Werror
 CXXFLAGS+=-Wextra
 
+CXXFLAGS+=-std=c++11
+
 CXXFLAGS+=-g -O0
 
 CXXFLAGS+=-I.

@@ -56,17 +56,21 @@ public:
 		}
 		return quit;
 	}
-	void Draw( uint8_t *arr = 0) {
+	void Draw( double *arr = 0) {
 		SDL_Rect rect;
 		if (arr) {
 			rect.w = 1;
 			rect.h = 1;
-			uint8_t *_arr = arr;
+			double *_arr = arr;
 			for (unsigned jj = 0; jj < m_h; jj++) {
 				rect.y = jj;
 				for (unsigned ii = 0; ii < m_w; ii++) {
 					rect.x = ii;
-					Uint32 col = SDL_MapRGB( m_screen->format, _arr[0], _arr[1], _arr[2]);
+					unsigned r, g, b;
+					r = _arr[0] * 256;
+					g = _arr[1] * 256;
+					b = _arr[2] * 256;
+					Uint32 col = SDL_MapRGB( m_screen->format, r, g, b);
 					SDL_FillRect( m_screen, &rect, col);
 					_arr += 3;
 				}
