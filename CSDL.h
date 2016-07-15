@@ -53,6 +53,12 @@ public:
 				quit = 1;
 				break;
 			}
+			else if (event.type == SDL_KEYUP) {
+				if (event.key.keysym.sym == SDLK_ESCAPE) {
+					quit = 1;
+					break;
+				}
+			}
 		}
 		return quit;
 	}
@@ -67,9 +73,9 @@ public:
 				for (unsigned ii = 0; ii < m_w; ii++) {
 					rect.x = ii;
 					unsigned r, g, b;
-					r = _arr[0] * 256;
-					g = _arr[1] * 256;
-					b = _arr[2] * 256;
+					r = _arr[0] * 255;
+					g = _arr[1] * 255;
+					b = _arr[2] * 255;
 					Uint32 col = SDL_MapRGB( m_screen->format, r, g, b);
 					SDL_FillRect( m_screen, &rect, col);
 					_arr += 3;
