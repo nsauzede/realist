@@ -45,13 +45,16 @@ void vprint( const v3 &v) {
 	printf( "%f,%f,%f\n", v[0], v[1], v[2]);
 }
 
+#define ONCE
 class CRealist {
 public:
 	void Trace( const double &t, const v3 &e, const v3 &v, v3 &color) {
 //		printf( "t=%f\n", t);
 //		vprint( e);
 //		vprint( "v", v);
-//		vprint( v);
+#ifdef ONCE
+		vprint( v);
+#endif
 		v3 va;
 		vadd( va, e, v);
 //		vprint( "e+v", va);
@@ -62,21 +65,30 @@ public:
 	void Render( double tr) {
 		memset( m_arr, 0, m_sz);
 		// eye
+#ifdef ONCE
+		v3 e = { 0, 0, 3};
+		v3 f = { 0, 0, -2};	// front towards screen
+		v3 u = { 0, 1, 0};		// up along screen
+#else
 		v3 e = { 3, 3, 0};
 		v3 f = { -1, -1, 0};	// front towards screen
 		v3 u = { 0, 0, 1};		// up along screen
-		v3 r;
-		vnorm( f);
+#endif
 		vnorm( u);
+		v3 r;
 		vcross( r, f, u);			// right along screen
+		vnorm( r);
 		// ray
 //		double x, y, z;
 		v3 v;
 //		printf( "tr=%f\n", tr);
-//		vprint( "e", e);
-//		vprint( "f", f);
-//		vprint( "u", u);
-//		vprint( "r", r);
+#if 1
+		vprint( "e", e);
+		vprint( "f", f);
+		vprint( "u", u);
+		vprint( "r", r);
+#endif
+		printf( "\n");
 		for (unsigned jj = 0; jj < m_h; jj++) {
 			v3 vu;
 			vmult( vu, u, (double)jj - m_h / 2);
@@ -86,6 +98,7 @@ public:
 				vmult( vr, r, (double)ii - m_w / 2);
 //				vprint( "vr", vr);
 				vcopy( v, f);
+				vnorm( v);
 				vadd( v, v, vu);
 				vadd( v, v, vr);
 //				vnorm( v);
@@ -95,7 +108,9 @@ public:
 				m_arr[((jj * m_w + ii) * 3) + 1] = color[1];
 				m_arr[((jj * m_w + ii) * 3) + 2] = color[2];
 			}
-//			printf( "\n");
+#ifdef ONCE
+			printf( "\n");
+#endif
 		}
 	}
 #define W 320
@@ -112,10 +127,12 @@ public:
 			if (sdl.Poll())
 				break;
 			Render( t);
+#ifdef ONCE
+			break;
+#endif
 			t += 0.1;
 			sdl.Draw( m_arr);
 			sdl.Delay( 1000);
-//			break;
 		}
 		free( m_arr);
 	}
@@ -127,6 +144,10 @@ private:
 
 int main() {
 	CRealist r;
-	r.Run();
+	r.Run(
+#ifdef ONCE
+		5, 5
+#endif
+	);
 	return 0;
 }
