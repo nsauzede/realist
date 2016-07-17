@@ -83,6 +83,8 @@ int solvetri( const double &a, const double &b, const double &c, double &t1, dou
 
 class CObject {
 public:
+	virtual ~CObject() {
+	}
 	// returns intersection distance (HUGE_VAL => no intersection)
 	virtual double Intersec( const v3 &e, const v3 &v) const = 0;
 	virtual void SetColor( const double *color) {
@@ -125,13 +127,9 @@ private:
 	double m_r;
 };
 
-//#define ONCE
 class CRealist {
 public:
 	void Trace( const v3 &v, v3 &color) const {
-#ifdef ONCE
-		vprint( v);
-#endif
 		v3 va;
 		vadd( va, m_e, v);
 #define TMAX 1E10
@@ -169,9 +167,6 @@ public:
 				m_arr[(((m_h - jj - 1)  * m_w + ii) * 3) + 1] = color[1];
 				m_arr[(((m_h - jj - 1)  * m_w + ii) * 3) + 2] = color[2];
 			}
-#ifdef ONCE
-			printf( "\n");
-#endif
 		}
 	}
 #define W 640
@@ -199,27 +194,20 @@ public:
 		printf( "ww=%f hh=%f\n", m_ww, m_hh);
 		// eye
 #define ED 3
-#if 0
-		vset( m_e, ED, ED, 0);
-		vset( m_f, -1, -1, 0);	// front towards screen
-		vset( m_u, 0, 0, 1);		// up along screen
-#else
 		vset( m_e, ED, ED, ED);
 		vset( m_f, -1, -1, -1);	// front towards screen
 		vset( m_u, 0, 0, 1);		// up along screen
-#endif
 
 		vnorm( m_u);
 		vcross( m_r, m_f, m_u);		// compute right
 		vcross( m_u, m_r, m_f);		// re-compute up
 		vnorm( m_u);
 		vnorm( m_r);
-#if 1
+
 		vprint( "e", m_e);
 		vprint( "f", m_f);
 		vprint( "u", m_u);
 		vprint( "r", m_r);
-#endif
 		printf( "\n");
 
 		for (unsigned ii = 0; ii < (sizeof(sph) / sizeof(sph[0])); ii++) {
@@ -229,7 +217,8 @@ public:
 		memset( m_arr, 0, m_sz);
 		int quit = 0;
 		while (!quit) {
-			switch (sdl.Poll()) {
+			int ev = sdl.Poll();
+			switch (ev) {
 				case CSDL::QUIT:
 					quit = 1;
 					break;
@@ -249,20 +238,20 @@ public:
 			if (quit)
 				break;
 			Render( t);
-#ifdef ONCE
-			break;
-#endif
 			t += 0.1;
 			sdl.Draw( m_arr);
-			sdl.Delay( 1000);
+			if (ev != CSDL::NONE) {
+				sdl.Delay( 50);
+			}
+			else {
+				sdl.Delay( 500);
+			}
 		}
 		free( m_arr);
-#if 0
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
 			delete m_objs.at( ii);
 			m_objs.at( ii) = 0;
 		}
-#endif
 	}
 private:
 	unsigned m_w, m_h;	// screen pixel dimensions
@@ -279,10 +268,6 @@ private:
 
 int main() {
 	CRealist r;
-	r.Run(
-#ifdef ONCE
-		5, 5
-#endif
-	);
+	r.Run();
 	return 0;
 }
