@@ -45,22 +45,39 @@ public:
 	}
 	atexit( SDL_Quit);
 	}
+	enum { NONE, QUIT, LEFT, RIGHT, UP, DOWN};
 	int Poll() {
-		int quit = 0;
+		int result = NONE;
 		SDL_Event event;
 		while (SDL_PollEvent( &event)) {
 			if (event.type == SDL_QUIT) {
-				quit = 1;
+				result = QUIT;
 				break;
 			}
 			else if (event.type == SDL_KEYUP) {
 				if (event.key.keysym.sym == SDLK_ESCAPE) {
-					quit = 1;
+					result = QUIT;
+					break;
+				}
+				else if (event.key.keysym.sym == SDLK_LEFT) {
+					result = LEFT;
+					break;
+				}
+				else if (event.key.keysym.sym == SDLK_RIGHT) {
+					result = RIGHT;
+					break;
+				}
+				else if (event.key.keysym.sym == SDLK_UP) {
+					result = UP;
+					break;
+				}
+				else if (event.key.keysym.sym == SDLK_DOWN) {
+					result = DOWN;
 					break;
 				}
 			}
 		}
-		return quit;
+		return result;
 	}
 	void Draw( double *arr = 0) {
 		SDL_Rect rect;
