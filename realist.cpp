@@ -100,7 +100,11 @@ private:
 class CSphere : public CObject {
 public:
 	// { center_x, center_y, center_z, radius, color_r, color_g, color_b }
-	enum { CENTER_X, CENTER_Y, CENTER_Z, RADIUS, COLOR, COLOR_RED = COLOR, COLOR_GREEN, COLOR_BLUE, MAX};
+	enum {
+		CENTER_X, CENTER_Y, CENTER_Z, RADIUS, COLOR, COLOR_RED = COLOR, COLOR_GREEN, COLOR_BLUE,
+		A0, B0, C0, D0, E0, F0,
+		MAX
+	};
 	CSphere( const double *params) :
 		m_r( params[RADIUS]) {
 		vcopy( m_c, params);
@@ -180,6 +184,15 @@ public:
 		m_arr = (double *)malloc( m_sz);
 		double t = 0;
 
+#if 0
+// origins
+		// camera
+		v3 cam[] = {
+#define ED 3
+			{ ED, ED, ED},	// eye
+			{ -1, -1, -1},	// front towards screen
+			{ 0, 0, 1},		// up along screen
+		};
 		// scene
 		double sph[][CSphere::MAX] = {
 #define SR 0.1
@@ -187,6 +200,92 @@ public:
 			{ 1, 0, 0, SR, 1, 0, 0},
 			{ 0, 1, 0, SR, 0, 1, 0},
 			{ 0, 0, 1, SR, 0, 0, 1},
+#else
+// ioccc ray
+		// camera
+		v3 cam[] = {
+#define ED 3
+			{ 0*ED, 0*ED, 1*ED},	// eye
+			{ 0, 0, -1},	// front towards screen
+			{ 0, 1, 0},		// up along screen
+		};
+		// scene
+		double sph[][CSphere::MAX] = {
+#define WINSCALE 1.0
+#define SR 0.05
+#define R 1.0
+#define G 1.0
+#define B 1.0
+#define Z 0
+#define CX 0.05*WINSCALE
+#define CY 0.08*WINSCALE
+#define CZ 0.1*WINSCALE
+    { [CSphere::CENTER_X] = -7*CX, [CSphere::CENTER_Y] = 4*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -3*CX, [CSphere::CENTER_Y] = 4*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 2*CX, [CSphere::CENTER_Y] = 4*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 5*CX, [CSphere::CENTER_Y] = 4*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 8*CX, [CSphere::CENTER_Y] = 4*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+
+    { [CSphere::CENTER_X] = -7*CX, [CSphere::CENTER_Y] = 3*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -4*CX, [CSphere::CENTER_Y] = 3*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -2*CX, [CSphere::CENTER_Y] = 3*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 1*CX, [CSphere::CENTER_Y] = 3*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 4*CX, [CSphere::CENTER_Y] = 3*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 7*CX, [CSphere::CENTER_Y] = 3*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+
+    { [CSphere::CENTER_X] = -7*CX, [CSphere::CENTER_Y] = 2*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -4*CX, [CSphere::CENTER_Y] = 2*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -2*CX, [CSphere::CENTER_Y] = 2*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 1*CX, [CSphere::CENTER_Y] = 2*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 4*CX, [CSphere::CENTER_Y] = 2*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 7*CX, [CSphere::CENTER_Y] = 2*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+
+    { [CSphere::CENTER_X] = -7*CX, [CSphere::CENTER_Y] = 1*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -3*CX, [CSphere::CENTER_Y] = 1*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 2*CX, [CSphere::CENTER_Y] = 1*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1*G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 5*CX, [CSphere::CENTER_Y] = 1*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1*B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 8*CX, [CSphere::CENTER_Y] = 1*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = SR, [CSphere::COLOR_RED] = 1*R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+
+#undef CX
+#undef CY
+#undef CZ
+#undef R
+#undef G
+#undef B
+#define R 0.0
+#define G 0.0
+#define B 0.0
+#define CX 0.025*WINSCALE
+#define CY 0.013*WINSCALE
+#define CZ 0.05*WINSCALE
+#undef Z
+#define Z 5
+    { [CSphere::CENTER_X] = -11*CX, [CSphere::CENTER_Y] = -5*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = 1, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -9*CX, [CSphere::CENTER_Y] = -5*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = 1, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 0*CX, [CSphere::CENTER_Y] = -5*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 7*CX, [CSphere::CENTER_Y] = -5*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 11*CX, [CSphere::CENTER_Y] = -5*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+
+    { [CSphere::CENTER_X] = -11*CX, [CSphere::CENTER_Y] = -10*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = 1, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -7*CX, [CSphere::CENTER_Y] = -10*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = 1, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -2*CX, [CSphere::CENTER_Y] = -10*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 2*CX, [CSphere::CENTER_Y] = -10*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 7*CX, [CSphere::CENTER_Y] = -10*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 11*CX, [CSphere::CENTER_Y] = -10*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+
+    { [CSphere::CENTER_X] = -11*CX, [CSphere::CENTER_Y] = -15*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = 1, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -9*CX, [CSphere::CENTER_Y] = -15*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = 1, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -2*CX, [CSphere::CENTER_Y] = -15*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 0*CX, [CSphere::CENTER_Y] = -15*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 2*CX, [CSphere::CENTER_Y] = -15*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 9*CX, [CSphere::CENTER_Y] = -15*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+
+    { [CSphere::CENTER_X] = -11*CX, [CSphere::CENTER_Y] = -20*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = 1, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -7*CX, [CSphere::CENTER_Y] = -20*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = 1, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = -2*CX, [CSphere::CENTER_Y] = -20*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 2*CX, [CSphere::CENTER_Y] = -20*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+    { [CSphere::CENTER_X] = 9*CX, [CSphere::CENTER_Y] = -20*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
+#endif
 		};
 		// screen
 		m_ww = 1;
@@ -194,9 +293,10 @@ public:
 		printf( "ww=%f hh=%f\n", m_ww, m_hh);
 		// eye
 #define ED 3
-		vset( m_e, ED, ED, ED);
-		vset( m_f, -1, -1, -1);	// front towards screen
-		vset( m_u, 0, 0, 1);		// up along screen
+		int i = 0;
+		vcopy( m_e, cam[i++]);
+		vcopy( m_f, cam[i++]);
+		vcopy( m_u, cam[i++]);
 
 		vnorm( m_u);
 		vcross( m_r, m_f, m_u);		// compute right
