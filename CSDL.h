@@ -31,7 +31,7 @@ public:
 #ifdef SDL1
 	m_screen = SDL_SetVideoMode( m_w, m_h, m_bpp, 0);
 #else
-	SDL_CreateWindowAndRenderer( m_w, m_h, 0, &m_sdlWindow, &m_sdlRenderer);
+	SDL_CreateWindowAndRenderer( m_w, m_h, SDL_WINDOW_FULLSCREEN_DESKTOP, &m_sdlWindow, &m_sdlRenderer);
 	m_screen = SDL_CreateRGBSurface( 0, m_w, m_h, m_bpp,
                                         0x00FF0000,
                                         0x0000FF00,

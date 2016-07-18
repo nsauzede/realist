@@ -93,8 +93,13 @@ public:
 	virtual const v3 &Color() const {
 		return m_color;
 	}
+	virtual const v3 &Center() const {
+		return m_c;
+	}
 private:
 	v3 m_color;
+protected:
+	v3 m_c;
 };
 
 class CSphere : public CObject {
@@ -122,18 +127,29 @@ public:
 		double t1, t2;
 		int sol = solvetri( a, b, c, t1, t2);
 		if (sol >= 1) {
-			result = t1;
+			if (sol > 1) {
+				if (t1 < t2) {
+					result = t1;
+				} else {
+					result = t2;
+				}
+			}
+			else {
+				result = t1;
+			}
 		}
 		return result;
 	}
 private:
-	v3 m_c;
 	double m_r;
 };
 
 class CRealist {
 public:
-	void Trace( const v3 &v, v3 &color) const {
+#define MAX_DEPTH 2
+	void Trace( int depth, const v3 &v, v3 &color) const {
+		if (depth > MAX_DEPTH)
+			return;
 		v3 va;
 		vadd( va, m_e, v);
 #define TMAX 1E10
@@ -148,7 +164,43 @@ public:
 		}
 		vmult( color, color, 0.2);
 		if (tmin < TMAX) {
+			// intersected object color
 			vcopy( color, omin->Color());
+			// coords of intersec
+			v3 vint;
+			vmult( vint, v, tmin);
+			vadd( vint, m_e, vint);
+			// normal at intersec
+			v3 nv;
+			vsub( nv, vint, omin->Center());
+			vnorm( nv);
+			// reflection
+			v3 vrefl;
+			v3 mv;
+			vmult( mv, v, -1);
+			double dot = vdot( mv, nv);
+			vmult( vrefl, nv, -dot);
+#if 1
+			vsub( vrefl, vrefl, v);
+			// refl index
+			double index = 0.01;
+			vmult( vrefl, vrefl, 1.0 - index);
+			vadd( vrefl, vrefl, v);
+#endif
+			vnorm( vrefl);
+			v3 refl_color = { 0, 0, 0};
+#if 0
+			if (depth == 1)
+				refl_color[0] = 1;
+			if (depth == 2)
+				refl_color[1] = 1;
+			if (depth == 3)
+				refl_color[2] = 1;
+#endif
+			Trace( depth + 1, vrefl, refl_color);
+			vmult( refl_color, refl_color, 0.5);
+			vadd( color, color, refl_color);
+			vnorm( color);
 		}
 	}
 	void Render( const double &tr = 0) const {
@@ -166,15 +218,20 @@ public:
 				vadd( v, v, vu);
 				vadd( v, v, vr);
 				v3 color = { 1, 1, 1};
-				Trace( v, color);
+				Trace( 0, v, color);
 				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
 				m_arr[(((m_h - jj - 1)  * m_w + ii) * 3) + 1] = color[1];
 				m_arr[(((m_h - jj - 1)  * m_w + ii) * 3) + 2] = color[2];
 			}
 		}
 	}
+#if 0
+#define W 320
+#define H 200
+#else
 #define W 640
 #define H 480
+#endif
 	void Run( unsigned w = W, unsigned h = H) {
 		CSDL sdl;
 		m_w = w;
@@ -204,7 +261,7 @@ public:
 // ioccc ray
 		// camera
 		v3 cam[] = {
-#define ED 3
+#define ED 1.0
 			{ 0*ED, 0*ED, 1*ED},	// eye
 			{ 0, 0, -1},	// front towards screen
 			{ 0, 1, 0},		// up along screen
@@ -292,7 +349,6 @@ public:
 		m_hh = m_ww * m_h / m_w;
 		printf( "ww=%f hh=%f\n", m_ww, m_hh);
 		// eye
-#define ED 3
 		int i = 0;
 		vcopy( m_e, cam[i++]);
 		vcopy( m_f, cam[i++]);
@@ -318,21 +374,30 @@ public:
 		int quit = 0;
 		while (!quit) {
 			int ev = sdl.Poll();
+			v3 v;
 			switch (ev) {
 				case CSDL::QUIT:
 					quit = 1;
 					break;
 				case CSDL::LEFT:
-					vsub( m_e, m_e, m_r);
+					vcopy( v, m_r);
+					vmult( v, v, 0.1);
+					vsub( m_e, m_e, v);
 					break;
 				case CSDL::RIGHT:
-					vadd( m_e, m_e, m_r);
+					vcopy( v, m_r);
+					vmult( v, v, 0.1);
+					vadd( m_e, m_e, v);
 					break;
 				case CSDL::UP:
-					vadd( m_e, m_e, m_u);
+					vcopy( v, m_u);
+					vmult( v, v, 0.1);
+					vadd( m_e, m_e, v);
 					break;
 				case CSDL::DOWN:
-					vsub( m_e, m_e, m_u);
+					vcopy( v, m_u);
+					vmult( v, v, 0.1);
+					vsub( m_e, m_e, v);
 					break;
 			}
 			if (quit)
