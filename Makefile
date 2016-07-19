@@ -5,7 +5,20 @@ CXXFLAGS+=-Wextra
 
 CXXFLAGS+=-std=c++11
 
-CXXFLAGS+=-g -O0
+CXXFLAGS+=-g
+
+#USE_OPT=1
+ifdef USE_OPT
+CXXFLAGS+=-O3
+CXXFLAGS+=-DUSE_OPT
+else
+CXXFLAGS+=-O0
+endif
+
+USE_VEC=1
+ifdef USE_VEC
+CXXFLAGS+=-DUSE_VEC
+endif
 
 CXXFLAGS+=-I.
 

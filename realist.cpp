@@ -1,9 +1,133 @@
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
+
 #include <vector>
+#include <iostream>
 
 #include "CSDL.h"
 
+//#define USE_VEC
+
+int solvetri( const double &a, const double &b, const double &c, double &t1, double &t2) {
+	int result;
+	double d = b * b - 4 * a * c;
+	if (d > 0) {
+		double sd = sqrt( d);
+		t1 = (-b - sd) / 2 / a;
+		t2 = (-b + sd) / 2 / a;
+		result = 2;
+	}
+	else if (d == 0) {
+		t1 = -b / 2 / a;
+		result = 1;
+	}
+	else {
+		result = 0;
+	}
+	return result;
+}
+
+#ifdef USE_VEC
+template<int n> class vec {
+public:
+	vec( double d1 = 0, double d2 = 0, double d3 = 0) {
+		m_d[0] = d1;
+		m_d[1] = d2;
+		m_d[2] = d3;
+	}
+	vec( const double *d) {
+		for (unsigned ii = 0; ii < n; ii++) {
+			m_d[ii] = *d++;
+		}
+	}
+	const double& at( unsigned i) const {
+		assert( (i < n));
+		return m_d[i];
+	}
+	vec operator^( const vec& r) const {
+		vec res;
+		res.m_d[0] = this->m_d[1] * r.m_d[2] - this->m_d[2] * r.m_d[1];
+		res.m_d[1] = this->m_d[2] * r.m_d[0] - this->m_d[0] * r.m_d[2];
+		res.m_d[2] = this->m_d[0] * r.m_d[1] - this->m_d[1] * r.m_d[0];
+		return res;
+	}
+	const vec& operator/=( const double& r) {
+		for (unsigned ii = 0; ii < n; ii++) {
+			m_d[ii] /= r;
+		}
+		return *this;
+	}
+	vec operator/( const double& r) const {
+		vec res = *this;
+		res /= r;
+		return res;
+	}
+	const vec& operator*=( const double& r) {
+		for (unsigned ii = 0; ii < n; ii++) {
+			m_d[ii] *= r;
+		}
+		return *this;
+	}
+	vec operator*( const double& r) const {
+		vec res = *this;
+		res *= r;
+		return res;
+	}
+	const vec& operator+=( const vec& r) {
+		for (unsigned ii = 0; ii < n; ii++) {
+			m_d[ii] += r.m_d[ii];
+		}
+		return *this;
+	}
+	vec operator+( const vec& r) const {
+		vec res = *this;
+		res += r;
+		return res;
+	}
+	const vec& operator-=( const vec& r) {
+		for (unsigned ii = 0; ii < n; ii++) {
+			m_d[ii] -= r.m_d[ii];
+		}
+		return *this;
+	}
+	vec operator-( const vec& r) const {
+		vec res = *this;
+		res -= r;
+		return res;
+	}
+	double operator!() const {
+		return sqrt( *this % *this);
+	}
+	const double& operator[]( unsigned i) const {
+		assert( (i < n));
+		return m_d[i];
+	}
+	vec operator~() const {
+		vec res = *this;
+		res /= !res;
+		return res;
+	}
+	double operator%( const vec& r) const {
+		double result = 0;
+		for (unsigned ii = 0; ii < n; ii++) {
+			result += m_d[ii] * r.m_d[ii];
+		}
+		return result;
+	}
+	void Print() const {
+		for (unsigned ii = 0; ii < n; ii++) {
+			if (ii > 0)
+				printf( ",");
+			printf( "%f", m_d[ii]);
+		}
+		printf( "\n");
+	}
+private:
+	double m_d[n];
+};
+typedef vec<3> v3;
+#else
 typedef double v3[3];
 
 void vcross( v3 &l, const v3 &r1, const v3 &r2) {
@@ -54,31 +178,13 @@ double vdot( const v3 &v1, const v3 &v2) {
 	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
 }
 
-void vprint( const char *t, const v3 &v) {
-	printf( "%s={%f,%f,%f}\n", t, v[0], v[1], v[2]);
-}
-
 void vprint( const v3 &v) {
 	printf( "%f,%f,%f\n", v[0], v[1], v[2]);
 }
+#endif
 
-int solvetri( const double &a, const double &b, const double &c, double &t1, double &t2) {
-	int result;
-	double d = b * b - 4 * a * c;
-	if (d > 0) {
-		double sd = sqrt( d);
-		t1 = (-b - sd) / 2 / a;
-		t2 = (-b + sd) / 2 / a;
-		result = 2;
-	}
-	else if (d == 0) {
-		t1 = -b / 2 / a;
-		result = 1;
-	}
-	else {
-		result = 0;
-	}
-	return result;
+void vprint( const char *t, const v3 &v) {
+	printf( "%s={%f,%f,%f}\n", t, v[0], v[1], v[2]);
 }
 
 class CObject {
@@ -88,7 +194,11 @@ public:
 	// returns intersection distance (HUGE_VAL => no intersection)
 	virtual double Intersec( const v3 &e, const v3 &v) const = 0;
 	virtual void SetColor( const double *color) {
+#ifdef USE_VEC
+		m_color = color;
+#else
 		vcopy( m_color, color);
+#endif
 	}
 	virtual const v3 &Color() const {
 		return m_color;
@@ -112,18 +222,29 @@ public:
 	};
 	CSphere( const double *params) :
 		m_r( params[RADIUS]) {
+#ifdef USE_VEC
+		m_c = params;
+#else
 		vcopy( m_c, params);
+#endif
 		SetColor( &params[COLOR]);
 	}
 	double Intersec( const v3 &e, const v3 &v) const {
 		double result = HUGE_VAL;
 		double sr2 = m_r * m_r;
+		double a, b, c;
+#ifdef USE_VEC
+		v3 t = e - m_c;
+		a = v % v;
+		b = 2 * (v % t);
+		c = (t % t) - sr2;
+#else
 		v3 t;
 		vsub( t, e, m_c);
-		double a, b, c;
 		a = vdot( v, v);
 		b = 2 * vdot( v, t);
 		c = vdot( t, t) - sr2;
+#endif
 		double t1, t2;
 		int sol = solvetri( a, b, c, t1, t2);
 		if (sol >= 1) {
@@ -150,8 +271,6 @@ public:
 	void Trace( int depth, const v3 &v, v3 &color) const {
 		if (depth > MAX_DEPTH)
 			return;
-		v3 va;
-		vadd( va, m_e, v);
 #define TMAX 1E10
 		double tmin = HUGE_VAL;
 		CObject *omin = 0;
@@ -162,8 +281,30 @@ public:
 				omin = m_objs.at( ii);
 			}
 		}
+#ifdef USE_VEC
+		color *= 0.2;
+#else
 		vmult( color, color, 0.2);
+#endif
 		if (tmin < TMAX) {
+#ifdef USE_VEC
+			// intersected object color
+			color = omin->Color();
+			// coords of intersec
+			v3 vint = m_e + v * tmin;
+			// normal at intersec
+			v3 nv = ~(vint - omin->Center());
+			// reflection
+			v3 vrefl = nv * -((v * -1) % nv);
+#if 1
+			vrefl -= v;
+			// refl index
+			double index = 0.01;
+			vrefl *= 1.0 - index;
+			vrefl += v;
+#endif
+			vrefl = ~vrefl;
+#else
 			// intersected object color
 			vcopy( color, omin->Color());
 			// coords of intersec
@@ -188,6 +329,7 @@ public:
 			vadd( vrefl, vrefl, v);
 #endif
 			vnorm( vrefl);
+#endif
 			v3 refl_color = { 0, 0, 0};
 #if 0
 			if (depth == 1)
@@ -198,9 +340,14 @@ public:
 				refl_color[2] = 1;
 #endif
 			Trace( depth + 1, vrefl, refl_color);
+#ifdef USE_VEC
+			refl_color *= 0.5;
+			color = ~(color + refl_color);
+#else
 			vmult( refl_color, refl_color, 0.5);
 			vadd( color, color, refl_color);
 			vnorm( color);
+#endif
 		}
 	}
 	void Render( const double &tr = 0) const {
@@ -209,14 +356,23 @@ public:
 		printf( "tr=%f\n", tr);
 		for (unsigned jj = 0; jj < m_h; jj++) {
 			v3 vu;
+#ifdef USE_VEC
+			vu = m_u * ((double)jj - m_h / 2) / m_h * m_hh;
+#else
 			vmult( vu, m_u, ((double)jj - m_h / 2) / m_h * m_hh);
+#endif
 			for (unsigned ii = 0; ii < m_w; ii++) {
 				v3 vr;
+#ifdef USE_VEC
+				vr = m_r * ((double)ii - m_w / 2) / m_w * m_ww;
+				v = ~m_f + vu + vr;
+#else
 				vmult( vr, m_r, ((double)ii - m_w / 2) / m_w * m_ww);
 				vcopy( v, m_f);
 				vnorm( v);
 				vadd( v, v, vu);
 				vadd( v, v, vr);
+#endif
 				v3 color = { 1, 1, 1};
 				Trace( 0, v, color);
 				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
@@ -233,6 +389,16 @@ public:
 #define H 480
 #endif
 	void Run( unsigned w = W, unsigned h = H) {
+#ifdef USE_VEC
+		printf( "using VEC\n");
+#else
+		printf( "*NOT* using VEC\n");
+#endif
+#ifdef USE_OPT
+		printf( "using OPT\n");
+#else
+		printf( "*NOT* using OPT\n");
+#endif
 		CSDL sdl;
 		m_w = w;
 		m_h = h;
@@ -350,6 +516,17 @@ public:
 		printf( "ww=%f hh=%f\n", m_ww, m_hh);
 		// eye
 		int i = 0;
+#ifdef USE_VEC
+		m_e = cam[i++];
+		m_f = cam[i++];
+		m_u = cam[i++];
+
+		m_u = ~m_u;
+		m_r = m_f ^ m_u;		// compute right
+		m_u = m_r ^ m_f;		// re-compute up
+		m_u = ~m_u;
+		m_r = ~m_r;
+#else
 		vcopy( m_e, cam[i++]);
 		vcopy( m_f, cam[i++]);
 		vcopy( m_u, cam[i++]);
@@ -359,6 +536,7 @@ public:
 		vcross( m_u, m_r, m_f);		// re-compute up
 		vnorm( m_u);
 		vnorm( m_r);
+#endif
 
 		vprint( "e", m_e);
 		vprint( "f", m_f);
@@ -374,11 +552,27 @@ public:
 		int quit = 0;
 		while (!quit) {
 			int ev = sdl.Poll();
+#ifndef USE_VEC
 			v3 v;
+#endif
 			switch (ev) {
 				case CSDL::QUIT:
 					quit = 1;
 					break;
+#ifdef USE_VEC
+				case CSDL::LEFT:
+					m_e -= m_r * 0.1;
+					break;
+				case CSDL::RIGHT:
+					m_e += m_r * 0.1;
+					break;
+				case CSDL::UP:
+					m_e += m_u * 0.1;
+					break;
+				case CSDL::DOWN:
+					m_e -= m_u * 0.1;
+					break;
+#else
 				case CSDL::LEFT:
 					vcopy( v, m_r);
 					vmult( v, v, 0.1);
@@ -399,6 +593,7 @@ public:
 					vmult( v, v, 0.1);
 					vsub( m_e, m_e, v);
 					break;
+#endif
 			}
 			if (quit)
 				break;
