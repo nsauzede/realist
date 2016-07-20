@@ -7,7 +7,7 @@
 
 #include "CSDL.h"
 
-//#define USE_VEC
+#define DO_REFL
 
 int solvetri( const double &a, const double &b, const double &c, double &t1, double &t2) {
 	int result;
@@ -178,10 +178,11 @@ double vdot( const v3 &v1, const v3 &v2) {
 	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
 }
 
+#endif
+
 void vprint( const v3 &v) {
 	printf( "%f,%f,%f\n", v[0], v[1], v[2]);
 }
-#endif
 
 void vprint( const char *t, const v3 &v) {
 	printf( "%s={%f,%f,%f}\n", t, v[0], v[1], v[2]);
@@ -245,10 +246,11 @@ public:
 		b = 2 * vdot( v, t);
 		c = vdot( t, t) - sr2;
 #endif
-		double t1, t2;
+		double t1 = 0, t2 = 0;
 		int sol = solvetri( a, b, c, t1, t2);
 		if (sol >= 1) {
 			if (sol > 1) {
+//				printf( "t1=%f t2=%f => ", t1, t2);
 				if (t1 < t2) {
 					result = t1;
 				} else {
@@ -256,6 +258,7 @@ public:
 				}
 			}
 			else {
+//				printf( "t1=%f => ", t1);
 				result = t1;
 			}
 		}
@@ -292,6 +295,9 @@ public:
 			color = omin->Color();
 			// coords of intersec
 			v3 vint = m_e + v * tmin;
+//			vprint( vint);
+//			exit(0);
+#ifdef DO_REFL
 			// normal at intersec
 			v3 nv = ~(vint - omin->Center());
 			// reflection
@@ -304,6 +310,7 @@ public:
 			vrefl += v;
 #endif
 			vrefl = ~vrefl;
+#endif
 #else
 			// intersected object color
 			vcopy( color, omin->Color());
@@ -311,6 +318,8 @@ public:
 			v3 vint;
 			vmult( vint, v, tmin);
 			vadd( vint, m_e, vint);
+//			vprint( vint);
+#ifdef DO_REFL
 			// normal at intersec
 			v3 nv;
 			vsub( nv, vint, omin->Center());
@@ -330,15 +339,9 @@ public:
 #endif
 			vnorm( vrefl);
 #endif
-			v3 refl_color = { 0, 0, 0};
-#if 0
-			if (depth == 1)
-				refl_color[0] = 1;
-			if (depth == 2)
-				refl_color[1] = 1;
-			if (depth == 3)
-				refl_color[2] = 1;
 #endif
+#ifdef DO_REFL
+			v3 refl_color = { 0, 0, 0};
 			Trace( depth + 1, vrefl, refl_color);
 #ifdef USE_VEC
 			refl_color *= 0.5;
@@ -347,6 +350,7 @@ public:
 			vmult( refl_color, refl_color, 0.5);
 			vadd( color, color, refl_color);
 			vnorm( color);
+#endif
 #endif
 		}
 	}
@@ -376,17 +380,27 @@ public:
 				v3 color = { 1, 1, 1};
 				Trace( 0, v, color);
 				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
-				m_arr[(((m_h - jj - 1)  * m_w + ii) * 3) + 1] = color[1];
-				m_arr[(((m_h - jj - 1)  * m_w + ii) * 3) + 2] = color[2];
+				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 1] = color[1];
+				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 2] = color[2];
 			}
+//			printf( "\n");
 		}
 	}
 #if 0
+#define W 32
+#define H 16
+#elif 0
+#define W 200
+#define H 100
+#elif 0
 #define W 320
 #define H 200
-#else
+#elif 1
 #define W 640
 #define H 480
+#else
+#define W 1024
+#define H 768
 #endif
 	void Run( unsigned w = W, unsigned h = H) {
 #ifdef USE_VEC
@@ -412,17 +426,19 @@ public:
 		// camera
 		v3 cam[] = {
 #define ED 3
-			{ ED, ED, ED},	// eye
-			{ -1, -1, -1},	// front towards screen
+			{ ED, ED, 1*ED},	// eye
+			{ -1, -1, 1*-1},	// front towards screen
 			{ 0, 0, 1},		// up along screen
 		};
 		// scene
 		double sph[][CSphere::MAX] = {
 #define SR 0.1
 			{ 0, 0, 0, SR, 0, 0, 0},
+#if 1
 			{ 1, 0, 0, SR, 1, 0, 0},
 			{ 0, 1, 0, SR, 0, 1, 0},
 			{ 0, 0, 1, SR, 0, 0, 1},
+#endif
 #else
 // ioccc ray
 		// camera
@@ -600,6 +616,7 @@ public:
 			Render( t);
 			t += 0.1;
 			sdl.Draw( m_arr);
+//			break;
 			if (ev != CSDL::NONE) {
 				sdl.Delay( 50);
 			}
