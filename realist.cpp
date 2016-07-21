@@ -293,10 +293,11 @@ public:
 				omin = m_objs.at( ii);
 			}
 		}
+		double def_color = 0;
 #ifdef USE_VEC
-		color *= 0.2;
+		color *= def_color;
 #else
-		vmult( color, color, 0.2);
+		vmult( color, color, def_color);
 #endif
 		if (tmin < TMAX) {
 #ifdef USE_VEC
@@ -304,11 +305,10 @@ public:
 			color = omin->Color();
 			// coords of intersec
 			v3 vint = o + v * tmin;
-//			vprint( vint);
-//			exit(0);
-#ifdef DO_REFL
 			// normal at intersec
 			v3 nv = ~(vint - omin->Center());
+			color *= (1 + nv[2]) / 2;
+#ifdef DO_REFL
 			// reflection
 			v3 vrefl = nv * -((v * -1) % nv);
 #if 1
@@ -327,12 +327,12 @@ public:
 			v3 vint;
 			vmult( vint, v, tmin);
 			vadd( vint, o, vint);
-//			vprint( vint);
-#ifdef DO_REFL
 			// normal at intersec
 			v3 nv;
 			vsub( nv, vint, omin->Center());
 			vnorm( nv);
+			vmult( color, color, (1 + nv[2]) / 2);
+#ifdef DO_REFL
 			// reflection
 			v3 vrefl;
 			v3 mv;
@@ -352,13 +352,15 @@ public:
 #ifdef DO_REFL
 			v3 refl_color = { 0, 0, 0};
 			Trace( depth + 1, vint, vrefl, refl_color);
+			double refl_att = 0.9;
 #ifdef USE_VEC
-			refl_color *= 0.5;
-			color = ~(color + refl_color);
+			color *= (1 - refl_att);
+			color += refl_color * refl_att;
 #else
-			vmult( refl_color, refl_color, 0.5);
+			vmult( refl_color, refl_color, refl_att);
+			vmult( color, color, 1 - refl_att);
 			vadd( color, color, refl_color);
-			vnorm( color);
+//			vnorm( color);
 #endif
 #endif
 		}
