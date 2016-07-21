@@ -29,7 +29,17 @@ int solvetri( const double &a, const double &b, const double &c, double &t1, dou
 }
 
 #ifdef USE_VEC
+#if 0
+template<int n> class vec;
+typedef vec<3> v3;
 template<int n> class vec {
+#else
+class vec;
+typedef vec v3;
+class vec {
+private:
+	static const int n = 3;
+#endif
 public:
 	vec( double d1 = 0, double d2 = 0, double d3 = 0) {
 		m_d[0] = d1;
@@ -126,7 +136,6 @@ public:
 private:
 	double m_d[n];
 };
-typedef vec<3> v3;
 #else
 typedef double v3[3];
 
@@ -166,16 +175,16 @@ void vmult( v3 &l, const v3 &r1, const double &r2) {
 	l[2] = r1[2] * r2;
 }
 
-void vnorm( v3 &v) {
-	double norm;
-	norm = sqrt( v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-	v[0] /= norm;
-	v[1] /= norm;
-	v[2] /= norm;
-}
-
 double vdot( const v3 &v1, const v3 &v2) {
 	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+}
+
+void vnorm( v3 &l) {
+	double norm;
+	norm = sqrt( vdot( l, l));
+	l[0] /= norm;
+	l[1] /= norm;
+	l[2] /= norm;
 }
 
 #endif
@@ -402,7 +411,7 @@ public:
 #define W 1024
 #define H 768
 #endif
-	void Run( unsigned w = W, unsigned h = H) {
+	void Run( int nosdl = 0, unsigned w = W, unsigned h = H) {
 #ifdef USE_VEC
 		printf( "using VEC\n");
 #else
@@ -413,10 +422,13 @@ public:
 #else
 		printf( "*NOT* using OPT\n");
 #endif
-		CSDL sdl;
+		CSDL *sdl = 0;
+		if (!nosdl)
+			sdl = new CSDL;
 		m_w = w;
 		m_h = h;
-		sdl.Init( m_w, m_h);
+		if (sdl)
+			sdl->Init( m_w, m_h);
 		m_sz = sizeof( *m_arr) * 3 * m_w * m_h;
 		m_arr = (double *)malloc( m_sz);
 		double t = 0;
@@ -567,67 +579,72 @@ public:
 		memset( m_arr, 0, m_sz);
 		int quit = 0;
 		while (!quit) {
-			int ev = sdl.Poll();
-#ifndef USE_VEC
-			v3 v;
-#endif
-			switch (ev) {
-				case CSDL::QUIT:
-					quit = 1;
-					break;
-#ifdef USE_VEC
-				case CSDL::LEFT:
-					m_e -= m_r * 0.1;
-					break;
-				case CSDL::RIGHT:
-					m_e += m_r * 0.1;
-					break;
-				case CSDL::UP:
-					m_e += m_u * 0.1;
-					break;
-				case CSDL::DOWN:
-					m_e -= m_u * 0.1;
-					break;
-#else
-				case CSDL::LEFT:
-					vcopy( v, m_r);
-					vmult( v, v, 0.1);
-					vsub( m_e, m_e, v);
-					break;
-				case CSDL::RIGHT:
-					vcopy( v, m_r);
-					vmult( v, v, 0.1);
-					vadd( m_e, m_e, v);
-					break;
-				case CSDL::UP:
-					vcopy( v, m_u);
-					vmult( v, v, 0.1);
-					vadd( m_e, m_e, v);
-					break;
-				case CSDL::DOWN:
-					vcopy( v, m_u);
-					vmult( v, v, 0.1);
-					vsub( m_e, m_e, v);
-					break;
-#endif
-			}
-			if (quit)
-				break;
 			Render( t);
 			t += 0.1;
-			sdl.Draw( m_arr);
-//			break;
-			if (ev != CSDL::NONE) {
-				sdl.Delay( 50);
+			if (sdl) {
+				int ev = sdl->Poll();
+#ifndef USE_VEC
+				v3 v;
+#endif
+				switch (ev) {
+					case CSDL::QUIT:
+						quit = 1;
+						break;
+#ifdef USE_VEC
+					case CSDL::LEFT:
+						m_e -= m_r * 0.1;
+						break;
+					case CSDL::RIGHT:
+						m_e += m_r * 0.1;
+						break;
+					case CSDL::UP:
+						m_e += m_u * 0.1;
+						break;
+					case CSDL::DOWN:
+						m_e -= m_u * 0.1;
+						break;
+#else
+					case CSDL::LEFT:
+						vcopy( v, m_r);
+						vmult( v, v, 0.1);
+						vsub( m_e, m_e, v);
+						break;
+					case CSDL::RIGHT:
+						vcopy( v, m_r);
+						vmult( v, v, 0.1);
+						vadd( m_e, m_e, v);
+						break;
+					case CSDL::UP:
+						vcopy( v, m_u);
+						vmult( v, v, 0.1);
+						vadd( m_e, m_e, v);
+						break;
+					case CSDL::DOWN:
+						vcopy( v, m_u);
+						vmult( v, v, 0.1);
+						vsub( m_e, m_e, v);
+						break;
+#endif
+				}
+				sdl->Draw( m_arr);
+				if (ev != CSDL::NONE) {
+					sdl->Delay( 50);
+				}
+				else {
+					sdl->Delay( 500);
+				}
 			}
-			else {
-				sdl.Delay( 500);
-			}
+			else
+				break;
 		}
 		free( m_arr);
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
 			delete m_objs.at( ii);
 			m_objs.at( ii) = 0;
+		}
+		if (sdl) {
+			free( sdl);
+			sdl = 0;
 		}
 	}
 private:
@@ -643,8 +660,13 @@ private:
 	double m_ww, m_hh;	// screen dimensions (space)
 };
 
-int main() {
+int main( int argc, char *argv[]) {
+	int nosdl = 0;
+	int arg = 1;
+	if (arg < argc) {
+		sscanf( argv[arg++], "%d", &nosdl);
+	}
 	CRealist r;
-	r.Run();
+	r.Run( nosdl);
 	return 0;
 }
