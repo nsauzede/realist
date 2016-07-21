@@ -50,7 +50,7 @@ public:
 	}
 	atexit( SDL_Quit);
 	}
-	enum { NONE, QUIT, LEFT, RIGHT, UP, DOWN};
+	enum { NONE, QUIT, LEFT, RIGHT, UP, DOWN, PUP, PDOWN};
 	int Poll() {
 		int result = NONE;
 		SDL_Event event;
@@ -78,6 +78,14 @@ public:
 				}
 				else if (event.key.keysym.sym == SDLK_DOWN) {
 					result = DOWN;
+					break;
+				}
+				else if (event.key.keysym.sym == SDLK_PAGEUP) {
+					result = PUP;
+					break;
+				}
+				else if (event.key.keysym.sym == SDLK_PAGEDOWN) {
+					result = PDOWN;
 					break;
 				}
 			}

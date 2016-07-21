@@ -605,6 +605,12 @@ public:
 					case CSDL::DOWN:
 						m_e -= m_u * 0.1;
 						break;
+					case CSDL::PUP:
+						m_e += m_f * 0.1;
+						break;
+					case CSDL::PDOWN:
+						m_e -= m_f * 0.1;
+						break;
 #else
 					case CSDL::LEFT:
 						vcopy( v, m_r);
