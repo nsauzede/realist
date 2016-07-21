@@ -30,6 +30,7 @@ public:
 
 #ifdef SDL1
 	m_screen = SDL_SetVideoMode( m_w, m_h, m_bpp, 0);
+	SDL_EnableKeyRepeat( 1+0*SDL_DEFAULT_REPEAT_DELAY, 1+0*SDL_DEFAULT_REPEAT_INTERVAL);
 #else
 	SDL_CreateWindowAndRenderer( m_w, m_h, SDL_WINDOW_FULLSCREEN_DESKTOP, &m_sdlWindow, &m_sdlRenderer);
 	m_screen = SDL_CreateRGBSurface( 0, m_w, m_h, m_bpp,
@@ -54,7 +55,7 @@ public:
 				result = QUIT;
 				break;
 			}
-			else if (event.type == SDL_KEYUP) {
+			else if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.sym == SDLK_ESCAPE) {
 					result = QUIT;
 					break;

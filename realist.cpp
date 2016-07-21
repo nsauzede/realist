@@ -271,14 +271,14 @@ private:
 class CRealist {
 public:
 #define MAX_DEPTH 2
-	void Trace( int depth, const v3 &v, v3 &color) const {
+	void Trace( int depth, const v3 &o, const v3 &v, v3 &color) const {
 		if (depth > MAX_DEPTH)
 			return;
 #define TMAX 1E10
 		double tmin = HUGE_VAL;
 		CObject *omin = 0;
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
-			double tres = m_objs.at( ii)->Intersec( m_e, v);
+			double tres = m_objs.at( ii)->Intersec( o, v);
 			if (tres < tmin) {
 				tmin = tres;
 				omin = m_objs.at( ii);
@@ -294,7 +294,7 @@ public:
 			// intersected object color
 			color = omin->Color();
 			// coords of intersec
-			v3 vint = m_e + v * tmin;
+			v3 vint = o + v * tmin;
 //			vprint( vint);
 //			exit(0);
 #ifdef DO_REFL
@@ -317,7 +317,7 @@ public:
 			// coords of intersec
 			v3 vint;
 			vmult( vint, v, tmin);
-			vadd( vint, m_e, vint);
+			vadd( vint, o, vint);
 //			vprint( vint);
 #ifdef DO_REFL
 			// normal at intersec
@@ -342,7 +342,7 @@ public:
 #endif
 #ifdef DO_REFL
 			v3 refl_color = { 0, 0, 0};
-			Trace( depth + 1, vrefl, refl_color);
+			Trace( depth + 1, vint, vrefl, refl_color);
 #ifdef USE_VEC
 			refl_color *= 0.5;
 			color = ~(color + refl_color);
@@ -378,7 +378,7 @@ public:
 				vadd( v, v, vr);
 #endif
 				v3 color = { 1, 1, 1};
-				Trace( 0, v, color);
+				Trace( 0, m_e, v, color);
 				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
 				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 1] = color[1];
 				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 2] = color[2];
@@ -395,7 +395,7 @@ public:
 #elif 0
 #define W 320
 #define H 200
-#elif 1
+#elif 0
 #define W 640
 #define H 480
 #else
