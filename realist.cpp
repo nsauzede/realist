@@ -7,8 +7,6 @@
 
 #include "CSDL.h"
 
-#define DO_REFL
-
 int solvetri( const double &a, const double &b, const double &c, double &t1, double &t2) {
 	int result;
 	double d = b * b - 4 * a * c;
@@ -300,67 +298,78 @@ public:
 		vmult( color, color, def_color);
 #endif
 		if (tmin < TMAX) {
+			double energy = 0;
+			// ambient
+			energy += 0.5;
+#if defined USE_FLASH || defined USE_REFL
+			// coords of intersec
+			v3 vint;
+			// normal at intersec
+			v3 nv;
+#endif
 #ifdef USE_VEC
 			// intersected object color
 			color = omin->Color();
+#if defined USE_FLASH || defined USE_REFL
 			// coords of intersec
-			v3 vint = o + v * tmin;
+			vint = o + v * tmin;
 			// normal at intersec
-			v3 nv = ~(vint - omin->Center());
-			color *= (1 + nv[2]) / 2;
-#ifdef DO_REFL
+			nv = ~(vint - omin->Center());
+#endif
+#ifdef USE_REFL
 			// reflection
 			v3 vrefl = nv * -((v * -1) % nv);
-#if 1
 			vrefl -= v;
 			// refl index
 			double index = 0.01;
 			vrefl *= 1.0 - index;
 			vrefl += v;
-#endif
 			vrefl = ~vrefl;
 #endif
 #else
 			// intersected object color
 			vcopy( color, omin->Color());
 			// coords of intersec
-			v3 vint;
 			vmult( vint, v, tmin);
 			vadd( vint, o, vint);
 			// normal at intersec
-			v3 nv;
 			vsub( nv, vint, omin->Center());
 			vnorm( nv);
-			vmult( color, color, (1 + nv[2]) / 2);
-#ifdef DO_REFL
+#ifdef USE_REFL
 			// reflection
 			v3 vrefl;
 			v3 mv;
 			vmult( mv, v, -1);
 			double dot = vdot( mv, nv);
 			vmult( vrefl, nv, -dot);
-#if 1
 			vsub( vrefl, vrefl, v);
 			// refl index
 			double index = 0.01;
 			vmult( vrefl, vrefl, 1.0 - index);
 			vadd( vrefl, vrefl, v);
-#endif
 			vnorm( vrefl);
 #endif
 #endif
-#ifdef DO_REFL
+#ifdef USE_FLASH
+			// camera flash
+			energy += nv[2] * (1 - energy);
+#endif
+#ifdef USE_VEC
+			color *= energy;
+#else
+			vmult( color, color, energy);
+#endif
+#ifdef USE_REFL
 			v3 refl_color = { 0, 0, 0};
 			Trace( depth + 1, vint, vrefl, refl_color);
-			double refl_att = 0.9;
+			double refl_att = 0.1;
 #ifdef USE_VEC
 			color *= (1 - refl_att);
 			color += refl_color * refl_att;
 #else
-			vmult( refl_color, refl_color, refl_att);
 			vmult( color, color, 1 - refl_att);
+			vmult( refl_color, refl_color, refl_att);
 			vadd( color, color, refl_color);
-//			vnorm( color);
 #endif
 #endif
 		}
@@ -635,10 +644,7 @@ public:
 #endif
 				}
 				sdl->Draw( m_arr);
-				if (ev != CSDL::NONE) {
-					sdl->Delay( 50);
-				}
-				else {
+				if (ev == CSDL::NONE) {
 					sdl->Delay( 500);
 				}
 			}

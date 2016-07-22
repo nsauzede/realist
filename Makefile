@@ -20,6 +20,16 @@ ifdef USE_VEC
 CXXFLAGS+=-DUSE_VEC
 endif
 
+USE_FLASH=1
+ifdef USE_FLASH
+CXXFLAGS+=-DUSE_FLASH
+endif
+
+USE_REFL=1
+ifdef USE_REFL
+CXXFLAGS+=-DUSE_REFL
+endif
+
 CXXFLAGS+=-I.
 
 include sdl.mak
