@@ -26,18 +26,9 @@ int solvetri( const double &a, const double &b, const double &c, double &t1, dou
 	return result;
 }
 
-#ifdef USE_VEC
-#if 0
 template<int n> class vec;
 typedef vec<3> v3;
 template<int n> class vec {
-#else
-class vec;
-typedef vec v3;
-class vec {
-private:
-	static const int n = 3;
-#endif
 public:
 	vec( double d1 = 0, double d2 = 0, double d3 = 0) {
 		m_d[0] = d1;
@@ -134,58 +125,6 @@ public:
 private:
 	double m_d[n];
 };
-#else
-typedef double v3[3];
-
-void vcross( v3 &l, const v3 &r1, const v3 &r2) {
-	l[0] = r1[1] * r2[2] - r1[2] * r2[1];
-	l[1] = r1[2] * r2[0] - r1[0] * r2[2];
-	l[2] = r1[0] * r2[1] - r1[1] * r2[0];
-}
-
-void vadd( v3 &l, const v3 &r1, const v3 &r2) {
-	l[0] = r1[0] + r2[0];
-	l[1] = r1[1] + r2[1];
-	l[2] = r1[2] + r2[2];
-}
-
-void vsub( v3 &l, const v3 &r1, const v3 &r2) {
-	l[0] = r1[0] - r2[0];
-	l[1] = r1[1] - r2[1];
-	l[2] = r1[2] - r2[2];
-}
-
-void vcopy( v3 &l, const double *r) {
-	l[0] = r[0];
-	l[1] = r[1];
-	l[2] = r[2];
-}
-
-void vset( v3 &l, const double &r1, const double &r2, const double &r3) {
-	l[0] = r1;
-	l[1] = r2;
-	l[2] = r3;
-}
-
-void vmult( v3 &l, const v3 &r1, const double &r2) {
-	l[0] = r1[0] * r2;
-	l[1] = r1[1] * r2;
-	l[2] = r1[2] * r2;
-}
-
-double vdot( const v3 &v1, const v3 &v2) {
-	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-}
-
-void vnorm( v3 &l) {
-	double norm;
-	norm = sqrt( vdot( l, l));
-	l[0] /= norm;
-	l[1] /= norm;
-	l[2] /= norm;
-}
-
-#endif
 
 void vprint( const v3 &v) {
 	printf( "%f,%f,%f\n", v[0], v[1], v[2]);
@@ -202,11 +141,7 @@ public:
 	// returns intersection distance (HUGE_VAL => no intersection)
 	virtual double Intersec( const v3 &e, const v3 &v) const = 0;
 	virtual void SetColor( const double *color) {
-#ifdef USE_VEC
 		m_color = color;
-#else
-		vcopy( m_color, color);
-#endif
 	}
 	virtual const v3 &Color() const {
 		return m_color;
@@ -230,29 +165,17 @@ public:
 	};
 	CSphere( const double *params) :
 		m_r( params[RADIUS]) {
-#ifdef USE_VEC
 		m_c = params;
-#else
-		vcopy( m_c, params);
-#endif
 		SetColor( &params[COLOR]);
 	}
 	double Intersec( const v3 &e, const v3 &v) const {
 		double result = HUGE_VAL;
 		double sr2 = m_r * m_r;
 		double a, b, c;
-#ifdef USE_VEC
 		v3 t = e - m_c;
 		a = v % v;
 		b = 2 * (v % t);
 		c = (t % t) - sr2;
-#else
-		v3 t;
-		vsub( t, e, m_c);
-		a = vdot( v, v);
-		b = 2 * vdot( v, t);
-		c = vdot( t, t) - sr2;
-#endif
 		double t1 = 0, t2 = 0;
 		int sol = solvetri( a, b, c, t1, t2);
 		if (sol >= 1) {
@@ -292,11 +215,7 @@ public:
 			}
 		}
 		double def_color = 0;
-#ifdef USE_VEC
 		color *= def_color;
-#else
-		vmult( color, color, def_color);
-#endif
 		if (tmin < TMAX) {
 			double energy = 0;
 			// ambient
@@ -307,7 +226,6 @@ public:
 			// normal at intersec
 			v3 nv;
 #endif
-#ifdef USE_VEC
 			// intersected object color
 			color = omin->Color();
 #if defined USE_FLASH || defined USE_REFL
@@ -326,51 +244,17 @@ public:
 			vrefl += v;
 			vrefl = ~vrefl;
 #endif
-#else
-			// intersected object color
-			vcopy( color, omin->Color());
-			// coords of intersec
-			vmult( vint, v, tmin);
-			vadd( vint, o, vint);
-			// normal at intersec
-			vsub( nv, vint, omin->Center());
-			vnorm( nv);
-#ifdef USE_REFL
-			// reflection
-			v3 vrefl;
-			v3 mv;
-			vmult( mv, v, -1);
-			double dot = vdot( mv, nv);
-			vmult( vrefl, nv, -dot);
-			vsub( vrefl, vrefl, v);
-			// refl index
-			double index = 0.01;
-			vmult( vrefl, vrefl, 1.0 - index);
-			vadd( vrefl, vrefl, v);
-			vnorm( vrefl);
-#endif
-#endif
 #ifdef USE_FLASH
 			// camera flash
 			energy += nv[2] * (1 - energy);
 #endif
-#ifdef USE_VEC
 			color *= energy;
-#else
-			vmult( color, color, energy);
-#endif
 #ifdef USE_REFL
 			v3 refl_color = { 0, 0, 0};
 			Trace( depth + 1, vint, vrefl, refl_color);
 			double refl_att = 0.1;
-#ifdef USE_VEC
 			color *= (1 - refl_att);
 			color += refl_color * refl_att;
-#else
-			vmult( color, color, 1 - refl_att);
-			vmult( refl_color, refl_color, refl_att);
-			vadd( color, color, refl_color);
-#endif
 #endif
 		}
 	}
@@ -380,23 +264,11 @@ public:
 		printf( "tr=%f\n", tr);
 		for (unsigned jj = 0; jj < m_h; jj++) {
 			v3 vu;
-#ifdef USE_VEC
 			vu = m_u * ((double)jj - m_h / 2) / m_h * m_hh;
-#else
-			vmult( vu, m_u, ((double)jj - m_h / 2) / m_h * m_hh);
-#endif
 			for (unsigned ii = 0; ii < m_w; ii++) {
 				v3 vr;
-#ifdef USE_VEC
 				vr = m_r * ((double)ii - m_w / 2) / m_w * m_ww;
 				v = ~m_f + vu + vr;
-#else
-				vmult( vr, m_r, ((double)ii - m_w / 2) / m_w * m_ww);
-				vcopy( v, m_f);
-				vnorm( v);
-				vadd( v, v, vu);
-				vadd( v, v, vr);
-#endif
 				v3 color = { 1, 1, 1};
 				Trace( 0, m_e, v, color);
 				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
@@ -423,11 +295,6 @@ public:
 #define H 768
 #endif
 	void Run( int nosdl = 0, unsigned w = W, unsigned h = H) {
-#ifdef USE_VEC
-		printf( "using VEC\n");
-#else
-		printf( "*NOT* using VEC\n");
-#endif
 #ifdef USE_OPT
 		printf( "using OPT\n");
 #else
@@ -555,7 +422,6 @@ public:
 		printf( "ww=%f hh=%f\n", m_ww, m_hh);
 		// eye
 		int i = 0;
-#ifdef USE_VEC
 		m_e = cam[i++];
 		m_f = cam[i++];
 		m_u = cam[i++];
@@ -565,17 +431,6 @@ public:
 		m_u = m_r ^ m_f;		// re-compute up
 		m_u = ~m_u;
 		m_r = ~m_r;
-#else
-		vcopy( m_e, cam[i++]);
-		vcopy( m_f, cam[i++]);
-		vcopy( m_u, cam[i++]);
-
-		vnorm( m_u);
-		vcross( m_r, m_f, m_u);		// compute right
-		vcross( m_u, m_r, m_f);		// re-compute up
-		vnorm( m_u);
-		vnorm( m_r);
-#endif
 
 		vprint( "e", m_e);
 		vprint( "f", m_f);
@@ -594,14 +449,10 @@ public:
 			t += 0.1;
 			if (sdl) {
 				int ev = sdl->Poll();
-#ifndef USE_VEC
-				v3 v;
-#endif
 				switch (ev) {
 					case CSDL::QUIT:
 						quit = 1;
 						break;
-#ifdef USE_VEC
 					case CSDL::LEFT:
 						m_e -= m_r * 0.1;
 						break;
@@ -620,28 +471,6 @@ public:
 					case CSDL::PDOWN:
 						m_e -= m_f * 0.1;
 						break;
-#else
-					case CSDL::LEFT:
-						vcopy( v, m_r);
-						vmult( v, v, 0.1);
-						vsub( m_e, m_e, v);
-						break;
-					case CSDL::RIGHT:
-						vcopy( v, m_r);
-						vmult( v, v, 0.1);
-						vadd( m_e, m_e, v);
-						break;
-					case CSDL::UP:
-						vcopy( v, m_u);
-						vmult( v, v, 0.1);
-						vadd( m_e, m_e, v);
-						break;
-					case CSDL::DOWN:
-						vcopy( v, m_u);
-						vmult( v, v, 0.1);
-						vsub( m_e, m_e, v);
-						break;
-#endif
 				}
 				sdl->Draw( m_arr);
 				if (ev == CSDL::NONE) {

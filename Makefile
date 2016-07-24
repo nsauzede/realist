@@ -32,6 +32,8 @@ endif
 
 CXXFLAGS+=-I.
 
+all: SDL_CHECK $(TARGET)
+
 include sdl.mak
 ifeq ($(SDL_VER),1)
 CXXFLAGS+=-DSDL1
@@ -41,8 +43,6 @@ endif
 
 CXXFLAGS+=$(SDL_FLAGS)
 LDLIBS+=$(SDL_LIBS)
-
-all: SDL_CHECK $(TARGET)
 
 clean:
 	$(RM) $(TARGET)
