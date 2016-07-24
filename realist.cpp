@@ -241,7 +241,8 @@ public:
 			color *= energy;
 #ifdef USE_REFL
 			// reflection
-			v3 vrefl = nv * (v % nv);
+			double dot = (v % nv);
+			v3 vrefl = v + nv * dot;
 			v3 refl_color = { 0, 0, 0};
 			Trace( depth + 1, vint, vrefl, refl_color);
 			double refl_att = 0.1;
