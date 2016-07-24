@@ -234,22 +234,14 @@ public:
 			// normal at intersec
 			nv = ~(vint - omin->Center());
 #endif
-#ifdef USE_REFL
-			// reflection
-			v3 vrefl = nv * -((v * -1) % nv);
-			vrefl -= v;
-			// refl index
-			double index = 0.01;
-			vrefl *= 1.0 - index;
-			vrefl += v;
-			vrefl = ~vrefl;
-#endif
 #ifdef USE_FLASH
 			// camera flash
 			energy += nv[2] * (1 - energy);
 #endif
 			color *= energy;
 #ifdef USE_REFL
+			// reflection
+			v3 vrefl = nv * (v % nv);
 			v3 refl_color = { 0, 0, 0};
 			Trace( depth + 1, vint, vrefl, refl_color);
 			double refl_att = 0.1;
@@ -311,7 +303,32 @@ public:
 		m_arr = (double *)malloc( m_sz);
 		double t = 0;
 
-#if 0
+#if 1
+// spheres pyramid
+		v3 cam[] = {
+#define ED 0.4
+			{ 1*ED, 0*ED, 1*ED},	// eye
+			{ -1, 0, -1},	// front towards screen
+			{ 0, 0, 1},		// up along screen
+		};
+		// scene
+		double sph[][CSphere::MAX] = {
+#define SR 0.05
+#define SD (2*SR)
+#define SC 0.8
+			{ 0*SD, -1*SD, 0*SR, SR, 1*SC, 1*SC, 1*SC},
+			{ 0*SD, +0*SD, 0*SR, SR, 1*SC, 1*SC, 1*SC},
+			{ 0*SD, +1*SD, 0*SR, SR, 1*SC, 1*SC, 1*SC},
+
+			{ 1*SD, -1*SR, 0*SR, SR, 1*SC, 0*SC, 0*SC},
+			{ 1*SD, +1*SR, 0*SR, SR, 0*SC, 0*SC, 1*SC},
+
+			{ 2*SD, +0*SD, 0*SR, SR, 0*SC, 1*SC, 0*SC},
+
+			{ 1*SR, -1*SR, 1*SD, SR, 1*SC, 1*SC, 1*SC},
+			{ 1*SR, +1*SR, 1*SD, SR, 1*SC, 1*SC, 1*SC},
+		};
+#elif 0
 // origins
 		// camera
 		v3 cam[] = {
@@ -329,6 +346,7 @@ public:
 			{ 0, 1, 0, SR, 0, 1, 0},
 			{ 0, 0, 1, SR, 0, 0, 1},
 #endif
+		};
 #else
 // ioccc ray
 		// camera
@@ -414,8 +432,8 @@ public:
     { [CSphere::CENTER_X] = -2*CX, [CSphere::CENTER_Y] = -20*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
     { [CSphere::CENTER_X] = 2*CX, [CSphere::CENTER_Y] = -20*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = 1, [CSphere::COLOR_BLUE] = B, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
     { [CSphere::CENTER_X] = 9*CX, [CSphere::CENTER_Y] = -20*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
-#endif
 		};
+#endif
 		// screen
 		m_ww = 1;
 		m_hh = m_ww * m_h / m_w;
@@ -453,23 +471,26 @@ public:
 					case CSDL::QUIT:
 						quit = 1;
 						break;
+#define LR 0.05
+#define UD 0.05
+#define PUD 0.1
 					case CSDL::LEFT:
-						m_e -= m_r * 0.1;
+						m_e -= m_r * LR;
 						break;
 					case CSDL::RIGHT:
-						m_e += m_r * 0.1;
+						m_e += m_r * LR;
 						break;
 					case CSDL::UP:
-						m_e += m_u * 0.1;
+						m_e += m_u * UD;
 						break;
 					case CSDL::DOWN:
-						m_e -= m_u * 0.1;
+						m_e -= m_u * UD;
 						break;
 					case CSDL::PUP:
-						m_e += m_f * 0.1;
+						m_e += m_f * PUD;
 						break;
 					case CSDL::PDOWN:
-						m_e -= m_f * 0.1;
+						m_e -= m_f * PUD;
 						break;
 				}
 				sdl->Draw( m_arr);
