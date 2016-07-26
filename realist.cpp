@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include "CSDL.h"
 
@@ -99,6 +100,10 @@ public:
 		return sqrt( *this % *this);
 	}
 	const double& operator[]( unsigned i) const {
+		assert( (i < n));
+		return m_d[i];
+	}
+	double& operator[]( unsigned i) {
 		assert( (i < n));
 		return m_d[i];
 	}
@@ -200,110 +205,36 @@ private:
 
 class CRealist {
 public:
-#define MAX_DEPTH 2
-	void Trace( int depth, const v3 &o, const v3 &v, v3 &color) const {
-		if (depth > MAX_DEPTH)
-			return;
-#define TMAX 1E10
-		double tmin = HUGE_VAL;
-		CObject *omin = 0;
-		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
-			double tres = m_objs.at( ii)->Intersec( o, v);
-			if (tres < tmin) {
-				tmin = tres;
-				omin = m_objs.at( ii);
+	int LoadScene( const char *scene_file) {
+		int result = -1;
+		std::ifstream ifs( scene_file);
+		if (!ifs.is_open())
+			return result;
+		for (unsigned ii = 0; ii < 3; ii++) {
+			ifs >> m_e[ii];
+		}
+		for (unsigned ii = 0; ii < 3; ii++) {
+			ifs >> m_f[ii];
+		}
+		for (unsigned ii = 0; ii < 3; ii++) {
+			ifs >> m_u[ii];
+		}
+		while (!ifs.eof()) {
+			double sp[CSphere::MAX];
+			for (unsigned ii = 0; ii < CSphere::MAX; ii++) {
+				ifs >> sp[ii];
 			}
+			CSphere *sph = new CSphere( sp);
+			m_objs.push_back( sph);
 		}
-		double def_color = 0;
-		color *= def_color;
-		if (tmin < TMAX) {
-			double energy = 0;
-			// ambient
-			energy += 0.5;
-#if defined USE_FLASH || defined USE_REFL
-			// coords of intersec
-			v3 vint;
-			// normal at intersec
-			v3 nv;
-#endif
-			// intersected object color
-			color = omin->Color();
-#if defined USE_FLASH || defined USE_REFL
-			// coords of intersec
-			vint = o + v * tmin;
-			// normal at intersec
-			nv = ~(vint - omin->Center());
-#endif
-#ifdef USE_FLASH
-			// camera flash
-			energy += nv[2] * (1 - energy);
-#endif
-			color *= energy;
-#ifdef USE_REFL
-			// reflection
-			double dot = (v % nv);
-			v3 vrefl = v + nv * dot;
-			v3 refl_color = { 0, 0, 0};
-			Trace( depth + 1, vint, vrefl, refl_color);
-			double refl_att = 0.1;
-			color *= (1 - refl_att);
-			color += refl_color * refl_att;
-#endif
-		}
+		return 0;
 	}
-	void Render( const double &tr = 0) const {
-		// ray
-		v3 v;
-		printf( "tr=%f\n", tr);
-		for (unsigned jj = 0; jj < m_h; jj++) {
-			v3 vu;
-			vu = m_u * ((double)jj - m_h / 2) / m_h * m_hh;
-			for (unsigned ii = 0; ii < m_w; ii++) {
-				v3 vr;
-				vr = m_r * ((double)ii - m_w / 2) / m_w * m_ww;
-				v = ~m_f + vu + vr;
-				v3 color = { 1, 1, 1};
-				Trace( 0, m_e, v, color);
-				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
-				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 1] = color[1];
-				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 2] = color[2];
-			}
-//			printf( "\n");
+	CRealist( const char *scene_file = 0) {
+		if (scene_file) {
+			if (LoadScene( scene_file))
+				return;
 		}
-	}
-#if 0
-#define W 32
-#define H 16
-#elif 0
-#define W 200
-#define H 100
-#elif 0
-#define W 320
-#define H 200
-#elif 0
-#define W 640
-#define H 480
-#else
-#define W 1024
-#define H 768
-#endif
-	void Run( int nosdl = 0, unsigned w = W, unsigned h = H) {
-#ifdef USE_OPT
-		printf( "using OPT\n");
-#else
-		printf( "*NOT* using OPT\n");
-#endif
-		CSDL *sdl = 0;
-		if (!nosdl)
-			sdl = new CSDL;
-		m_w = w;
-		m_h = h;
-		if (sdl)
-			sdl->Init( m_w, m_h);
-		m_sz = sizeof( *m_arr) * 3 * m_w * m_h;
-		m_arr = (double *)malloc( m_sz);
-		double t = 0;
-
+		else {
 #if 1
 // spheres pyramid
 		v3 cam[] = {
@@ -329,7 +260,7 @@ public:
 			{ 1*SR, -1*SR, 1*SD, SR, 1*SC, 1*SC, 1*SC},
 			{ 1*SR, +1*SR, 1*SD, SR, 1*SC, 1*SC, 1*SC},
 		};
-#elif 0
+#elif 1
 // origins
 		// camera
 		v3 cam[] = {
@@ -435,21 +366,24 @@ public:
     { [CSphere::CENTER_X] = 9*CX, [CSphere::CENTER_Y] = -20*CY, [CSphere::CENTER_Z] = Z*CZ, [CSphere::RADIUS] = 1*SR, [CSphere::COLOR_RED] = R, [CSphere::COLOR_GREEN] = G, [CSphere::COLOR_BLUE] = 1, [CSphere::A0] = 1.0, [CSphere::B0] = 1.0, [CSphere::C0] = 1.0, [CSphere::D0] = 1.0, [CSphere::E0] = 1.0, [CSphere::F0] = 1.0 },
 		};
 #endif
-		// screen
-		m_ww = 1;
-		m_hh = m_ww * m_h / m_w;
-		printf( "ww=%f hh=%f\n", m_ww, m_hh);
+
 		// eye
 		int i = 0;
 		m_e = cam[i++];
 		m_f = cam[i++];
 		m_u = cam[i++];
 
-		m_u = ~m_u;
-		m_r = m_f ^ m_u;		// compute right
-		m_u = m_r ^ m_f;		// re-compute up
-		m_u = ~m_u;
-		m_r = ~m_r;
+		for (unsigned ii = 0; ii < (sizeof(sph) / sizeof(sph[0])); ii++) {
+			m_objs.push_back( new CSphere( sph[ii]));
+		}
+		}
+		if (m_r[0] == 0 && m_r[1] == 0 && m_r[2] == 0) {
+			m_u = ~m_u;
+			m_r = m_f ^ m_u;		// compute right
+			m_u = m_r ^ m_f;		// re-compute up
+			m_u = ~m_u;
+			m_r = ~m_r;
+		}
 
 		vprint( "e", m_e);
 		vprint( "f", m_f);
@@ -457,9 +391,117 @@ public:
 		vprint( "r", m_r);
 		printf( "\n");
 
-		for (unsigned ii = 0; ii < (sizeof(sph) / sizeof(sph[0])); ii++) {
-			m_objs.push_back( new CSphere( sph[ii]));
+	}
+#define MAX_DEPTH 2
+	void Trace( int depth, const v3 &o, const v3 &v, v3 &color) const {
+		if (depth > MAX_DEPTH)
+			return;
+#define TMAX 1E10
+		double tmin = HUGE_VAL;
+		CObject *omin = 0;
+		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
+			double tres = m_objs.at( ii)->Intersec( o, v);
+			if (tres < tmin) {
+				tmin = tres;
+				omin = m_objs.at( ii);
+			}
 		}
+		double def_color = 0;
+		color *= def_color;
+		if (tmin < TMAX) {
+			double energy = 0;
+			// ambient
+			energy += 0.5;
+#if defined USE_FLASH || defined USE_REFL
+			// coords of intersec
+			v3 vint;
+			// normal at intersec
+			v3 nv;
+#endif
+			// intersected object color
+			color = omin->Color();
+#if defined USE_FLASH || defined USE_REFL
+			// coords of intersec
+			vint = o + v * tmin;
+			// normal at intersec
+			nv = ~(vint - omin->Center());
+#endif
+#ifdef USE_FLASH
+			// camera flash
+			energy += nv[2] * (1 - energy);
+#endif
+			color *= energy;
+#ifdef USE_REFL
+			// reflection
+			double dot = (v % nv);
+			v3 vrefl = v + nv * dot;
+			v3 refl_color = { 0, 0, 0};
+			Trace( depth + 1, vint, vrefl, refl_color);
+			double refl_att = 0.1;
+			color *= (1 - refl_att);
+			color += refl_color * refl_att;
+#endif
+		}
+	}
+	void Render( const double &tr = 0) const {
+		// ray
+		v3 v;
+		printf( "tr=%f\n", tr);
+		for (unsigned jj = 0; jj < m_h; jj++) {
+			v3 vu;
+			vu = m_u * ((double)jj - m_h / 2) / m_h * m_hh;
+			for (unsigned ii = 0; ii < m_w; ii++) {
+				v3 vr;
+				vr = m_r * ((double)ii - m_w / 2) / m_w * m_ww;
+				v = ~m_f + vu + vr;
+				v3 color = { 1, 1, 1};
+				Trace( 0, m_e, v, color);
+				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
+				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 1] = color[1];
+				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 2] = color[2];
+			}
+//			printf( "\n");
+		}
+	}
+#if 0
+#define W 32
+#define H 16
+#elif 0
+#define W 200
+#define H 100
+#elif 0
+#define W 320
+#define H 200
+#elif 0
+#define W 640
+#define H 480
+#else
+#define W 1024
+#define H 768
+#endif
+	void Run( int nosdl = 0, unsigned w = W, unsigned h = H) {
+#ifdef USE_OPT
+		printf( "using OPT\n");
+#else
+		printf( "*NOT* using OPT\n");
+#endif
+		CSDL *sdl = 0;
+		if (!nosdl)
+			sdl = new CSDL;
+		m_w = w;
+		m_h = h;
+		if (sdl)
+			sdl->Init( m_w, m_h);
+		m_sz = sizeof( *m_arr) * 3 * m_w * m_h;
+		m_arr = (double *)malloc( m_sz);
+		double t = 0;
+
+		// screen
+		m_ww = 1;
+		m_hh = m_ww * m_h / m_w;
+		printf( "ww=%f hh=%f\n", m_ww, m_hh);
+
+		printf( "found %zd objects\n", m_objs.size());
 
 		memset( m_arr, 0, m_sz);
 		int quit = 0;
@@ -527,11 +569,15 @@ private:
 
 int main( int argc, char *argv[]) {
 	int nosdl = 0;
+	char *scene = 0;
 	int arg = 1;
 	if (arg < argc) {
-		sscanf( argv[arg++], "%d", &nosdl);
+		scene = argv[arg++];
+		if (arg < argc) {
+			sscanf( argv[arg++], "%d", &nosdl);
+		}
 	}
-	CRealist r;
+	CRealist r( scene);
 	r.Run( nosdl);
 	return 0;
 }
