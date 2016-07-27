@@ -1,0 +1,12 @@
+
+
+-eclairage frontal
+
+-eclairage lampe => cosinus(normal,lamp)/d^2
+-reflexion speculaire : miroir
+-gamma : SRGB=encodedRGB=f(x)=x^(1/2.2)*255
+-linearRGB=g(x)=(x/255)^2.2
+
+-rgbe => HDR, non-normalized double, super RAW
+
+(-reflexion diffuse : lambertian, inversion de matrice, 1 / (1 - A))
