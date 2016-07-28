@@ -138,7 +138,7 @@ public:
 				return;
 		}
 		else {
-#if 1
+#if 0
 // spheres pyramid
 		v3 cam[] = {
 #define ED 0.4
@@ -163,7 +163,7 @@ public:
 			{ 1*SR, -1*SR, 1*SD, SR, 1*SC, 1*SC, 1*SC},
 			{ 1*SR, +1*SR, 1*SD, SR, 1*SC, 1*SC, 1*SC},
 		};
-#elif 1
+#elif 0
 // origins
 		// camera
 		v3 cam[] = {
