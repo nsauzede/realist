@@ -138,7 +138,7 @@ public:
 				return;
 		}
 		else {
-#if 0
+#if 1
 // spheres pyramid
 		v3 cam[] = {
 #define ED 0.4
@@ -175,7 +175,7 @@ public:
 		// scene
 		double sph[][CSphere::MAX] = {
 #define SR 0.1
-			{ 0, 0, 0, SR, 0, 0, 0},
+			{ 0, 0, 0, SR, 1, 1, 1},
 #if 1
 			{ 1, 0, 0, SR, 1, 0, 0},
 			{ 0, 1, 0, SR, 0, 1, 0},
@@ -295,7 +295,7 @@ public:
 		printf( "\n");
 
 	}
-#define MAX_DEPTH 2
+#define MAX_DEPTH 3
 	void Trace( int depth, const v3 &o, const v3 &v, v3 &color) const {
 		if (depth > MAX_DEPTH)
 			return;
@@ -304,7 +304,7 @@ public:
 		CObject *omin = 0;
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
 			double tres = m_objs.at( ii)->Intersec( o, v);
-			if (tres < tmin) {
+			if ((tres > 0) && (tres < tmin)) {
 				tmin = tres;
 				omin = m_objs.at( ii);
 			}
@@ -314,7 +314,7 @@ public:
 		if (tmin < TMAX) {
 			double energy = 0;
 			// ambient
-			energy += 0.5;
+			energy += 0.3;
 #if defined USE_FLASH || defined USE_REFL
 			// coords of intersec
 			v3 vint;
@@ -322,7 +322,7 @@ public:
 			v3 nv;
 #endif
 			// intersected object color
-			color = omin->Color();
+			color = omin->Color() * 1.0;
 #if defined USE_FLASH || defined USE_REFL
 			// coords of intersec
 			vint = o + v * tmin;
@@ -331,16 +331,24 @@ public:
 #endif
 #ifdef USE_FLASH
 			// camera flash
-			energy += nv[2] * (1 - energy);
+#define MAX_FLASH 0.1
+			double flash_nrj = 1 - energy;
+			if (flash_nrj > MAX_FLASH)
+				flash_nrj = MAX_FLASH;
+			double dist = !(vint - m_e);
+#define LAMP_FLOOR 0.4
+			if (dist < LAMP_FLOOR)
+				dist = LAMP_FLOOR;
+			energy += flash_nrj / dist / dist;
 #endif
 			color *= energy;
 #ifdef USE_REFL
 			// reflection
-			double dot = (v % nv);
-			v3 vrefl = v + nv * dot;
+			double dot = 2 * (v % nv);
+			v3 vrefl = v - nv * dot;
 			v3 refl_color = { 0, 0, 0};
 			Trace( depth + 1, vint, vrefl, refl_color);
-			double refl_att = 0.1;
+			double refl_att = 0.2;
 			color *= (1 - refl_att);
 			color += refl_color * refl_att;
 #endif
@@ -356,7 +364,7 @@ public:
 			for (unsigned ii = 0; ii < m_w; ii++) {
 				v3 vr;
 				vr = m_r * ((double)ii - m_w / 2) / m_w * m_ww;
-				v = ~m_f + vu + vr;
+				v = ~(m_f + vu + vr);
 				v3 color = { 1, 1, 1};
 				Trace( 0, m_e, v, color);
 				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
@@ -404,7 +412,7 @@ public:
 		m_hh = m_ww * m_h / m_w;
 		printf( "ww=%f hh=%f\n", m_ww, m_hh);
 
-		printf( "found %zd objects\n", m_objs.size());
+		printf( "found %d objects\n", (int)m_objs.size());
 
 		memset( m_arr, 0, m_sz);
 		int quit = 0;
@@ -412,7 +420,9 @@ public:
 			Render( t);
 			t += 0.1;
 			if (sdl) {
-				int ev = sdl->Poll();
+				int ev;
+				do {
+				ev = sdl->Poll();
 				switch (ev) {
 					case CSDL::QUIT:
 						quit = 1;
@@ -439,6 +449,7 @@ public:
 						m_e -= m_f * PUD;
 						break;
 				}
+				} while (ev != CSDL::NONE);
 				sdl->Draw( m_arr);
 				if (ev == CSDL::NONE) {
 					sdl->Delay( 500);
@@ -462,6 +473,7 @@ private:
 	double *m_arr;
 	unsigned m_sz;
 	std::vector<CObject *> m_objs;
+//	std::vector<CLamp *> m_lamps;
 
 	v3 m_e;	// eye position
 	v3 m_f;	// front towards screen
