@@ -476,9 +476,8 @@ public:
 
 		memset( m_arr, 0, m_sz);
 		int quit = 0;
+		int dirty = 1;
 		while (!quit) {
-			Render( t);
-			t += 0.1;
 			if (sdl) {
 				int ev;
 				do {
@@ -488,8 +487,8 @@ public:
 						ev = -ev;
 						shift = 1;
 					}
-					int dirty = 1;
 					v3 rv;
+					int modif = 1;
 					switch (ev) {
 						case CSDL::QUIT:
 							quit = 1;
@@ -516,22 +515,28 @@ public:
 							rv = m_f * -PUD;
 							break;
 						default:
-							dirty = 0;
+							modif = 0;
 							break;
 					}
 					if (quit)
 						break;
-					if (dirty) {
+					if (modif) {
 						if (shift)
 							m_lamps.at( 0)->Center() += rv;
 						else
 							m_e += rv;
+						dirty = 1;
 					}
 				} while (ev != CSDL::NONE);
 				if (quit)
 					break;
-				sdl->Draw( m_arr);
-				if (ev == CSDL::NONE) {
+				if (dirty) {
+					Render( t);
+					t += 0.1;
+					sdl->Draw( m_arr);
+					dirty = 0;
+				}
+				else {
 					sdl->Delay( 500);
 				}
 			}
