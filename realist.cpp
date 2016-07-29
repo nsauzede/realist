@@ -31,24 +31,38 @@ int solvetri( const double &a, const double &b, const double &c, double &t1, dou
 
 class CObject {
 public:
+	CObject():m_hollow(0){
+	}
 	virtual ~CObject() {
 	}
 	// returns intersection distance (HUGE_VAL => no intersection)
-	virtual double Intersec( const v3 &e, const v3 &v) const = 0;
+	virtual double Intersec( const v3& e, const v3& v) const = 0;
 	virtual void SetColor( const double *color) {
 		m_color = color;
 	}
-	virtual const v3 &Color() const {
+	virtual const v3& Color() const {
 		return m_color;
 	}
-	virtual const v3 &Center() const {
+	virtual v3& Center() {
 		return m_c;
+	}
+	virtual const v3& Center() const {
+		return m_c;
+	}
+	virtual void SetHollow( const int& hollow) {
+		m_hollow = hollow;
+	}
+	const int& Hollow() const {
+		return m_hollow;
 	}
 private:
 	v3 m_color;
+	int m_hollow;
 protected:
 	v3 m_c;
 };
+
+typedef class CSphere CLamp;
 
 class CSphere : public CObject {
 public:
@@ -294,6 +308,19 @@ public:
 		vprint( "r", m_r);
 		printf( "\n");
 
+		double slamp[] = {
+#define LAMP_DIST 0.5
+#define LAMP_RAD 0.02
+#define LAMP_COL 1.0
+			0.0 * LAMP_DIST, -1.0 * LAMP_DIST, 1.0 * LAMP_DIST,
+			LAMP_RAD,
+			1.0 * LAMP_COL, 1.0 * LAMP_COL, 0.0 * LAMP_COL
+		};
+		CSphere *lamp = new CLamp( slamp);
+		lamp->SetHollow( 1);
+		m_lamps.push_back( lamp);
+		m_objs.push_back( lamp);
+
 	}
 #define MAX_DEPTH 3
 	void Trace( int depth, const v3 &o, const v3 &v, v3 &color) const {
@@ -314,7 +341,7 @@ public:
 		if (tmin < TMAX) {
 			double energy = 0;
 			// ambient
-			energy += 0.3;
+			energy += 0.2;
 #if defined USE_FLASH || defined USE_REFL
 			// coords of intersec
 			v3 vint;
@@ -341,16 +368,49 @@ public:
 				dist = LAMP_FLOOR;
 			energy += flash_nrj / dist / dist;
 #endif
+			// is there any object intersection between vint and a lamp ?
+			for (unsigned jj = 0; jj < m_lamps.size(); jj++) {
+				if (omin == m_lamps.at( jj)) // skip current lamp==intersected object
+					continue;
+				v3 plamp = m_lamps.at( jj)->Center();
+				v3 vlamp = plamp - vint;
+				// is normal dot vlamp <= 0 (surface not exposed to light)
+				if ((vlamp % nv) <= 0)
+					continue;
+				double dlamp = !vlamp;
+				int shadowed = 0;
+				for (unsigned ii = 0; ii < m_objs.size(); ii++) {
+					if (omin == m_objs.at( ii)) // skip current object=intersected object
+						continue;
+					double tres = m_objs.at( ii)->Intersec( vint, vlamp);
+					if ((tres > 0) && (tres < tmin)) {
+						v3 vint2 = vint + vlamp * tres;
+						double dint = !(vint2 - vint);
+						if ((dint < dlamp) && !m_objs.at( ii)->Hollow()) {
+							shadowed = 1;
+							break;
+						}
+					}
+				}
+				if (!shadowed) {
+					double nrj = 0.1 * 1.0 / dlamp / dlamp;
+					if (nrj > 1.0)
+						nrj = 1.0;
+					energy += nrj;
+				}
+			}
 			color *= energy;
 #ifdef USE_REFL
-			// reflection
-			double dot = 2 * (v % nv);
-			v3 vrefl = v - nv * dot;
-			v3 refl_color = { 0, 0, 0};
-			Trace( depth + 1, vint, vrefl, refl_color);
-			double refl_att = 0.2;
-			color *= (1 - refl_att);
-			color += refl_color * refl_att;
+			if (!omin->Hollow()) {
+				// reflection
+				double dot = 2 * (v % nv);
+				v3 vrefl = v - nv * dot;
+				v3 refl_color = { 0, 0, 0};
+				Trace( depth + 1, vint, vrefl, refl_color);
+				double refl_att = 0.2;
+				color *= (1 - refl_att);
+				color += refl_color * refl_att;
+			}
 #endif
 		}
 	}
@@ -422,34 +482,54 @@ public:
 			if (sdl) {
 				int ev;
 				do {
-				ev = sdl->Poll();
-				switch (ev) {
-					case CSDL::QUIT:
-						quit = 1;
-						break;
+					ev = sdl->Poll();
+					int shift = 0;
+					if (ev < 0) {
+						ev = -ev;
+						shift = 1;
+					}
+					int dirty = 1;
+					v3 rv;
+					switch (ev) {
+						case CSDL::QUIT:
+							quit = 1;
+							break;
 #define LR 0.05
 #define UD 0.05
 #define PUD 0.1
-					case CSDL::LEFT:
-						m_e -= m_r * LR;
+						case CSDL::LEFT:
+							rv = m_r * -LR;
+							break;
+						case CSDL::RIGHT:
+							rv = m_r * +LR;
+							break;
+						case CSDL::UP:
+							rv = m_u * +UD;
+							break;
+						case CSDL::DOWN:
+							rv = m_u * -UD;
+							break;
+						case CSDL::PUP:
+							rv = m_f * +PUD;
+							break;
+						case CSDL::PDOWN:
+							rv = m_f * -PUD;
+							break;
+						default:
+							dirty = 0;
+							break;
+					}
+					if (quit)
 						break;
-					case CSDL::RIGHT:
-						m_e += m_r * LR;
-						break;
-					case CSDL::UP:
-						m_e += m_u * UD;
-						break;
-					case CSDL::DOWN:
-						m_e -= m_u * UD;
-						break;
-					case CSDL::PUP:
-						m_e += m_f * PUD;
-						break;
-					case CSDL::PDOWN:
-						m_e -= m_f * PUD;
-						break;
-				}
+					if (dirty) {
+						if (shift)
+							m_lamps.at( 0)->Center() += rv;
+						else
+							m_e += rv;
+					}
 				} while (ev != CSDL::NONE);
+				if (quit)
+					break;
 				sdl->Draw( m_arr);
 				if (ev == CSDL::NONE) {
 					sdl->Delay( 500);
@@ -473,7 +553,7 @@ private:
 	double *m_arr;
 	unsigned m_sz;
 	std::vector<CObject *> m_objs;
-//	std::vector<CLamp *> m_lamps;
+	std::vector<CLamp *> m_lamps;
 
 	v3 m_e;	// eye position
 	v3 m_f;	// front towards screen
