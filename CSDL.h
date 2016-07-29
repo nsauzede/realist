@@ -54,12 +54,15 @@ public:
 	int Poll() {
 		int result = NONE;
 		SDL_Event event;
+		int shift = 1;
 		while (SDL_PollEvent( &event)) {
 			if (event.type == SDL_QUIT) {
 				result = QUIT;
 				break;
 			}
 			else if (event.type == SDL_KEYDOWN) {
+				if (event.key.keysym.mod & KMOD_SHIFT)
+					shift = -1;
 				if (event.key.keysym.sym == SDLK_ESCAPE) {
 					result = QUIT;
 					break;
@@ -90,7 +93,7 @@ public:
 				}
 			}
 		}
-		return result;
+		return shift * result;
 	}
 	void Draw( double *arr = 0) {
 		SDL_Rect rect;
