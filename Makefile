@@ -48,3 +48,4 @@ clean:
 	$(RM) $(TARGET)
 
 clobber: clean
+	$(RM) *~
