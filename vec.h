@@ -105,8 +105,12 @@ public:
 		}
 		printf( "\n");
 	}
-	friend std::ostream& operator<<( std::ostream& out, const v3& v) {
-		out << v[0] << "," << v[1] << "," << v[2];
+	friend std::ostream& operator<<( std::ostream& out, const vec<n>& v) {
+		for (unsigned ii = 0; ii < n; ii++) {
+			if (ii > 0)
+				out << " ";
+			out << v[ii];
+		}
 		return out;
 	}
 private:
