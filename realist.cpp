@@ -69,7 +69,6 @@ typedef class CSphere CLamp;
 
 class CSphere : public CObject {
 public:
-	// { center_x, center_y, center_z, radius, color_r, color_g, color_b }
 	enum {
 		CENTER_X, CENTER_Y, CENTER_Z, RADIUS, COLOR, COLOR_RED = COLOR, COLOR_GREEN, COLOR_BLUE,
 		A0, B0, C0, D0, E0, F0,
@@ -82,7 +81,6 @@ public:
 		out << m_c << std::endl;
 		out << m_r << std::endl;
 		out << m_color << std::endl;
-//		out << 0.0 << 0.0 << 0.0 << 0.0 << 0.0 << 0.0 << std::endl;
 		double v1[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 		vec<6> v(v1);
 		out << v << std::endl;
@@ -105,7 +103,6 @@ public:
 		int sol = solvetri( a, b, c, t1, t2);
 		if (sol >= 1) {
 			if (sol > 1) {
-//				printf( "t1=%f t2=%f => ", t1, t2);
 				if (t1 < t2) {
 					result = t1;
 				} else {
@@ -113,7 +110,6 @@ public:
 				}
 			}
 			else {
-//				printf( "t1=%f => ", t1);
 				result = t1;
 			}
 		}
@@ -177,34 +173,31 @@ public:
 				return;
 		}
 		else {
-// origins
-               // camera
-               v3 cam[] = {
+// default scene : origins (unit vectors)
+			// camera
+			v3 cam[] = {
 #define ED 3
-                       { ED, ED, 1*ED},        // eye
-                       { -1, -1, 1*-1},        // front towards screen
-                       { 0, 0, 1},             // up along screen
-               };
-               // scene
-               double sph[][CSphere::MAX] = {
+				{ ED, ED, 1*ED},        // eye
+				{ -1, -1, 1*-1},        // front towards screen
+				{ 0, 0, 1},             // up along screen
+			};
+			// scene
+			double sph[][CSphere::MAX] = {
 #define SR 0.1
-                       { 0, 0, 0, SR, 1, 1, 1},
-#if 1
-                       { 1, 0, 0, SR, 1, 0, 0},
-                       { 0, 1, 0, SR, 0, 1, 0},
-                       { 0, 0, 1, SR, 0, 0, 1},
-#endif
-               };
+				{ 0, 0, 0, SR, 1, 1, 1},
+				{ 1, 0, 0, SR, 1, 0, 0},
+				{ 0, 1, 0, SR, 0, 1, 0},
+				{ 0, 0, 1, SR, 0, 0, 1},
+			};
 
-		// eye
-		int i = 0;
-		m_e = cam[i++];
-		m_f = cam[i++];
-		m_u = cam[i++];
+			int i = 0;
+			m_e = cam[i++];
+			m_f = cam[i++];
+			m_u = cam[i++];
 
-		for (unsigned ii = 0; ii < (sizeof(sph) / sizeof(sph[0])); ii++) {
-			m_objs.push_back( new CSphere( sph[ii]));
-		}
+			for (unsigned ii = 0; ii < (sizeof(sph) / sizeof(sph[0])); ii++) {
+				m_objs.push_back( new CSphere( sph[ii]));
+			}
 		}
 		if (m_r[0] == 0 && m_r[1] == 0 && m_r[2] == 0) {
 			m_u = ~m_u;
@@ -350,22 +343,8 @@ public:
 //			printf( "\n");
 		}
 	}
-#if 0
-#define W 32
-#define H 16
-#elif 0
-#define W 200
-#define H 100
-#elif 0
-#define W 320
-#define H 200
-#elif 0
-#define W 640
-#define H 480
-#else
 #define W 1024
 #define H 768
-#endif
 	void Run( int nosdl = 0, unsigned w = W, unsigned h = H) {
 #ifdef USE_OPT
 		printf( "using OPT\n");

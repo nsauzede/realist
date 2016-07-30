@@ -15,7 +15,6 @@ public:
 #else
 #define SDLV 2
 #endif
-//	std::cout << "hello SDL " << SDLV << std::endl;
 	SDL_Init( SDL_INIT_VIDEO);
 
 	m_w = _w;
@@ -45,7 +44,7 @@ public:
 	m_sdlTexture = SDL_CreateTexture( m_sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_w, m_h);
 #endif
 	if (!m_screen) {
-//		std::cout << "failed to init SDL" << std::endl;
+		std::cout << "failed to init SDL" << std::endl;
 		exit( 1);
 	}
 	atexit( SDL_Quit);
