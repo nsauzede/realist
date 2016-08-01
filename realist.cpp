@@ -148,7 +148,11 @@ public:
 			double sp[CSphere::MAX];
 			for (unsigned ii = 0; ii < CSphere::MAX; ii++) {
 				ifs >> sp[ii];
+				if (ifs.eof())
+					break;
 			}
+			if (ifs.eof())
+				break;
 			CSphere *sph = new CSphere( sp);
 			std::cout << *sph << std::endl;
 			m_objs.push_back( sph);
@@ -167,6 +171,7 @@ public:
 		return 0;
 	}
 	CRealist( const char *scene_file = 0) {
+		std::cout << "initial #objects: " << m_objs.size() << std::endl;
 		const char *wfile_name = 0;
 		if (scene_file) {
 			if (LoadScene( scene_file))
