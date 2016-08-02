@@ -154,7 +154,7 @@ public:
 			if (ifs.eof())
 				break;
 			CSphere *sph = new CSphere( sp);
-			std::cout << *sph << std::endl;
+//			std::cout << *sph << std::endl;
 			m_objs.push_back( sph);
 		}
 		return 0;
@@ -328,10 +328,10 @@ public:
 #endif
 		}
 	}
-	void Render( const double &tr = 0) const {
+	void Render( /*const double &tr = 0*/) const {
 		// ray
 		v3 v;
-		printf( "tr=%f\n", tr);
+//		printf( "tr=%f\n", tr);
 		for (unsigned jj = 0; jj < m_h; jj++) {
 			v3 vu;
 			vu = m_u * ((double)jj - m_h / 2) / m_h * m_hh;
@@ -350,7 +350,7 @@ public:
 	}
 #define W 1024
 #define H 768
-	void Run( int nosdl = 0, unsigned w = W, unsigned h = H) {
+	void Run( int nosdl = 0, unsigned w = 0, unsigned h = 0) {
 #ifdef USE_OPT
 		printf( "using OPT\n");
 #else
@@ -359,8 +359,8 @@ public:
 		CSDL *sdl = 0;
 		if (!nosdl)
 			sdl = new CSDL;
-		m_w = w;
-		m_h = h;
+		m_w = !w ? W : w;
+		m_h = !h ? H : h;
 		if (sdl)
 			sdl->Init( m_w, m_h);
 		m_sz = sizeof( *m_arr) * 3 * m_w * m_h;
@@ -431,13 +431,13 @@ public:
 				if (quit)
 					break;
 				if (dirty) {
-					Render( t);
+					Render( /*t*/);
 					t += 0.1;
 					sdl->Draw( m_arr);
 					dirty = 0;
 				}
 				else {
-					sdl->Delay( 500);
+					sdl->Delay( 50);
 				}
 			}
 			else
@@ -468,16 +468,23 @@ private:
 };
 
 int main( int argc, char *argv[]) {
+	unsigned w = 0, h = 0;
 	int nosdl = 0;
 	char *scene = 0;
 	int arg = 1;
 	if (arg < argc) {
 		scene = argv[arg++];
 		if (arg < argc) {
-			sscanf( argv[arg++], "%d", &nosdl);
+			sscanf( argv[arg++], "%d", &w);
+			if (arg < argc) {
+				sscanf( argv[arg++], "%d", &h);
+				if (arg < argc) {
+					sscanf( argv[arg++], "%d", &nosdl);
+				}
+			}
 		}
 	}
 	CRealist r( scene);
-	r.Run( nosdl);
+	r.Run( nosdl, w, h);
 	return 0;
 }
