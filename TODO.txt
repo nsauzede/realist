@@ -10,3 +10,12 @@
 -rgbe => HDR, non-normalized double, super RAW
 
 (-reflexion diffuse : lambertian, inversion de matrice, 1 / (1 - A))
+
+
+TODO:
+-support more objects (facet, etc..)
+-support colored lamps
+-support object as lamp
+-support focal view (lens ?)
+-support parameterized normals
+-support refraction

@@ -37,6 +37,7 @@ public:
 	}
 	// returns intersection distance (HUGE_VAL => no intersection)
 	virtual double Intersec( const v3& e, const v3& v) const = 0;
+	virtual v3 Normal( const v3& vint) const = 0;
 	virtual void SetColor( const double *color) {
 		m_color = color;
 	}
@@ -114,6 +115,10 @@ public:
 			}
 		}
 		return result;
+	}
+	v3 Normal( const v3& vint) const {
+		v3 nv = ~(vint - Center());
+		return nv;
 	}
 	friend std::ostream& operator<<( std::ostream& out, const CSphere& sp) {
 		out << "sphere: c=";
@@ -257,9 +262,7 @@ public:
 			// ambient
 			energy += 0.2;
 #if defined USE_FLASH || defined USE_REFL
-			// coords of intersec
 			v3 vint;
-			// normal at intersec
 			v3 nv;
 #endif
 			// intersected object color
@@ -268,7 +271,7 @@ public:
 			// coords of intersec
 			vint = o + v * tmin;
 			// normal at intersec
-			nv = ~(vint - omin->Center());
+			nv = ~omin->Normal( vint);
 #endif
 #ifdef USE_FLASH
 			// camera flash
@@ -437,7 +440,7 @@ public:
 					dirty = 0;
 				}
 				else {
-					sdl->Delay( 50);
+					sdl->Delay( 100);
 				}
 			}
 			else
