@@ -87,7 +87,7 @@ def Trace(o,v):
 		else:
 			col='K'
 	else:
-		col=0
+		col='.'
 	return col
 
 for j in range(h):
