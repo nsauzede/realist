@@ -78,7 +78,7 @@ public:
 	const double& Radius() const {
 		return m_r;
 	}
-	virtual std::ostream& Serialize( std::ostream& out) const {
+	std::ostream& Serialize( std::ostream& out) const {
 		out << m_c << std::endl;
 		out << m_r << std::endl;
 		out << m_color << std::endl;
@@ -131,6 +131,102 @@ public:
 	}
 private:
 	double m_r;
+};
+
+class CPlane : public CObject {
+public:
+	enum {
+		LOC0, LOC0_X = LOC0, LOC0_Y, LOC0_Z,
+		LOC1, LOC1_X = LOC1, LOC1_Y, LOC1_Z,
+		LOC2, LOC2_X = LOC2, LOC2_Y, LOC2_Z,
+		COLOR, COLOR_RED = COLOR, COLOR_GREEN, COLOR_BLUE,
+		MAX
+	};
+	CPlane( const double *params) :
+		m_loc0( &params[LOC0]),
+		m_loc1( &params[LOC1]),
+		m_loc2( &params[LOC2])
+	{
+		SetColor( &params[COLOR]);
+		std::cout << *this << std::endl;
+	}
+	std::ostream& Serialize( std::ostream& out) const {
+		return out;
+	}
+	double Intersec( const v3 &oi, const v3 &vi) const {
+		double res = HUGE_VAL;
+		v3 n = Normal( m_loc0);
+		v3 p = m_loc0 - oi;
+		double num = p % n;
+		double den = vi % n;
+		if (den == 0) {
+			if (num == 0) {
+				printf( "all intersections\n");
+			}
+			else {
+				printf( "no intersections\n");
+			}
+		}
+		else {
+//			printf( "to be computed\n");
+			double det;
+			double a, b, c, d, e, f, g, h, i;
+			v3 lb = oi + vi;
+			a = oi[0] - lb[0];
+			b = m_loc1[0] - m_loc0[0];
+			c = m_loc2[0] - m_loc0[0];
+			d = oi[1] - lb[1];
+			e = m_loc1[1] - m_loc0[1];
+			f = m_loc2[1] - m_loc0[1];
+			g = oi[2] - lb[2];
+			h = m_loc1[2] - m_loc0[2];
+			i = m_loc2[2] - m_loc0[2];
+			det = a * (e * i - f * h) - b * (i * d - f * g) + c * (d * h - e * g);
+			if (det > 0.001) {	// matrix is invertible
+				double A, B, C, D, E, F, G, H, I;
+				A = (e * i - f * h);
+				B = -(d * i - f * g);
+				C = (d * h - e * g);
+				D = -(b * i - c * h);
+				E = (a * i - c * g);
+				F = -(a * h - b * g);
+				G = (b * f - c * e);
+				H = -(a * f - c * d);
+				I = (a * e - b * d);
+				double t, u = 0, v = 0;
+				// p=p0+u*v1+v*v2
+				t = (A * (oi[0] - m_loc0[0]) + D * (oi[1] - m_loc0[1]) + G * (oi[2] - m_loc0[2])) / det;
+				u = (B * (oi[0] - m_loc0[0]) + E * (oi[1] - m_loc0[1]) + H * (oi[2] - m_loc0[2])) /det;
+				v = (C * (oi[0] - m_loc0[0]) + F * (oi[1] - m_loc0[1]) + I * (oi[2] - m_loc0[2])) / det;
+				if ((u >= 0 && u <= 1) && (v >= 0 && v <= 1) && ((u + v) <= 1)) {
+					if (t > 1) {
+						res = 1;
+					}
+				}
+			}
+		}
+		return res;
+	}
+	v3 Normal( const v3& vint) const {
+		v3 v1 = m_loc1 - vint;
+		v3 v2 = m_loc2 - vint;
+		v3 n;
+		n = ~(v1 ^ v2);
+		return n;
+	}
+	friend std::ostream& operator<<( std::ostream& out, const CPlane& pl) {
+		out << "plane: loc0=";
+		out << pl.m_loc0;
+		out << " loc1=";
+		out << pl.m_loc1;
+		out << " loc2=";
+		out << pl.m_loc2;
+		out << " col=";
+		out << pl.Color();
+		return out;
+	}
+private:
+	v3 m_loc0, m_loc1, m_loc2;
 };
 
 class CRealist {
@@ -207,6 +303,29 @@ public:
 
 			for (unsigned ii = 0; ii < (sizeof(sph) / sizeof(sph[0])); ii++) {
 				m_objs.push_back( new CSphere( sph[ii]));
+			}
+			double pl[][CPlane::MAX] = {
+			{
+				0.0, 0.0, 0.0,
+				1.0, 0.0, 0.0,
+				0.0, 0.0, 1.0,
+				1.0, 0.0, 0.0,
+			},
+			{
+				0.0, 0.0, 0.0,
+				0.0, 1.0, 0.0,
+				0.0, 0.0, 1.0,
+				0.0, 1.0, 0.0,
+			},
+			{
+				0.0, 0.0, 0.0,
+				1.0, 0.0, 0.0,
+				0.0, 1.0, 0.0,
+				0.0, 0.0, 1.0,
+			},
+			};
+			for (unsigned ii = 0; ii < (sizeof(pl) / sizeof(pl[0])); ii++) {
+				m_objs.push_back( new CPlane( pl[ii]));
 			}
 		}
 		if (m_r[0] == 0 && m_r[1] == 0 && m_r[2] == 0) {
