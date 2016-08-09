@@ -1,0 +1,14 @@
+{
+"screen": { "w":270, "h":90, "ratiox":1., "ratioy":2.},
+"camera": { "loc": [3,3,3], "front": [-1,-1,-1], "up": [-1, -1, 1]},
+"sphere": [
+	[	#center	#radius	#color
+		0,0,0,	0.1,	1,1,1	],
+	[	#center	#radius	#color
+		1,0,0,	0.1,	1,0,0	],
+	[	#center	#radius	#color
+		0,1,0,	0.1,	0,1,0	],
+	[	#center	#radius	#color
+		0,0,1,	0.1,	0,0,1	],
+],
+}

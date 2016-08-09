@@ -2,21 +2,27 @@
 import math
 import numpy.matlib as np
 
-w=100
-h=100
-ww=1.
-hh=ww*h/w
+
+fin=open("origins.json","r")
+try:
+	json=eval(fin.read())
+finally:
+	fin.close()
+screen=json['screen']
+camera=json['camera']
+spheres=json['sphere']
+
+w=screen['w']
+h=screen['h']
+ww=1.*screen['ratiox']
+hh=ww*h/w*screen['ratioy']
 tab=[['.' for x in range(w)] for y in range(h)]
-ED=3
-e=np.array([ED,ED,ED],dtype=float)
-f=np.array([-1,-1,-1],dtype=float)
-u=np.array([0,0,1],dtype=float)
-SR=0.1
+e=np.array(camera['loc'],dtype=float)
+f=np.array(camera['front'],dtype=float)
+u=np.array(camera['up'],dtype=float)
 sphs=[]
-sphs+=[np.array([0,0,0,SR,1,1,1],dtype=float)]
-sphs+=[np.array([1,0,0,SR,1,0,0],dtype=float)]
-sphs+=[np.array([0,1,0,SR,0,1,0],dtype=float)]
-sphs+=[np.array([0,0,1,SR,0,0,1],dtype=float)]
+for sph in spheres:
+	sphs += [np.array(sph,dtype=float)]
 u/=np.linalg.norm(u)
 r=np.cross(f,u)
 u=np.cross(r,f)
@@ -90,16 +96,21 @@ def Trace(o,v):
 		col='.'
 	return col
 
-for j in range(h):
-	vu=u*(j-h/2)/h*hh
-	for i in range(w):
-		vr=r*(i-w/2)/w*ww
-		v=f+vu+vr
-		v/=np.linalg.norm(v)
-		col=Trace(e,v)
-		tab[h-j-1][i]=col
+def Render():
+	for j in range(h):
+		vu=u*(j-h/2)/h*hh
+		for i in range(w):
+			vr=r*(i-w/2)/w*ww
+			v=f+vu+vr
+			v/=np.linalg.norm(v)
+			col=Trace(e,v)
+			tab[h-j-1][i]=col
 
-for row in tab:
-	for e in row:
-		print(e,end="")
-	print("")
+def Draw():
+	for row in tab:
+		for e in row:
+			print(e,end="")
+		print("")
+
+Render()
+Draw()
