@@ -1,6 +1,6 @@
 # initial #objects: 0
 {
-'screen': { 'w':1024, 'h':768, 'ratiox':1, 'ratioy':1 },
+'screen': { 'w':100, 'h':80, 'ratiox':1, 'ratioy':2 },
 'camera': { 'loc':[0, 0, 1], 'front':[0, 0, -1], 'up':[0, 1, 0]},
 'objects': [
 {'type':'sphere', 'data': [-0.35, 0.32, 0,	0.05,	1, 1, 1]},
