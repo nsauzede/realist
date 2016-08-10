@@ -516,6 +516,75 @@ public:
 //			printf( "\n");
 		}
 	}
+	// DoF (depth of field), aka focal blur, tentative; use 3x3=9 rays instead of only one
+	void Render2( /*const double &tr = 0*/) const {
+		for (unsigned jj = 0; jj < m_h; jj++) {
+			v3 vu[3];
+			vu[0] = m_u * ((double)jj - 1 - m_h / 2) / m_h * m_hh;
+			vu[1] = m_u * ((double)jj + 0 - m_h / 2) / m_h * m_hh;
+			vu[2] = m_u * ((double)jj + 1 - m_h / 2) / m_h * m_hh;
+			for (unsigned ii = 0; ii < m_w; ii++) {
+				v3 vr[3];
+				vr[0] = m_r * ((double)ii - 1 - m_w / 2) / m_w * m_ww;
+				vr[1] = m_r * ((double)ii + 0 - m_w / 2) / m_w * m_ww;
+				vr[2] = m_r * ((double)ii + 1 - m_w / 2) / m_w * m_ww;
+				// rays
+				v3 e[9];
+				v3 v[9];
+				v[0] = m_f + vu[0] + vr[0];
+				v[1] = m_f + vu[0] + vr[1];
+				v[2] = m_f + vu[0] + vr[2];
+				v[3] = m_f + vu[1] + vr[0];
+				v[4] = m_f + vu[1] + vr[1];
+				v[5] = m_f + vu[1] + vr[2];
+				v[6] = m_f + vu[2] + vr[0];
+				v[7] = m_f + vu[2] + vr[1];
+				v[8] = m_f + vu[2] + vr[2];
+				
+				// focal point for this pixel
+				// current pixel (center of 9x9==[4])
+				v3 fp = m_e + v[4] * 2.0;			// FIXME : this focal locus is a sphere ! should be a plane instead ?
+				e[0] = m_e + v[0];
+				v[0] = ~(fp - e[0]);
+				e[1] = m_e + v[0];
+				v[1] = ~(fp - e[0]);
+				e[2] = m_e + v[0];
+				v[2] = ~(fp - e[0]);
+				e[3] = m_e + v[0];
+				v[3] = ~(fp - e[0]);
+				e[4] = m_e + v[4];
+				v[4] = ~(fp - e[4]);
+				e[5] = m_e + v[0];
+				v[5] = ~(fp - e[0]);
+				e[6] = m_e + v[0];
+				v[6] = ~(fp - e[0]);
+				e[7] = m_e + v[0];
+				v[7] = ~(fp - e[0]);
+				e[8] = m_e + v[0];
+				v[8] = ~(fp - e[0]);
+				
+				v3 pcolor[9] = {{1, 1, 1},{1, 1, 1},{1, 1, 1},{1, 1, 1},{1, 1, 1},{1, 1, 1},{1, 1, 1},{1, 1, 1},{1, 1, 1}};
+
+				Trace( 0, e[0], v[0], pcolor[0]);
+				Trace( 0, e[1], v[1], pcolor[1]);
+				Trace( 0, e[2], v[2], pcolor[2]);
+				Trace( 0, e[3], v[3], pcolor[3]);
+				Trace( 0, e[4], v[4], pcolor[4]);
+				Trace( 0, e[5], v[5], pcolor[5]);
+				Trace( 0, e[6], v[6], pcolor[6]);
+				Trace( 0, e[7], v[7], pcolor[7]);
+				Trace( 0, e[8], v[8], pcolor[8]);
+
+				v3 color;
+				color = (pcolor[0] + pcolor[1] + pcolor[2] + pcolor[3]) / 4;
+				color = pcolor[4];
+
+				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
+				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 1] = color[1];
+				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 2] = color[2];
+			}
+		}
+	}
 	void Run( int nosdl = 0, unsigned w = 0, unsigned h = 0) {
 #ifdef USE_OPT
 		printf( "# using OPT\n");
