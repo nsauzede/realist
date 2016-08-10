@@ -1,16 +1,16 @@
 #!/mingw64/bin/python3
 import math
 import numpy.matlib as np
+import sys
 
-
-fin=open("origins.json","r")
+fin=open(sys.argv[1],"r")
 try:
 	json=eval(fin.read())
 finally:
 	fin.close()
 screen=json['screen']
 camera=json['camera']
-spheres=json['sphere']
+objects=json['objects']
 
 w=screen['w']
 h=screen['h']
@@ -21,8 +21,8 @@ e=np.array(camera['loc'],dtype=float)
 f=np.array(camera['front'],dtype=float)
 u=np.array(camera['up'],dtype=float)
 sphs=[]
-for sph in spheres:
-	sphs += [np.array(sph,dtype=float)]
+for sph in objects:
+	sphs += [np.array(sph['data'],dtype=float)]
 u/=np.linalg.norm(u)
 r=np.cross(f,u)
 u=np.cross(r,f)

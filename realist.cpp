@@ -60,6 +60,7 @@ public:
 	friend std::ostream& operator<<( std::ostream& out, const CObject& ob) {
 		return ob.Serialize( out);
 	}
+	virtual void Json( std::ostream& out) const = 0;
 protected:
 	v3 m_c;
 	v3 m_color;
@@ -86,6 +87,15 @@ public:
 		vec<6> v(v1);
 		out << v << std::endl;
 		return out;
+	}
+	void Json( std::ostream& out) const {
+		out << "{'type':'sphere', 'data': [";
+		m_c.Print( out);
+		out << ",\t";
+		out << m_r;
+		out << ",\t";
+		m_color.Print( out);
+		out << "]}";
 	}
 	CSphere( const double *params) :
 		m_r( params[RADIUS]) {
@@ -152,6 +162,17 @@ public:
 	}
 	std::ostream& Serialize( std::ostream& out) const {
 		return out;
+	}
+	void Json( std::ostream& out) const {
+		out << "'plane': [";
+		m_loc0.Print( out);
+		out << ",\t";
+		m_loc1.Print( out);
+		out << ",\t";
+		m_loc2.Print( out);
+		out << ",\t";
+		m_color.Print( out);
+		out << "]";
 	}
 	double Intersec( const v3 &oi, const v3 &vi) const {
 		double res = HUGE_VAL;
@@ -231,6 +252,26 @@ private:
 
 class CRealist {
 public:
+	void JsonScene( std::ostream& out) const {
+		out << "{" << std::endl;
+		out << "'screen': { 'w':" << m_w << ", 'h':" << m_h << ", 'ratiox':1, 'ratioy':1 }," << std::endl;
+		out << "'camera': { ";
+		out << "'loc':";
+		m_e.Json( out);
+		out << ", 'front':";
+		m_f.Json( out);
+		out << ", 'up':";
+		m_u.Json( out);
+		out << "}," << std::endl;
+		out << "'objects': [" << std::endl;
+		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
+			if (ii > 0)
+				out << "," << std::endl;
+			(m_objs.at( ii))->Json( out);
+		}
+		out << std::endl << "]" << std::endl;
+		out << "}" << std::endl;
+	}
 	int LoadScene( const char *scene_file) {
 		int result = -1;
 		std::ifstream ifs( scene_file);
@@ -258,6 +299,7 @@ public:
 //			std::cout << *sph << std::endl;
 			m_objs.push_back( sph);
 		}
+		JsonScene( std::cout);
 		return 0;
 	}
 	int SaveScene( const char *scene_file) const {
@@ -271,8 +313,12 @@ public:
 		}
 		return 0;
 	}
-	CRealist( const char *scene_file = 0) {
-		std::cout << "initial #objects: " << m_objs.size() << std::endl;
+#define W 1024
+#define H 768
+	CRealist( const char *scene_file = 0):
+		m_w(W),
+		m_h(H) {
+		std::cout << "# initial #objects: " << m_objs.size() << std::endl;
 		const char *wfile_name = 0;
 		if (scene_file) {
 			if (LoadScene( scene_file))
@@ -336,10 +382,10 @@ public:
 			m_r = ~m_r;
 		}
 
-		vprint( "e", m_e);
-		vprint( "f", m_f);
-		vprint( "u", m_u);
-		vprint( "r", m_r);
+		vprint( "#e", m_e);
+		vprint( "#f", m_f);
+		vprint( "#u", m_u);
+		vprint( "#r", m_r);
 		printf( "\n");
 
 		double slamp[] = {
@@ -470,18 +516,19 @@ public:
 //			printf( "\n");
 		}
 	}
-#define W 1024
-#define H 768
 	void Run( int nosdl = 0, unsigned w = 0, unsigned h = 0) {
 #ifdef USE_OPT
-		printf( "using OPT\n");
+		printf( "# using OPT\n");
 #else
-		printf( "*NOT* using OPT\n");
+		printf( "# *NOT* using OPT\n");
 #endif
 		CSDL *sdl = 0;
 		if (!nosdl)
 			sdl = new CSDL;
-		m_w = !w ? W : w;
+		if (w && h) {
+			m_w = w;
+			m_h = h;
+		}
 		m_h = !h ? H : h;
 		if (sdl)
 			sdl->Init( m_w, m_h);
@@ -492,9 +539,9 @@ public:
 		// screen
 		m_ww = 1;
 		m_hh = m_ww * m_h / m_w;
-		printf( "ww=%f hh=%f\n", m_ww, m_hh);
+		printf( "# ww=%f hh=%f\n", m_ww, m_hh);
 
-		printf( "found %d objects\n", (int)m_objs.size());
+		printf( "# found %d objects\n", (int)m_objs.size());
 
 		memset( m_arr, 0, m_sz);
 		int quit = 0;

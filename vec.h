@@ -105,6 +105,22 @@ public:
 		}
 		printf( "\n");
 	}
+	void Print( std::ostream& out) const {
+		for (unsigned ii = 0; ii < n; ii++) {
+			if (ii > 0)
+				out << ", ";
+			out << m_d[ii];
+		}
+	}
+	void Json( std::ostream& out) const {
+		out << "[";
+		for (unsigned ii = 0; ii < n; ii++) {
+			if (ii > 0)
+				out << ", ";
+			out << m_d[ii];
+		}
+		out << "]";
+	}
 	friend std::ostream& operator<<( std::ostream& out, const vec<n>& v) {
 		for (unsigned ii = 0; ii < n; ii++) {
 			if (ii > 0)
