@@ -73,22 +73,23 @@ def Trace(o,v):
 			tmin=t
 			omin=s
 	if tmin<HUGE_VAL:
-		if omin[4]==1:
-			if omin[5]==1:
-				if omin[6]==1:
+		if omin[4]>=omin[5] and omin[4]>=omin[6]:
+			if omin[6]>0:
+				if omin[5]>0:
 					col='W'
 				else:
-					col='M'
-			elif omin[6]==1:
-				col='V'
+					col='V'
 			else:
-				col='R'
-		elif omin[5]==1:
-			if omin[6]==1:
+				if omin[5]>0:
+					col='M'
+				else:
+					col='R'
+		elif omin[5]>=omin[6]:
+			if omin[6]>0:
 				col='Y'
 			else:
 				col='G'
-		elif omin[6]==1:
+		elif omin[6]>0:
 			col='B'
 		else:
 			col='K'
