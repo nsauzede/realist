@@ -29,9 +29,10 @@ int solvetri( const double &a, const double &b, const double &c, double &t1, dou
 	return result;
 }
 
+enum { OT_NONE = -1, OT_SPHERE = 0, OT_PLANE };
 class CObject {
 public:
-	CObject():m_hollow(0){
+	CObject( int type = OT_NONE, int len = 0) : m_type( type), m_len( len), m_flags( 0), m_hollow(0) {
 	}
 	virtual ~CObject() {
 	}
@@ -56,15 +57,22 @@ public:
 	const int& Hollow() const {
 		return m_hollow;
 	}
-	virtual std::ostream& Serialize( std::ostream& out) const = 0;
+	virtual std::ostream& Serialize( std::ostream& out) const {
+		out << m_type << " " << m_len << std::endl;
+		return out;
+	}
 	friend std::ostream& operator<<( std::ostream& out, const CObject& ob) {
 		return ob.Serialize( out);
 	}
 	virtual void Json( std::ostream& out) const = 0;
 protected:
-	v3 m_c;
+	int m_type;
+	int m_len;		// for serialization : total number of double excluding type and len
+//---------------
+	int m_flags;
 	v3 m_color;
 	int m_hollow;
+	v3 m_c;
 };
 
 typedef class CSphere CLamp;
@@ -72,20 +80,26 @@ typedef class CSphere CLamp;
 class CSphere : public CObject {
 public:
 	enum {
-		CENTER_X, CENTER_Y, CENTER_Z, RADIUS, COLOR, COLOR_RED = COLOR, COLOR_GREEN, COLOR_BLUE,
-		A0, B0, C0, D0, E0, F0,
+		FLAGS, COLOR, COLOR_RED = COLOR, COLOR_GREEN, COLOR_BLUE, CENTER, CENTER_X = CENTER, CENTER_Y, CENTER_Z, RADIUS,
+//		A0, B0, C0, D0, E0, F0,
 		MAX
 	};
+	CSphere( const double *params) :
+		CObject( OT_SPHERE, MAX),
+		m_r( params[RADIUS]) {
+		m_c = &params[CENTER];
+		SetColor( &params[COLOR]);
+//		std::cout << *this << std::endl;
+	}
 	const double& Radius() const {
 		return m_r;
 	}
 	std::ostream& Serialize( std::ostream& out) const {
+		CObject::Serialize( out);
+		out << m_flags << std::endl;
+		out << m_color << std::endl;
 		out << m_c << std::endl;
 		out << m_r << std::endl;
-		out << m_color << std::endl;
-		double v1[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-		vec<6> v(v1);
-		out << v << std::endl;
 		return out;
 	}
 	void Json( std::ostream& out) const {
@@ -96,11 +110,6 @@ public:
 		out << ",\t";
 		m_color.Print( out);
 		out << "]}";
-	}
-	CSphere( const double *params) :
-		m_r( params[RADIUS]) {
-		m_c = params;
-		SetColor( &params[COLOR]);
 	}
 	double Intersec( const v3 &e, const v3 &v) const {
 		double result = HUGE_VAL;
@@ -146,13 +155,14 @@ private:
 class CPlane : public CObject {
 public:
 	enum {
+		FLAGS, COLOR, COLOR_RED = COLOR, COLOR_GREEN, COLOR_BLUE,
 		LOC0, LOC0_X = LOC0, LOC0_Y, LOC0_Z,
 		LOC1, LOC1_X = LOC1, LOC1_Y, LOC1_Z,
 		LOC2, LOC2_X = LOC2, LOC2_Y, LOC2_Z,
-		COLOR, COLOR_RED = COLOR, COLOR_GREEN, COLOR_BLUE,
 		MAX
 	};
 	CPlane( const double *params) :
+		CObject( OT_PLANE, MAX),
 		m_loc0( &params[LOC0]),
 		m_loc1( &params[LOC1]),
 		m_loc2( &params[LOC2])
@@ -161,6 +171,12 @@ public:
 		std::cout << *this << std::endl;
 	}
 	std::ostream& Serialize( std::ostream& out) const {
+		CObject::Serialize( out);
+		out << m_flags << std::endl;
+		out << m_color << std::endl;
+		out << m_loc0 << std::endl;
+		out << m_loc1 << std::endl;
+		out << m_loc2 << std::endl;
 		return out;
 	}
 	void Json( std::ostream& out) const {
@@ -287,30 +303,48 @@ public:
 			ifs >> m_u[ii];
 		}
 		while (!ifs.eof()) {
-			double sp[CSphere::MAX];
-			for (unsigned ii = 0; ii < CSphere::MAX; ii++) {
-				ifs >> sp[ii];
+			unsigned type;
+			unsigned len;
+			ifs >> type;
+			if (ifs.eof())
+				break;
+			result = -1;
+			ifs >> len;
+//			printf( "read type=%u len=%u\n", type, len);
+			double *data = new double[len];
+			for (unsigned ii = 0; ii < len; ii++) {
 				if (ifs.eof())
 					break;
+				ifs >> data[ii];
 			}
 			if (ifs.eof())
 				break;
-			CSphere *sph = new CSphere( sp);
-//			std::cout << *sph << std::endl;
-			m_objs.push_back( sph);
+			CObject *obj = 0;
+			switch (type) {
+				case OT_SPHERE:
+					obj = new CSphere( data);
+					break;
+			}
+			if (obj)
+				m_objs.push_back( obj);
+			delete data;
+			result = 0;
 		}
-		JsonScene( std::cout);
-		return 0;
+//		JsonScene( std::cout);
+		return result;
+	}
+	void OutScene( std::ostream& out) const {
+		out << m_e << std::endl;
+		out << m_f << std::endl;
+		out << m_u << std::endl;
+		out << std::endl;
+		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
+			out << *(m_objs.at( ii)) << std::endl;
+		}
 	}
 	int SaveScene( const char *scene_file) const {
 		std::ofstream f( scene_file);
-		f << m_e << std::endl;
-		f << m_f << std::endl;
-		f << m_u << std::endl;
-		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
-			f << std::endl;
-			f << *(m_objs.at( ii)) << std::endl;
-		}
+		OutScene( f);
 		return 0;
 	}
 #define W 1024
@@ -318,11 +352,13 @@ public:
 	CRealist( const char *scene_file = 0):
 		m_w(W),
 		m_h(H) {
-		std::cout << "# initial #objects: " << m_objs.size() << std::endl;
+//		std::cout << "# initial #objects: " << m_objs.size() << std::endl;
 		const char *wfile_name = 0;
 		if (scene_file) {
-			if (LoadScene( scene_file))
-				return;
+			if (LoadScene( scene_file)) {
+				printf( "failed to load\n");
+				exit( 1);
+			}
 		}
 		else {
 // default scene : origins (unit vectors)
@@ -336,10 +372,10 @@ public:
 			// scene
 			double sph[][CSphere::MAX] = {
 #define SR 0.1
-				{ 0, 0, 0, SR, 1, 1, 1},
-				{ 1, 0, 0, SR, 1, 0, 0},
-				{ 0, 1, 0, SR, 0, 1, 0},
-				{ 0, 0, 1, SR, 0, 0, 1},
+				{ 0, 1, 1, 1, 0, 0, 0, SR},
+				{ 0, 1, 0, 0, 1, 0, 0, SR},
+				{ 0, 0, 1, 0, 0, 1, 0, SR},
+				{ 0, 0, 0, 1, 0, 0, 1, SR},
 			};
 
 			int i = 0;
@@ -382,19 +418,20 @@ public:
 			m_r = ~m_r;
 		}
 
-		vprint( "#e", m_e);
-		vprint( "#f", m_f);
-		vprint( "#u", m_u);
-		vprint( "#r", m_r);
-		printf( "\n");
+//		vprint( "#e", m_e);
+//		vprint( "#f", m_f);
+//		vprint( "#u", m_u);
+//		vprint( "#r", m_r);
+//		printf( "\n");
 
 		double slamp[] = {
+			0,
 #define LAMP_DIST 0.5
 #define LAMP_RAD 0.02
 #define LAMP_COL 1.0
+			1.0 * LAMP_COL, 1.0 * LAMP_COL, 0.0 * LAMP_COL,
 			0.0 * LAMP_DIST, -1.0 * LAMP_DIST, 1.0 * LAMP_DIST,
 			LAMP_RAD,
-			1.0 * LAMP_COL, 1.0 * LAMP_COL, 0.0 * LAMP_COL
 		};
 		CSphere *lamp = new CLamp( slamp);
 		lamp->SetHollow( 1);
@@ -587,9 +624,9 @@ public:
 	}
 	void Run( int nosdl = 0, unsigned w = 0, unsigned h = 0) {
 #ifdef USE_OPT
-		printf( "# using OPT\n");
+//		printf( "# using OPT\n");
 #else
-		printf( "# *NOT* using OPT\n");
+//		printf( "# *NOT* using OPT\n");
 #endif
 		CSDL *sdl = 0;
 		if (!nosdl)
@@ -608,9 +645,9 @@ public:
 		// screen
 		m_ww = 1;
 		m_hh = m_ww * m_h / m_w;
-		printf( "# ww=%f hh=%f\n", m_ww, m_hh);
+//		printf( "# ww=%f hh=%f\n", m_ww, m_hh);
 
-		printf( "# found %d objects\n", (int)m_objs.size());
+//		printf( "# found %d objects\n", (int)m_objs.size());
 
 		memset( m_arr, 0, m_sz);
 		int quit = 0;
@@ -651,6 +688,14 @@ public:
 							break;
 						case CSDL::PDOWN:
 							rv = m_f * -PUD;
+							break;
+						case CSDL::K_d:
+							OutScene( std::cout);
+							modif = 0;
+							break;
+						case CSDL::K_j:
+							JsonScene( std::cout);
+							modif = 0;
 							break;
 						default:
 							modif = 0;

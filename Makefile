@@ -7,6 +7,9 @@ CXXFLAGS+=-std=c++11
 
 CXXFLAGS+=-g
 
+CXXFLAGS+=-pipe
+LDFLAGS+=-pipe
+
 USE_OPT=1
 ifdef USE_OPT
 CXXFLAGS+=-O3
