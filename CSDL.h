@@ -50,18 +50,21 @@ public:
 	atexit( SDL_Quit);
 	}
 	enum { NONE, QUIT, LEFT, RIGHT, UP, DOWN, PUP, PDOWN, K_d, K_j};
-	int Poll() {
+	int Poll( int *_ctrl = 0, int *_shift = 0) {
 		int result = NONE;
 		SDL_Event event;
-		int shift = 1;
+		int ctrl = 0;
+		int shift = 0;
 		while (SDL_PollEvent( &event)) {
 			if (event.type == SDL_QUIT) {
 				result = QUIT;
 				break;
 			}
 			else if (event.type == SDL_KEYDOWN) {
+				if (event.key.keysym.mod & KMOD_CTRL)
+					ctrl = 1;
 				if (event.key.keysym.mod & KMOD_SHIFT)
-					shift = -1;
+					shift = 1;
 				if (event.key.keysym.sym == SDLK_ESCAPE) {
 					result = QUIT;
 					break;
@@ -100,7 +103,14 @@ public:
 				}
 			}
 		}
-		return shift * result;
+		if (_ctrl)
+			*_ctrl = ctrl;
+		if (_shift)
+			*_shift = shift;
+		if (result != NONE) {
+//			printf( "ctrl=%d shift=%d\n", ctrl, shift);
+		}
+		return result;
 	}
 	void Draw( double *arr = 0) {
 		SDL_Rect rect;

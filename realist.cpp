@@ -656,32 +656,34 @@ public:
 			if (sdl) {
 				int ev;
 				do {
-					ev = sdl->Poll();
+					int ctrl = 0;
 					int shift = 0;
-					if (ev < 0) {
-						ev = -ev;
-						shift = 1;
-					}
+					ev = sdl->Poll( &ctrl, &shift);
 					v3 rv;
 					int modif = 1;
+					int dir = 0;
 					switch (ev) {
 						case CSDL::QUIT:
 							quit = 1;
 							break;
-#define LR 0.05
-#define UD 0.05
+#define LR 0.1
+#define UD 0.1
 #define PUD 0.1
 						case CSDL::LEFT:
 							rv = m_r * -LR;
+							dir = 1;
 							break;
 						case CSDL::RIGHT:
 							rv = m_r * +LR;
+							dir = 2;
 							break;
 						case CSDL::UP:
 							rv = m_u * +UD;
+							dir = 3;
 							break;
 						case CSDL::DOWN:
 							rv = m_u * -UD;
+							dir = 4;
 							break;
 						case CSDL::PUP:
 							rv = m_f * +PUD;
@@ -704,10 +706,57 @@ public:
 					if (quit)
 						break;
 					if (modif) {
-						if (!shift)
+						if (!ctrl && !shift)
 							m_lamps.at( 0)->Center() += rv;
-						else
-							m_e += rv;
+						else {
+							if (ctrl) {
+								double phi = 3.14159265 * 10.0 / 180.0;
+								v3 u;
+								switch (dir) {
+									case 2:
+										phi *= -1;
+									case 1:
+										u = m_u;
+										break;
+									case 3:
+										phi *= -1;
+									case 4:
+										u = m_r;
+										break;
+								}
+//								std::cout << u << std::endl;
+
+								double x, y;
+								double z;
+								double a, b, c, d, e, f, g, h, i;
+								a = cos( phi) + u[0] * u[0] * (1 - cos( phi));
+								b = u[0] * u[1] * (1 - cos( phi)) - u[2] * sin( phi);
+								c = u[0] * u[2] * (1 - cos( phi)) + u[1] * sin( phi);
+								d = u[1] * u[0] * (1 - cos( phi)) + u[2] * sin( phi);
+								e = cos( phi) + u[1] * u[1] * (1 - cos( phi));
+								f = u[1] * u[2] * (1 - cos( phi)) - u[0] * sin( phi);
+								g = u[2] * u[0] * (1 - cos( phi)) - u[1] * sin( phi);
+								h = u[2] * u[1] * (1 - cos( phi)) + u[0] * sin( phi);
+								i = cos( phi) + u[2] * u[2] * (1 - cos( phi));
+
+								x = m_f[0] * a + m_f[1] * b + m_f[2] * c;
+								y = m_f[0] * d + m_f[1] * e + m_f[2] * f;
+								z = m_f[0] * g + m_f[1] * h + m_f[2] * i;
+
+								m_f[0] = x;
+								m_f[1] = y;
+								m_f[2] = z;
+
+								m_u = ~m_u;
+								m_r = m_f ^ m_u;		// compute right
+								m_u = m_r ^ m_f;		// re-compute up
+								m_u = ~m_u;
+								m_r = ~m_r;
+							}
+							else {
+								m_e += rv;
+							}
+						}
 						dirty = 1;
 					}
 				} while (ev != CSDL::NONE);
