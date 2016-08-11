@@ -47,6 +47,8 @@ endif
 CXXFLAGS+=$(SDL_FLAGS)
 LDLIBS+=$(SDL_LIBS)
 
+realist: realist.cpp vec.h CSDL.h
+
 clean:
 	$(RM) $(TARGET)
 

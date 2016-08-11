@@ -1,3 +1,4 @@
+#include <stdio.h>
 
 #include <SDL.h>
 
@@ -44,7 +45,7 @@ public:
 	m_sdlTexture = SDL_CreateTexture( m_sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_w, m_h);
 #endif
 	if (!m_screen) {
-		std::cout << "failed to init SDL" << std::endl;
+		printf( "failed to init SDL\n");
 		exit( 1);
 	}
 	atexit( SDL_Quit);
@@ -59,6 +60,67 @@ public:
 			if (event.type == SDL_QUIT) {
 				result = QUIT;
 				break;
+			}
+#ifdef SDL1
+#if 0
+			else if (event.type == SDL_MOUSEBUTTONDOWN) {
+				if (event.button == SDL_BUTTON_WHEELUP)
+					result = PUP;
+				else if (event.button == SDL_BUTTON_WHEELUP)
+					result = PDOWN;
+			}
+#endif
+#else
+			else if (event.type == SDL_MOUSEWHEEL) {
+				int deltax = 0;
+				int deltay = 0;
+				static int last_x = -1;
+				int x = event.wheel.x;
+				static int last_y = -1;
+				int y = event.wheel.y;
+				if (last_x != -1) {
+					deltax = x - last_x;
+				}
+				if (last_y != -1) {
+					deltay = y - last_y;
+				}
+				last_x = x;
+				last_y = y;
+				if (deltax < 0)
+					result = LEFT;
+				else if (deltax > 0)
+					result = RIGHT;
+				else if (deltay < 0)
+					result = UP;
+				else if (deltay > 0)
+					result = DOWN;
+			}
+#endif
+			else if (event.type == SDL_MOUSEMOTION) {
+				int deltax = 0;
+				int deltay = 0;
+				static int last_x = -1;
+				int x = event.motion.x;
+				static int last_y = -1;
+				int y = event.motion.y;
+				if (last_x != -1) {
+					deltax = x - last_x;
+				}
+				if (last_y != -1) {
+					deltay = y - last_y;
+				}
+				last_x = x;
+				last_y = y;
+				if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+					if (deltax < 0)
+						result = LEFT;
+					else if (deltax > 0)
+						result = RIGHT;
+					else if (deltay < 0)
+						result = UP;
+					else if (deltay > 0)
+						result = DOWN;
+				}
 			}
 			else if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.mod & KMOD_CTRL)
