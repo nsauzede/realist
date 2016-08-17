@@ -463,13 +463,13 @@ public:
 			double energy = 0;
 			// ambient
 			energy += 0.2;
-#if defined USE_FLASH || defined USE_REFL
+#if defined USE_FLASH || defined USE_REFL || defined USE_LAMP
 			v3 vint;
 			v3 nv;
 #endif
 			// intersected object color
 			color = omin->Color() * 1.0;
-#if defined USE_FLASH || defined USE_REFL
+#if defined USE_FLASH || defined USE_REFL || defined USE_LAMP
 			// coords of intersec
 			vint = o + v * tmin;
 			// normal at intersec
@@ -487,6 +487,7 @@ public:
 				dist = LAMP_FLOOR;
 			energy += flash_nrj / dist / dist;
 #endif
+#ifdef USE_LAMP
 			// is there any object intersection between vint and a lamp ?
 			for (unsigned jj = 0; jj < m_lamps.size(); jj++) {
 				if (omin == m_lamps.at( jj)) // skip current lamp==intersected object
@@ -518,6 +519,7 @@ public:
 					energy += nrj;
 				}
 			}
+#endif
 			color *= energy;
 #ifdef USE_REFL
 			if (!omin->Hollow()) {
