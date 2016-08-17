@@ -637,7 +637,6 @@ public:
 			m_w = w;
 			m_h = h;
 		}
-		m_h = !h ? H : h;
 		if (sdl)
 			sdl->Init( m_w, m_h);
 		m_sz = sizeof( *m_arr) * 3 * m_w * m_h;
@@ -655,6 +654,10 @@ public:
 		int quit = 0;
 		int dirty = 1;
 		while (!quit) {
+			if (dirty) {
+				Render( /*t*/);
+				t += 0.1;
+			}
 			if (sdl) {
 				int ev;
 				do {
@@ -765,17 +768,52 @@ public:
 				if (quit)
 					break;
 				if (dirty) {
-					Render( /*t*/);
-					t += 0.1;
 					sdl->Draw( m_arr);
-					dirty = 0;
 				}
 				else {
 					sdl->Delay( 100);
 				}
-			}
-			else
+			} else {
+				// sdl->Draw( m_arr);
+				for (unsigned jj = 0; jj < m_h; jj++) {
+					for (unsigned ii = 0; ii < m_w; ii++) {
+						double r, g, b;
+						r = m_arr[((jj * m_w + ii) * 3) + 0];
+						g = m_arr[((jj * m_w + ii) * 3) + 1];
+						b = m_arr[((jj * m_w + ii) * 3) + 2];
+						char col;
+						if (r >= g && r >= b) {
+							if (b > 0) {
+								if (g > 0) {
+									col = 'W';
+								} else {
+									col = 'V';
+								}
+							} else if (g > 0) {
+								col = 'M';
+							} else if (r > 0) {
+								col = 'R';
+							} else {
+								col = '.';
+							}
+						} else if (g >= b) {
+							if (b > 0) {
+								col = 'Y';
+							} else {
+								col = 'G';
+							}
+						} else if (b > 0) {
+							col = 'B';
+						} else {
+							col = 'K';
+						}
+						printf( "%c", col);
+					}
+					printf( "\n");
+				}
 				break;
+			}
+			dirty = 0;
 		}
 		free( m_arr);
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
