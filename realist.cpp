@@ -815,7 +815,7 @@ public:
 							printf( "%c", col);
 						}
 						else
-							printf( " %.2lf,%.2lf,%.2lf", r, g, b);
+							printf( " %3.lf,%3.lf,%3.lf", 100*r, 100*g, 100*b);
 					}
 					printf( "\n");
 				}

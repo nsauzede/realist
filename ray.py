@@ -101,7 +101,7 @@ def Draw():
 	for row in tab:
 		for e in row:
 			r, g ,b = e
-			print(" %.2f,%.2f,%.2f" % (r,g,b),end="")
+			print(" %3.f,%3.f,%3.f" % (100*r,100*g,100*b),end="")
 		print("")
 
 def Draw0():
