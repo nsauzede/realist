@@ -657,6 +657,12 @@ public:
 			if (dirty) {
 				Render( /*t*/);
 				t += 0.1;
+				if (sdl)
+					sdl->Draw( m_arr);
+				dirty = 0;
+			} else {
+				if (sdl)
+					sdl->Delay( 100);
 			}
 			if (sdl) {
 				int ev;
@@ -768,13 +774,8 @@ public:
 				if (quit)
 					break;
 				if (dirty) {
-					sdl->Draw( m_arr);
-				}
-				else {
-					sdl->Delay( 100);
 				}
 			} else {
-				// sdl->Draw( m_arr);
 				for (unsigned jj = 0; jj < m_h; jj++) {
 					for (unsigned ii = 0; ii < m_w; ii++) {
 						double r, g, b;
@@ -813,7 +814,6 @@ public:
 				}
 				break;
 			}
-			dirty = 0;
 		}
 		free( m_arr);
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
