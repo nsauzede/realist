@@ -1,4 +1,4 @@
-#!/mingw64/bin/python3
+#!/usr/bin/python3
 import math
 import numpy.matlib as np
 import sys
