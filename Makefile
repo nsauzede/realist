@@ -1,4 +1,5 @@
 TARGET=realist
+TARGET+=raygo.exe
 
 CXXFLAGS=-Wall -Werror
 CXXFLAGS+=-Wextra
@@ -51,6 +52,9 @@ endif
 
 CXXFLAGS+=$(SDL_FLAGS)
 LDLIBS+=$(SDL_LIBS)
+
+raygo.exe:
+	GOPATH=$(shell pwd)/go go build go/raygo.go
 
 realist: realist.cpp vec.h CSDL.h
 
