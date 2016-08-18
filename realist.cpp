@@ -776,39 +776,44 @@ public:
 				if (dirty) {
 				}
 			} else {
-				for (unsigned jj = 0; jj < m_h; jj++) {
+					int do_ascii = 0;
+					for (unsigned jj = 0; jj < m_h; jj++) {
 					for (unsigned ii = 0; ii < m_w; ii++) {
 						double r, g, b;
 						r = m_arr[((jj * m_w + ii) * 3) + 0];
 						g = m_arr[((jj * m_w + ii) * 3) + 1];
 						b = m_arr[((jj * m_w + ii) * 3) + 2];
-						char col;
-						if (r >= g && r >= b) {
-							if (b > 0) {
-								if (g > 0) {
-									col = 'W';
+						if (do_ascii) {
+							char col;
+							if (r >= g && r >= b) {
+								if (b > 0) {
+									if (g > 0) {
+										col = 'W';
+									} else {
+										col = 'V';
+									}
+								} else if (g > 0) {
+									col = 'M';
+								} else if (r > 0) {
+									col = 'R';
 								} else {
-									col = 'V';
+									col = '.';
 								}
-							} else if (g > 0) {
-								col = 'M';
-							} else if (r > 0) {
-								col = 'R';
+							} else if (g >= b) {
+								if (b > 0) {
+									col = 'Y';
+								} else {
+									col = 'G';
+								}
+							} else if (b > 0) {
+								col = 'B';
 							} else {
-								col = '.';
+								col = 'K';
 							}
-						} else if (g >= b) {
-							if (b > 0) {
-								col = 'Y';
-							} else {
-								col = 'G';
-							}
-						} else if (b > 0) {
-							col = 'B';
-						} else {
-							col = 'K';
+							printf( "%c", col);
 						}
-						printf( "%c", col);
+						else
+							printf( " %.2lf,%.2lf,%.2lf", r, g, b);
 					}
 					printf( "\n");
 				}
