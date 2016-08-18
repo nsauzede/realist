@@ -14,8 +14,18 @@ objects=json['objects']
 
 w=screen['w']
 h=screen['h']
-ww=1.*screen['ratiox']
-hh=ww*h/w*screen['ratioy']
+ratiox=screen['ratiox']
+ratioy=screen['ratioy']
+if len(sys.argv) > 2:
+	w=int(sys.argv[2])
+if len(sys.argv) > 3:
+	h=int(sys.argv[3])
+if len(sys.argv) > 4:
+	ratiox=float(sys.argv[4])
+if len(sys.argv) > 5:
+	ratioy=float(sys.argv[5])
+ww=1.*ratiox
+hh=ww*h/w*ratioy
 tab=[['.' for x in range(w)] for y in range(h)]
 e=np.array(camera['loc'],dtype=float)
 f=np.array(camera['front'],dtype=float)
@@ -72,30 +82,10 @@ def Trace(o,v):
 		if t>0 and t<tmin:
 			tmin=t
 			omin=s
+	rr,gg,bb = 0, 0, 0
 	if tmin<HUGE_VAL:
-		if omin[4]>=omin[5] and omin[4]>=omin[6]:
-			if omin[6]>0:
-				if omin[5]>0:
-					col='W'
-				else:
-					col='V'
-			else:
-				if omin[5]>0:
-					col='M'
-				else:
-					col='R'
-		elif omin[5]>=omin[6]:
-			if omin[6]>0:
-				col='Y'
-			else:
-				col='G'
-		elif omin[6]>0:
-			col='B'
-		else:
-			col='K'
-	else:
-		col='.'
-	return col
+		rr, gg, bb = omin[4], omin[5], omin[6]
+	return rr,gg,bb
 
 def Render():
 	for j in range(h):
@@ -104,12 +94,40 @@ def Render():
 			vr=r*(i-w/2)/w*ww
 			v=f+vu+vr
 			v/=np.linalg.norm(v)
-			col=Trace(e,v)
-			tab[h-j-1][i]=col
+			rr,gg,bb=Trace(e,v)
+			tab[h-j-1][i]=[rr,gg,bb]
 
 def Draw():
 	for row in tab:
 		for e in row:
+			r, g ,b = e
+			print(" %.2f,%.2f,%.2f" % (r,g,b),end="")
+		print("")
+
+def Draw0():
+	for row in tab:
+		for e in row:
+			r, g ,b = e
+			if r>=g and r>=b:
+				if b>0:
+					if g>0:
+						col='W'
+					else:
+						col='V'
+				else:
+					if g>0:
+						col='M'
+					else:
+						col='R'
+			elif g>=b:
+				if b>0:
+					col='Y'
+				else:
+					col='G'
+			elif b>0:
+				col='B'
+			else:
+				col='K'
 			print(e,end="")
 		print("")
 

@@ -462,10 +462,12 @@ public:
 		if (tmin < TMAX) {
 			double energy = 0;
 			// ambient
-			energy += 0.2;
 #if defined USE_FLASH || defined USE_REFL || defined USE_LAMP
+			energy += 0.2;
 			v3 vint;
 			v3 nv;
+#else
+			energy += 1.0;
 #endif
 			// intersected object color
 			color = omin->Color() * 1.0;
