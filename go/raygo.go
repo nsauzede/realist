@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"vec"
 )
 
 var w = 10
 var h = 10
 var nobj = 4
-
 var s, e vec.V3
 
 func Solvetri(a, b, c float32) (sol int, t1, t2 float32) {
@@ -37,16 +37,15 @@ func Render() {
 	}
 }
 
-func Draw() {
-	for j := 0; j < h; j++ {
-		for i := 0; i < w; i++ {
-//			fmt.Print(".")
-		}
-//		fmt.Println()
-	}
-}
-
 func main() {
+	argv := os.Args
+	arg,argc := 1, len(argv)
+	fmt.Printf("argc=%d\n", argc)
+	if arg < argc {
+		fmt.Sscanf(argv[arg], "%d", &w); arg++
+		if arg < argc {
+			fmt.Sscanf(argv[arg], "%d", &h); arg++
+		}
+	}
 	Render()
-	Draw()
 }

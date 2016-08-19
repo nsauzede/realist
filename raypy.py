@@ -26,7 +26,6 @@ if len(sys.argv) > 5:
 	ratioy=float(sys.argv[5])
 ww=1.*ratiox
 hh=ww*h/w*ratioy
-tab=[['.' for x in range(w)] for y in range(h)]
 e=np.array(camera['loc'],dtype=float)
 f=np.array(camera['front'],dtype=float)
 u=np.array(camera['up'],dtype=float)
@@ -89,47 +88,12 @@ def Trace(o,v):
 
 def Render():
 	for j in range(h):
-		vu=u*(j-h/2)/h*hh
+		vu=u*(h-j-1-h/2)/h*hh
 		for i in range(w):
 			vr=r*(i-w/2)/w*ww
 			v=f+vu+vr
 			v/=np.linalg.norm(v)
 			rr,gg,bb=Trace(e,v)
-			tab[h-j-1][i]=[rr,gg,bb]
-
-def Draw():
-	for row in tab:
-		for e in row:
-			r, g ,b = e
-			print(" %3.f,%3.f,%3.f" % (100*r,100*g,100*b),end="")
+			print(" %3.f,%3.f,%3.f" % (100*rr,100*gg,100*bb),end="")
 		print("")
-
-def Draw0():
-	for row in tab:
-		for e in row:
-			r, g ,b = e
-			if r>=g and r>=b:
-				if b>0:
-					if g>0:
-						col='W'
-					else:
-						col='V'
-				else:
-					if g>0:
-						col='M'
-					else:
-						col='R'
-			elif g>=b:
-				if b>0:
-					col='Y'
-				else:
-					col='G'
-			elif b>0:
-				col='B'
-			else:
-				col='K'
-			print(e,end="")
-		print("")
-
 Render()
-Draw()
