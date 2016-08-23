@@ -40,8 +40,7 @@ r/=np.linalg.norm(r)
 
 def SolveTri(a,b,c):
 	d=b*b-4*a*c
-	t1=0.
-	t2=0.
+	t1,t2 = 0., 0.
 	sol=0
 	if d>0:
 		sd=math.sqrt(d)
