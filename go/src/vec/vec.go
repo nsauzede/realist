@@ -4,6 +4,10 @@ type Vector struct {
 	X, Y, Z float64
 }
 
+func (v Vector) IsEqual(ov Vector) bool {
+	return v.X == ov.X && v.Y == ov.Y && v.Z == ov.Z
+}
+
 func (v Vector) Dot(ov Vector) float64 {
 	return v.X * ov.X + v.Y * ov.Y + v.Z * ov.Z
 }
