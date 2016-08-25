@@ -5,6 +5,8 @@ import (
 	"math"
 	"os"
 	"vec"
+	"container/list"
+//	"reflect"
 )
 
 var w = 10
@@ -17,12 +19,12 @@ var nobj = 4
 var e = vec.Vector { 0.4, 0, 0.4 }
 var f = vec.Vector { -1, 0, -1 }
 var u = vec.Vector { -0.707107, 0, 0.707107 }
-var sphs vec.Vector
+var sphs *list.List
 
 func Solvetri(a, b, c float64) (sol int, t1, t2 float64) {
 	return
 }
-func Intersec(s, o, v vec.Vector) (t float64) {
+func Intersec(s *list.Element, o, v vec.Vector) (t float64) {
 	t = v.Dot(v)
 	return
 }
@@ -31,19 +33,28 @@ func Trace(o, v vec.Vector) (r, g, b float64) {
 //	fmt.Println( "v=", v)
 //	os.Exit( 1)
 	tmin := math.MaxFloat64
-	for i := 0; i < nobj; i++ {
-		t := Intersec(sphs, o, v)
+	var omin vec.Vector
+//	for i := 0; i < nobj; i++ {
+	for s := sphs.Front(); s != nil; s = s.Next() {
+		t := Intersec(s, o, v)
 		if t > 0 && t < tmin {
 			tmin = t
+			omin = s.Value.(vec.Vector)
+//			omin = 2.
+//			fmt.Println( reflect.TypeOf( s.Value))
+//			fmt.Println( s.Value)
 		}
 	}
 	if tmin < math.MaxFloat64 {
-		r, g, b = 1., 1., 1.
+//		fmt.Println( omin)
+		r, g, b = omin.X, omin.Y, omin.Z
 	}
 	return
 }
 
 func Render() {
+	sphs = list.New()
+	sphs.PushBack(vec.Vector{0.1, 0.2, 0.3})
 	u.Normalize()
 	var r = f.Cross( u)
 	u = r.Cross( f)
