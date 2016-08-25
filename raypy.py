@@ -86,6 +86,10 @@ def Trace(o,v):
 	return rr,gg,bb
 
 def Render():
+	print("P6")
+	print("# raypy")
+	print("%s %s" % (w, h))
+	print(100)
 	for j in range(h):
 		vu=u*(h-j-1-h/2)/h*hh
 		for i in range(w):
@@ -93,6 +97,7 @@ def Render():
 			v=f+vu+vr
 			v/=np.linalg.norm(v)
 			rr,gg,bb=Trace(e,v)
-			print(" %3.f,%3.f,%3.f" % (100*rr,100*gg,100*bb),end="")
+#			print(" %f,%f,%f" % (rr,gg,bb),end="")
+			print("%2.f %2.f %2.f   " % (100*rr,100*gg,100*bb),end="")
 		print("")
 Render()
