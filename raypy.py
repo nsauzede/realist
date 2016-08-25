@@ -73,6 +73,9 @@ def Intersec(s,o,v):
 	return t
 
 def Trace(o,v):
+#	print("o=%s" % o)
+#	print("v=%s" % v)
+#	raise Exception("bye")
 	tmin=HUGE_VAL
 	for s in sphs:
 		t=Intersec(s,o,v)
@@ -88,12 +91,17 @@ def Trace(o,v):
 def Render():
 	print("P3")
 	print("# raypy")
+	print("#e=%s" % e)
+	print("#f=%s" % f)
+	print("#u=%s" % u)
 	print("%s %s" % (w, h))
 	print(100)
 	for j in range(h):
 		vu=u*(h-j-1-h/2)/h*hh
+#		print("vu=%s" % vu)
 		for i in range(w):
 			vr=r*(i-w/2)/w*ww
+#			print("vr=%s" % vr)
 			v=f+vu+vr
 			v/=np.linalg.norm(v)
 			rr,gg,bb=Trace(e,v)
