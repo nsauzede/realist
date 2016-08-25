@@ -74,15 +74,15 @@ def Intersec(s,o,v):
 
 def Trace(o,v):
 	tmin=HUGE_VAL
-	omin=0
 	for s in sphs:
 		t=Intersec(s,o,v)
 		if t>0 and t<tmin:
 			tmin=t
 			omin=s
-	rr,gg,bb = 0, 0, 0
 	if tmin<HUGE_VAL:
 		rr, gg, bb = omin[4], omin[5], omin[6]
+	else:
+		rr,gg,bb = 0, 0, 0
 	return rr,gg,bb
 
 def Render():

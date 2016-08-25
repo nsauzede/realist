@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"vec"
 )
@@ -28,21 +29,33 @@ func Intersec(s, o, v vec.Vector) (t float64) {
 }
 
 func Trace(o, v vec.Vector) (r, g, b float64) {
+	tmin := math.MaxFloat64
 	for i := 0; i < nobj; i++ {
-		Intersec(s, o, v)
+		t := Intersec(s, o, v)
+		if t > 0 && t < tmin {
+			tmin = t
+		}
+	}
+	if tmin < math.MaxFloat64 {
+		r, g, b = 1., 1., 1.
 	}
 	return
 }
 
 func Render() {
+	fmt.Println("P3")
+	fmt.Println("# raygo")
+	fmt.Printf("%d %d\n", w, h)
+	fmt.Println(100)
 	for j := 0; j < h; j++ {
-		//		vu := u * (h - j - 1 - h / 2) / h * hh
+		//vu := u * (h - j - 1 - h / 2) / h * hh
 		vu := u.Mult((float64(h) - float64(j) - 1 - float64(h)/2) / float64(h) * hh)
 		for i := 0; i < w; i++ {
-			vr := r.Mult((float64(i)-float64(w)/2)/float64(w)*ww)
+			vr := r.Mult((float64(i) - float64(w)/2) / float64(w) * ww)
 			v := f.Add(vu.Add(vr))
 			r, g, b := Trace(e, v)
-			fmt.Printf(" %3.f,%3.f,%3.f", 100*r, 100*g, 100*b)
+			//fmt.Printf(" %3.f,%3.f,%3.f", 100*r, 100*g, 100*b)
+			fmt.Printf("%2.f %2.f %2.f   ", 100*r, 100*g, 100*b)
 		}
 		fmt.Println()
 	}
