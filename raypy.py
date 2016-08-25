@@ -86,7 +86,7 @@ def Trace(o,v):
 	return rr,gg,bb
 
 def Render():
-	print("P6")
+	print("P3")
 	print("# raypy")
 	print("%s %s" % (w, h))
 	print(100)
