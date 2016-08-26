@@ -53,3 +53,11 @@ func (v Vector) Add(ov Vector) Vector {
 	rv.Z = v.Z + ov.Z
 	return rv
 }
+
+func (v Vector) Sub(ov Vector) Vector {
+	var rv Vector
+	rv.X = v.X - ov.X
+	rv.Y = v.Y - ov.Y
+	rv.Z = v.Z - ov.Z
+	return rv
+}

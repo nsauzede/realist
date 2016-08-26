@@ -110,3 +110,21 @@ func TestAdd(t *testing.T) {
 		}
 	}
 }
+
+func TestSub(t *testing.T) {
+	tests := []struct {
+		v1 Vector
+		v2 Vector
+		want Vector
+	}{
+		{Vector{1, 1, 1}, Vector{ -1, -2, -3}, Vector{2, 3, 4}},
+	}
+	for _, test := range tests {
+		v1 := test.v1
+		v2 := test.v2
+		res := v1.Sub(v2)
+		if !res.IsEqual(test.want) {
+			t.Errorf("%v - %v = %v, want %v", v1, v2, res, test.want)
+		}
+	}
+}

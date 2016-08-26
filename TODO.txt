@@ -19,3 +19,22 @@ TODO:
 -support focal view (lens ?)
 -support parameterized normals
 -support refraction
+
+
+Stats: (spyr.json)
+
+-100x100:
+raypy : 0:00.73
+raygo : 0:00.02
+raycpp: 0:00.01
+
+-1000x1000:
+raypy : 0:55.11
+raygo : 0:02.38
+raycpp: 0:00.72
+
+-10000x1000:
+raypy : 0:55.11
+raygo : 0:02.38
+raycpp: 0:00.72
+

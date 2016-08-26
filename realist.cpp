@@ -651,6 +651,12 @@ public:
 //		printf( "# ww=%f hh=%f\n", m_ww, m_hh);
 
 //		printf( "# found %d objects\n", (int)m_objs.size());
+		if (!sdl) {
+			printf( "P3\n");
+//			printf( "# raycpp\n");
+			printf( "%d %d\n", m_w, m_h);
+			printf( "%d\n", 100);
+		}
 
 		memset( m_arr, 0, m_sz);
 		int quit = 0;
@@ -815,7 +821,7 @@ public:
 							printf( "%c", col);
 						}
 						else
-							printf( " %3.lf,%3.lf,%3.lf", 100*r, 100*g, 100*b);
+							printf( "%2.lf %2.lf %2.lf   ", 100*r, 100*g, 100*b);
 					}
 					printf( "\n");
 				}
