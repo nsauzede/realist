@@ -21,7 +21,7 @@ TODO:
 -support refraction
 
 
-Stats: (spyr.json)
+Stats: spyr.json, linux
 
 -100x100:
 raypy : 0:00.73
@@ -34,7 +34,24 @@ raygo : 0:02.38
 raycpp: 0:00.72
 
 -10000x1000:
-raypy : 0:55.11
-raygo : 0:02.38
-raycpp: 0:00.72
+raypy : 
+raygo : 
+raycpp: 
+
+Stats: spyr.json, windows, > /dev/null
+
+-1000x100:
+raypy : 0:07.10
+raygo : 0:00.24
+raycpp: 0:00.23
+
+-1000x1000:
+raypy : 1:07.28
+raygo : 0:02.16
+raycpp: 0:01.69
+
+-1000x10000:
+raypy :10:56.79
+raygo : 0:21.43
+raycpp: 0:14.75
 
