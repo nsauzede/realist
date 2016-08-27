@@ -1,5 +1,6 @@
 TARGET=realist
 TARGET+=raygo.exe
+TARGET+=raycpp
 
 CXXFLAGS=-Wall -Werror
 CXXFLAGS+=-Wextra
@@ -45,13 +46,16 @@ all: SDL_CHECK $(TARGET)
 
 include sdl.mak
 ifeq ($(SDL_VER),1)
-CXXFLAGS+=-DSDL1
+SDL_CXXFLAGS+=-DSDL1
 else
-CXXFLAGS+=-DSDL2
+SDL_CXXFLAGS+=-DSDL2
 endif
 
-CXXFLAGS+=$(SDL_FLAGS)
-LDLIBS+=$(SDL_LIBS)
+SDL_CXXFLAGS+=$(SDL_FLAGS)
+SDL_LDLIBS+=$(SDL_LIBS)
+
+realist: CXXFLAGS+=$(SDL_CXXFLAGS)
+realist: LDLIBS+=$(SDL_LDLIBS)
 
 raygo.exe:
 	GOPATH=$(shell pwd)/go go build go/raygo.go
