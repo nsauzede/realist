@@ -550,7 +550,7 @@ public:
 //			printf( "\n");
 		}
 	}
-	void Run( unsigned w = 0, unsigned h = 0) {
+	void Run( unsigned w = 0, unsigned h = 0, char *fnameout = 0) {
 		if (w && h) {
 			m_w = w;
 			m_h = h;
@@ -561,10 +561,14 @@ public:
 		// screen
 		m_ww = 1;
 		m_hh = m_ww * m_h / m_w;
-		printf( "P3\n");
-//		printf( "# raycpp\n");
-		printf( "%d %d\n", m_w, m_h);
-		printf( "%d\n", 100);
+		FILE *fout = stdout;
+		if (fnameout) {
+			fout = fopen( fnameout, "wb");
+		}
+		fprintf( fout, "P3\n");
+//		fprintf( fout, "# raycpp\n");
+		fprintf( fout, "%d %d\n", m_w, m_h);
+		fprintf( fout, "%d\n", 100);
 
 		memset( m_arr, 0, m_sz);
 		Render();
@@ -574,9 +578,13 @@ public:
 				r = m_arr[((jj * m_w + ii) * 3) + 0];
 				g = m_arr[((jj * m_w + ii) * 3) + 1];
 				b = m_arr[((jj * m_w + ii) * 3) + 2];
-				printf( "%2.lf %2.lf %2.lf   ", 100*r, 100*g, 100*b);
+				fprintf( fout, "%2.lf %2.lf %2.lf   ", 100*r, 100*g, 100*b);
 			}
-			printf( "\n");
+			fprintf( fout, "\n");
+		}
+		if (fout != 0 && fout != stdout) {
+			fflush( fout);
+			fclose( fout);
 		}
 		free( m_arr);
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
@@ -600,6 +608,7 @@ private:
 
 int main( int argc, char *argv[]) {
 	unsigned w = 0, h = 0;
+	char *fnameout = 0;
 	char *scene = 0;
 	int arg = 1;
 	if (arg < argc) {
@@ -608,10 +617,13 @@ int main( int argc, char *argv[]) {
 			sscanf( argv[arg++], "%d", &w);
 			if (arg < argc) {
 				sscanf( argv[arg++], "%d", &h);
+				if (arg < argc) {
+					fnameout = argv[arg++];
+				}
 			}
 		}
 	}
 	CRealist r( scene);
-	r.Run( w, h);
+	r.Run( w, h, fnameout);
 	return 0;
 }
