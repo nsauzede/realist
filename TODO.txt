@@ -55,15 +55,15 @@ raypy :10:56.79 = 657 = 43.8x
 raygo : 0:21.43 = 22 = 1.47x
 raycpp: 0:14.75 = 15
 
-Stats: spyr.json, windows, > rayXX.ppm
+Stats: spyr.json, windows, write to rayXX.ppm
 
 -1000x1000:
 raypy : 1:11.50 = 72 = 72x
-raygo : 1:11.87 = 72 = 72x
+raygo : 0:01.61 = 2 = 2x
 raycpp: 0:00.93 = 1
 
 -1000x10000:
 raypy :10:56.79 = 657 = 43.8x
-raygo : 1:11.87 = 72 = 11x
+raygo : 0:15.68 = 16 = 2.28x
 raycpp: 0:06.85 = 7
 

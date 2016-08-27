@@ -40,6 +40,10 @@ ifdef USE_LAMP
 CXXFLAGS+=-DUSE_LAMP
 endif
 
+ifdef STATIC
+LDFLAGS+=-static
+endif
+
 CXXFLAGS+=-I.
 
 all: SDL_CHECK $(TARGET)

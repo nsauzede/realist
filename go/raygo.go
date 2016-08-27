@@ -6,6 +6,7 @@ import (
 	"os"
 	"vec"
 	"container/list"
+	"bufio"
 //	"reflect"
 )
 
@@ -20,6 +21,7 @@ var e = vec.Vector { 0.4, 0, 0.4 }
 var f = vec.Vector { -1, 0, -1 }
 var u = vec.Vector { -0.707107, 0, 0.707107 }
 var sphs *list.List
+var fnameout string
 
 func SolveTri(a, b, c float64) (sol int, t1, t2 float64) {
 	d := b * b - 4. * a * c
@@ -99,13 +101,23 @@ func Render() {
 	u.Normalize()
 	r.Normalize()
 
-	fmt.Println("P3")
-//	fmt.Println("# raygo")
-//	fmt.Println("#e=", e)
-//	fmt.Println("#f=", f)
-//	fmt.Println("#u=", u)
-	fmt.Printf("%d %d\n", w, h)
-	fmt.Println(100)
+	var err error
+	fout := os.Stdout
+	if fnameout != "" {
+		fout,err = os.Create( fnameout)
+		if err != nil {
+			panic(err)
+		}
+		defer fout.Close()
+	}
+	buf := bufio.NewWriter(fout)
+	fmt.Fprintf(buf,"P3\n")
+//	fmt.Fprintf(buf,"# raygo\n")
+//	fmt.Fprintf(buf,"#e=%f\n", e)
+//	fmt.Fprintf(buf,"#f=%f\n", f)
+//	fmt.Fprintf(buf,"#u=%f\n", u)
+	fmt.Fprintf(buf,"%d %d\n", w, h)
+	fmt.Fprintf(buf,"%d\n",100)
 	for j := 0; j < h; j++ {
 		vu := u.Mult((float64(h) - float64(j) - 1 - float64(h) / 2) / float64(h) * hh)
 		for i := 0; i < w; i++ {
@@ -113,10 +125,11 @@ func Render() {
 			v := f.Add( vu.Add( vr))
 			v.Normalize()
 			rr, gg, bb := Trace(e, v)
-			fmt.Printf("%2.f %2.f %2.f   ", 100*rr, 100*gg, 100*bb)
+			fmt.Fprintf(buf,"%2.f %2.f %2.f   ", 100*rr, 100*gg, 100*bb)
 		}
-		fmt.Println()
+		fmt.Fprintf(buf,"\n")
 	}
+	buf.Flush()
 }
 
 func main() {
@@ -128,6 +141,10 @@ func main() {
 		if arg < argc {
 			fmt.Sscanf(argv[arg], "%d", &h)
 			arg++
+			if arg < argc {
+				fnameout = argv[arg]
+				arg++
+			}
 		}
 	}
 	Render()
