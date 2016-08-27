@@ -12,6 +12,7 @@ screen=json['screen']
 camera=json['camera']
 objects=json['objects']
 
+fnameout=""
 w=screen['w']
 h=screen['h']
 ratiox=screen['ratiox']
@@ -21,9 +22,11 @@ if len(sys.argv) > 2:
 if len(sys.argv) > 3:
 	h=int(sys.argv[3])
 if len(sys.argv) > 4:
-	ratiox=float(sys.argv[4])
+	fnameout=sys.argv[4]
 if len(sys.argv) > 5:
-	ratioy=float(sys.argv[5])
+	ratiox=float(sys.argv[4])
+if len(sys.argv) > 6:
+	ratioy=float(sys.argv[6])
 ww=1.*ratiox
 hh=ww*h/w*ratioy
 e=np.array(camera['loc'],dtype=float)
@@ -94,13 +97,19 @@ def Trace(o,v):
 	return rr,gg,bb
 
 def Render():
-	print("P3")
-#	print("# raypy")
-#	print("#e=%s" % e)
-#	print("#f=%s" % f)
-#	print("#u=%s" % u)
-	print("%s %s" % (w, h))
-	print(100)
+	fout=sys.stdout
+	if fnameout != "":
+		fout = open(fnameout,"w")
+#	print("P3",file=fout)
+	fout.write("P3\n")
+#	print("# raypy",file=fout)
+#	print("#e=%s" % e,file=fout)
+#	print("#f=%s" % f,file=fout)
+#	print("#u=%s" % u,file=fout)
+#	print("%s %s" % (w, h),file=fout)
+	fout.write("%s %s\n" % (w, h))
+#	print(100,file=fout)
+	fout.write("%s\n" % 100)
 	for j in range(h):
 		vu=u*(h-j-1-h/2)/h*hh
 		for i in range(w):
@@ -108,6 +117,8 @@ def Render():
 			v=f+vu+vr
 			v/=np.linalg.norm(v)
 			rr,gg,bb=Trace(e,v)
-			print("%2.f %2.f %2.f   " % (100*rr,100*gg,100*bb),end="")
-		print("")
+#			print("%2.f %2.f %2.f   " % (100*rr,100*gg,100*bb),end="",file=fout)
+			fout.write("%2.f %2.f %2.f   " % (100*rr,100*gg,100*bb))
+#		print("",file=fout)
+		fout.write("\n")
 Render()
