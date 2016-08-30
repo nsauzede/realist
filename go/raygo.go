@@ -1,13 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"math"
-	"os"
-	"vec"
-	"container/list"
-	"bufio"
-)
+import ("fmt"; "math"; "os"; "vec"; "container/list"; "bufio")
 
 var nobj = 4
 var e = vec.Vector { 0.4, 0, 0.4 }
