@@ -2,10 +2,6 @@ package main
 
 import ("fmt"; "math"; "os"; "vec"; "container/list"; "bufio")
 
-var nobj = 4
-var e = vec.Vector { 0.4, 0, 0.4 }
-var f = vec.Vector { -1, 0, -1 }
-var u = vec.Vector { -0.707107, 0, 0.707107 }
 var sphs *list.List
 
 func SolveTri(a, b, c float64) (sol int, t1, t2 float64) {
@@ -65,6 +61,9 @@ func Render( w, h int, fnameout string) {
 	var ratioy = 1.
 	var ww = 1. * ratiox
 	var hh = ww * float64(h) / float64(w) * ratioy
+	var e = vec.Vector { 0.4, 0, 0.4 }
+	var f = vec.Vector { -1, 0, -1 }
+	var u = vec.Vector { -0.707107, 0, 0.707107 }
 	sphs = list.New()
 	sphs.PushBack([]float64{ 0, -0.1, 0, 0.05, 0.8, 0.8, 0.8})
 	sphs.PushBack([]float64{ 0, 0, 0, 0.05,   0.8, 0.8, 0.8})
@@ -75,6 +74,7 @@ func Render( w, h int, fnameout string) {
 	sphs.PushBack([]float64{ 0.05, -0.05, 0.1,    0.05,   0.8, 0.8, 0.8})
 	sphs.PushBack([]float64{ 0.05, 0.05, 0.1, 0.05,   0.8, 0.8, 0.8})
 	sphs.PushBack([]float64{ 0, -0.5, 0.5,    0.02,   1, 1, 0})
+
 	u.Normalize()
 	var r = f.Cross( u)
 	u = r.Cross( f)

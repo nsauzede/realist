@@ -1,23 +1,35 @@
 TARGET=realist
 TARGET+=raygo.exe
 TARGET+=raycpp
+TARGET+=rayc
+
+CFLAGS=-Wall -Werror
+CFLAGS+=-Wextra
 
 CXXFLAGS=-Wall -Werror
 CXXFLAGS+=-Wextra
 
-CXXFLAGS+=-std=c++11
+CFLAGS+=-g
 
 CXXFLAGS+=-g
 
+CFLAGS+=-pipe
 CXXFLAGS+=-pipe
+
 LDFLAGS+=-pipe
+
+CXXFLAGS+=-std=c++11
+
+LDLIBS+=-lm
 
 USE_OPT=1
 ifdef USE_OPT
 CXXFLAGS+=-O3
+CFLAGS+=-O3
 CXXFLAGS+=-DUSE_OPT
 else
 CXXFLAGS+=-O0
+CFLAGS+=-O0
 endif
 
 USE_VEC=1
