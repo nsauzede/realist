@@ -7,25 +7,16 @@ import (
 	"vec"
 	"container/list"
 	"bufio"
-//	"reflect"
 )
 
-var w = 10
-var h = 10
-var ratiox = 1.
-var ratioy = 1.
-var ww = 1. * ratiox
-var hh = ww * float64(h) / float64(w) * ratioy
 var nobj = 4
 var e = vec.Vector { 0.4, 0, 0.4 }
 var f = vec.Vector { -1, 0, -1 }
 var u = vec.Vector { -0.707107, 0, 0.707107 }
 var sphs *list.List
-var fnameout string
 
 func SolveTri(a, b, c float64) (sol int, t1, t2 float64) {
 	d := b * b - 4. * a * c
-//	fmt.Println("d=",d)
 	if d > 0 {
 		sd := math.Sqrt( d)
 		t1 = (-b - sd) / 2 / a;
@@ -45,14 +36,6 @@ func Intersec(s []float64, o, v vec.Vector) (t float64) {
 	b := 2 * v.Dot( vt)
 	c := vt.Dot( vt) - rad * rad
 	sol, t1, t2 := SolveTri( a, b, c)
-//	if sol > 2 {
-//		fmt.Println("center=",center)
-//		fmt.Println("rad=",rad)
-//		fmt.Println("vt=",vt)
-//		fmt.Printf("a=%f b=%f c=%f\n",a,b,c)
-//		fmt.Printf("sol=%d t1=%f t2=%f\n",sol,t1,t2)
-//		os.Exit( 1)
-//	}
 	if sol == 2 {
 		if t1 < t2 {
 			t = t1
@@ -84,7 +67,11 @@ func Trace(o, v vec.Vector) (rr, gg, bb float64) {
 	return
 }
 
-func Render() {
+func Render( w, h int, fnameout string) {
+	var ratiox = 1.
+	var ratioy = 1.
+	var ww = 1. * ratiox
+	var hh = ww * float64(h) / float64(w) * ratioy
 	sphs = list.New()
 	sphs.PushBack([]float64{ 0, -0.1, 0, 0.05, 0.8, 0.8, 0.8})
 	sphs.PushBack([]float64{ 0, 0, 0, 0.05,   0.8, 0.8, 0.8})
@@ -112,10 +99,6 @@ func Render() {
 	}
 	buf := bufio.NewWriter(fout)
 	fmt.Fprintf(buf,"P3\n")
-//	fmt.Fprintf(buf,"# raygo\n")
-//	fmt.Fprintf(buf,"#e=%f\n", e)
-//	fmt.Fprintf(buf,"#f=%f\n", f)
-//	fmt.Fprintf(buf,"#u=%f\n", u)
 	fmt.Fprintf(buf,"%d %d\n", w, h)
 	fmt.Fprintf(buf,"%d\n",100)
 	for j := 0; j < h; j++ {
@@ -133,6 +116,8 @@ func Render() {
 }
 
 func main() {
+	var w, h = 10, 10
+	var fnameout = ""
 	argv := os.Args
 	arg, argc := 1, len(argv)
 	if arg < argc {
@@ -147,5 +132,5 @@ func main() {
 			}
 		}
 	}
-	Render()
+	Render( w, h, fnameout)
 }
