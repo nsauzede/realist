@@ -424,11 +424,13 @@ public:
 #define TMAX 1E10
 		double tmin = HUGE_VAL;
 		CObject *omin = 0;
+//		unsigned imin = 0;
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
 			double tres = m_objs.at( ii)->Intersec( o, v);
 			if ((tres > 0) && (tres < tmin)) {
 				tmin = tres;
 				omin = m_objs.at( ii);
+//				imin = ii;
 			}
 		}
 		double def_color = 0;
@@ -443,6 +445,7 @@ public:
 #else
 			energy += 1.0;
 #endif
+//			printf( "[HIT %u]", imin);
 			// intersected object color
 			color = omin->Color() * 1.0;
 #if defined USE_FLASH || defined USE_REFL || defined USE_LAMP
@@ -511,33 +514,13 @@ public:
 #endif
 		}
 	}
-	void Render( /*const double &tr = 0*/) const {
-		// ray
-		v3 v;
-//		printf( "tr=%f\n", tr);
-		for (unsigned jj = 0; jj < m_h; jj++) {
-			v3 vu;
-			vu = m_u * ((double)jj - m_h / 2) / m_h * m_hh;
-			for (unsigned ii = 0; ii < m_w; ii++) {
-				v3 vr;
-				vr = m_r * ((double)ii - m_w / 2) / m_w * m_ww;
-				v = ~(m_f + vu + vr);
-				v3 color = { 1, 1, 1};
-				Trace( 0, m_e, v, color);
-				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
-				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 1] = color[1];
-				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 2] = color[2];
-			}
-//			printf( "\n");
-		}
-	}
-	void Run( unsigned w = 0, unsigned h = 0, char *fnameout = 0) {
+	void Render( unsigned w = 0, unsigned h = 0, char *fnameout = 0) {
 		if (w && h) {
 			m_w = w;
 			m_h = h;
 		}
-		m_sz = sizeof( *m_arr) * 3 * m_w * m_h;
-		m_arr = (double *)malloc( m_sz);
+//		m_sz = sizeof( *m_arr) * 3 * m_w * m_h;
+//		m_arr = (double *)malloc( m_sz);
 
 		// screen
 		m_ww = 1;
@@ -550,15 +533,25 @@ public:
 		fprintf( fout, "%d %d\n", m_w, m_h);
 		fprintf( fout, "%d\n", 100);
 
-		memset( m_arr, 0, m_sz);
-		Render();
+//		memset( m_arr, 0, m_sz);
+		// ray
+		v3 v;
+//		printf( "tr=%f\n", tr);
 		for (unsigned jj = 0; jj < m_h; jj++) {
+			v3 vu;
+			vu = m_u * ((double)m_h - (double)jj - 1.0 - (double)m_h / 2) / (double)m_h * m_hh;
+//			vprint( "raycpp vu", vu);
+//			getchar();
 			for (unsigned ii = 0; ii < m_w; ii++) {
-				double r, g, b;
-				r = m_arr[((jj * m_w + ii) * 3) + 0];
-				g = m_arr[((jj * m_w + ii) * 3) + 1];
-				b = m_arr[((jj * m_w + ii) * 3) + 2];
-				fprintf( fout, "%2.lf %2.lf %2.lf   ", 100*r, 100*g, 100*b);
+				v3 vr;
+				vr = m_r * ((double)ii - m_w / 2) / m_w * m_ww;
+				v = ~(m_f + vu + vr);
+				v3 color = { 1, 1, 1};
+				Trace( 0, m_e, v, color);
+//				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
+//				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 1] = color[1];
+//				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 2] = color[2];
+				fprintf( fout, "%2.lf %2.lf %2.lf   ", 100*color[0], 100*color[1], 100*color[2]);
 			}
 			fprintf( fout, "\n");
 		}
@@ -566,7 +559,7 @@ public:
 			fflush( fout);
 			fclose( fout);
 		}
-		free( m_arr);
+//		free( m_arr);
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
 			delete m_objs.at( ii);
 			m_objs.at( ii) = 0;
@@ -574,8 +567,8 @@ public:
 	}
 private:
 	unsigned m_w, m_h;	// screen pixel dimensions
-	double *m_arr;
-	unsigned m_sz;
+//	double *m_arr;
+//	unsigned m_sz;
 	std::vector<CObject *> m_objs;
 	std::vector<CLamp *> m_lamps;
 
@@ -604,6 +597,6 @@ int main( int argc, char *argv[]) {
 		}
 	}
 	CRealist r( scene);
-	r.Run( w, h, fnameout);
+	r.Render( w, h, fnameout);
 	return 0;
 }

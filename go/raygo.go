@@ -1,8 +1,9 @@
 package main
 
-import ("fmt"; "math"; "os"; "vec"; "container/list"; "bufio")
+import ("fmt"; "math"; "os"; "vec"; "container/list"; "bufio"; /*"reflect"*/)
 
 var sphs *list.List
+//var buf *bufio.Writer
 
 func SolveTri(a, b, c float64) (sol int, t1, t2 float64) {
 	d := b * b - 4. * a * c
@@ -42,15 +43,20 @@ func Intersec(s []float64, o, v vec.Vector) (t float64) {
 func Trace(o, v vec.Vector) (rr, gg, bb float64) {
 	tmin := math.MaxFloat64
 	var omin []float64
+//	var imin uint
+//	var i uint = 0
 	for e := sphs.Front(); e != nil; e = e.Next() {
 		s := e.Value.([]float64)
 		t := Intersec(s, o, v)
 		if t > 0 && t < tmin {
 			tmin = t
 			omin = s
+//			imin = i
 		}
+//		i++
 	}
 	if tmin < math.MaxFloat64 {
+//		fmt.Fprintf( buf, "[HIT %d]", imin);
 		rr, gg, bb = omin[4], omin[5], omin[6]
 	}
 	return
@@ -91,11 +97,19 @@ func Render( w, h int, fnameout string) {
 		defer fout.Close()
 	}
 	buf := bufio.NewWriter(fout)
+//	buf = bufio.NewWriter(fout)
+//	fmt.Println( reflect.TypeOf(buf));
 	fmt.Fprintf(buf,"P3\n")
 	fmt.Fprintf(buf,"%d %d\n", w, h)
 	fmt.Fprintf(buf,"%d\n",100)
 	for j := 0; j < h; j++ {
 		vu := u.Mult((float64(h) - float64(j) - 1 - float64(h) / 2) / float64(h) * hh)
+
+//		fmt.Fprintf( buf, "raygo vu=%v\n", vu);
+//		buf.Flush()
+//		var b []byte = make([]byte, 1)
+//		os.Stdin.Read( b)
+
 		for i := 0; i < w; i++ {
 			vr := r.Mult((float64(i) - float64(w) / 2) / float64(w) * ww)
 			v := f.Add( vu.Add( vr))

@@ -77,12 +77,16 @@ def Intersec(s,o,v):
 
 def Trace(o,v):
 	tmin=HUGE_VAL
+#	i=0
 	for s in sphs:
 		t=Intersec(s,o,v)
 		if t>0 and t<tmin:
 			tmin=t
 			omin=s
+#			imin=i
+#		i+=1
 	if tmin<HUGE_VAL:
+#		print("[HIT %u]" % imin,end="")
 		rr, gg, bb = omin[4], omin[5], omin[6]
 	else:
 		rr,gg,bb = 0, 0, 0
@@ -97,6 +101,8 @@ def Render():
 	fout.write("%s\n" % 100)
 	for j in range(h):
 		vu=u*(h-j-1-h/2)/h*hh
+#		print("raypy vu=%s" % vu)
+#		input()
 		for i in range(w):
 			vr=r*(i-w/2)/w*ww
 			v=f+vu+vr

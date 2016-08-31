@@ -7,6 +7,7 @@
 enum { SPHCENT, SPHX = SPHCENT, SPHY, SPHZ, SPHRAD, SPHCOL, SPHR = SPHCOL, SPHG, SPHB};
 // scene
 double sph[][7] = {
+    { 0, -0.1, 0, 0.05, 0.8, 0.8, 0.8},
     { 0, 0, 0, 0.05,   0.8, 0.8, 0.8},
     { 0, 0.1, 0,   0.05,   0.8, 0.8, 0.8},
     { 0.1, -0.05, 0,   0.05,   0.8, 0, 0},
@@ -50,14 +51,17 @@ void Trace( const v3 o, const v3 v, v3 color) {
 #define TMAX 1E10
 	double tmin = HUGE_VAL;
 	double *omin = NULL;
+//	unsigned imin = 0;
 	for (unsigned ii = 0; ii < nsph; ii++) {
 		double tres = Intersec( sph[ii], o, v);
 		if ((tres > 0) && (tres < tmin)) {
 			tmin = tres;
 			omin = &sph[ii][SPHCOL];
+//			imin = ii;
 		}
 	}
 	if (tmin < TMAX) {
+//		printf( "[HIT %u]", imin);
 		// intersected object color
 		vcopy( color, omin);
 	}
@@ -99,6 +103,8 @@ void Render( unsigned w, unsigned h, char *fnameout) {
 	for (unsigned jj = 0; jj < h; jj++) {
 		v3 vu;
 		vmult( vu, m_u, ((double)h - (double)jj - 1.0 - (double)h / 2.0) / (double)h * m_hh);
+//		vprintn( "rayc vu", vu);
+//		getchar();
 		for (unsigned ii = 0; ii < w; ii++) {
 			v3 vr;
 			vmult( vr, m_r, ((double)ii - (double)w / 2.0) / (double)w * m_ww);

@@ -233,4 +233,12 @@ void vnormalize( v3 l) {
 	l[2] /= norm;
 }
 
+//inline void vprint( const v3 v) {
+//	printf( "%f,%f,%f\n", v[0], v[1], v[2]);
+//}
+
+inline void vprintn( const char *t, const v3 v) {
+	printf( "%s={%f,%f,%f}\n", t, v[0], v[1], v[2]);
+}
+
 #endif
