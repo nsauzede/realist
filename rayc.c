@@ -66,7 +66,7 @@ void Trace( const v3 o, const v3 v, v3 color) {
 void Render( unsigned w, unsigned h, char *fnameout) {
 	// screen
 	double m_ww = 1;
-	double m_hh = m_ww * h / w;
+	double m_hh = m_ww * (double)h / (double)w;
 	// camera
 	v3 cam[] = {
 		{ 0.4, 0, 0.4},				// eye
@@ -98,14 +98,14 @@ void Render( unsigned w, unsigned h, char *fnameout) {
 	v3 v;
 	for (unsigned jj = 0; jj < h; jj++) {
 		v3 vu;
-		vmult( vu, m_u, ((double)jj - h / 2) / h * m_hh);
+		vmult( vu, m_u, ((double)h - (double)jj - 1.0 - (double)h / 2.0) / (double)h * m_hh);
 		for (unsigned ii = 0; ii < w; ii++) {
 			v3 vr;
-			vmult( vr, m_r, ((double)ii - w / 2) / w * m_ww);
+			vmult( vr, m_r, ((double)ii - (double)w / 2.0) / (double)w * m_ww);
 			vadd( v, vu, vr);
 			vadd( v, v, m_f);
 			vnormalize( v);
-			v3 color = { 1, 1, 1};
+			v3 color = { 0, 0, 0};
 			Trace( m_e, v, color);
 			fprintf( fout, "%2.lf %2.lf %2.lf   ", 100*color[0], 100*color[1], 100*color[2]);
 		}
