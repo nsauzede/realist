@@ -1,7 +1,15 @@
 TARGET=realist
-TARGET+=raygo.exe
 TARGET+=raycpp
 TARGET+=rayc
+
+GO=go
+ifeq (x$(shell which $(GO) > /dev/null ; echo $$?),x0)
+HAVE_GO=1
+endif
+
+ifdef HAVE_GO
+TARGET+=raygo.exe
+endif
 
 CFLAGS=-Wall -Werror
 CFLAGS+=-Wextra
@@ -76,7 +84,7 @@ realist: CXXFLAGS+=$(SDL_CXXFLAGS)
 realist: LDLIBS+=$(SDL_LDLIBS)
 
 raygo.exe:
-	GOPATH=$(shell pwd)/go go build go/raygo.go
+	GOPATH=$(shell pwd)/go $(GO) build go/raygo.go
 
 realist: realist.cpp vec.h CSDL.h
 
