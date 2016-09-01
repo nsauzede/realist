@@ -20,6 +20,8 @@ LDFLAGS+=-pipe
 
 CXXFLAGS+=-std=c++11
 
+CFLAGS+=-std=c99
+
 LDLIBS+=-lm
 
 USE_OPT=1
