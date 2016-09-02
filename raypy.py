@@ -93,12 +93,11 @@ def Trace(o,v):
 	return rr,gg,bb
 
 def Render():
-	fout=sys.stdout
+	fout=getattr(sys.stdout,'buffer',sys.stdout)	# get binary buffer of stdout
 	if fnameout != "":
-		fout = open(fnameout,"w")
-	fout.write("P3\n")
-	fout.write("%s %s\n" % (w, h))
-	fout.write("%s\n" % 100)
+		fout = open(fnameout,"wb")
+	fout.write(b"P3\n")
+	fout.write(str.encode("%s %s\n" % (w, h)))
 	for j in range(h):
 		vu=u*(h-j-1-h/2)/h*hh
 #		print("raypy vu=%s" % vu)
@@ -108,6 +107,6 @@ def Render():
 			v=f+vu+vr
 			v/=np.linalg.norm(v)
 			rr,gg,bb=Trace(e,v)
-			fout.write("%2.f %2.f %2.f   " % (100*rr,100*gg,100*bb))
-		fout.write("\n")
+			fout.write(str.encode("%2.f %2.f %2.f   "%(100*rr,100*gg,100*bb)))
+		fout.write(b"\n")
 Render()
