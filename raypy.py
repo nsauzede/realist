@@ -98,6 +98,7 @@ def Render():
 		fout = open(fnameout,"wb")
 	fout.write(b"P3\n")
 	fout.write(str.encode("%s %s\n" % (w, h)))
+	fout.write(b"100\n")
 	for j in range(h):
 		vu=u*(h-j-1-h/2)/h*hh
 #		print("raypy vu=%s" % vu)
