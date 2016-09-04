@@ -84,7 +84,7 @@ realist: CXXFLAGS+=$(SDL_CXXFLAGS)
 realist: LDLIBS+=$(SDL_LDLIBS)
 
 raygo.exe:
-	GOPATH=$(shell pwd)/go $(GO) build go/raygo.go
+	GOPATH=$(shell pwd)/go $(GO) build -o $@ go/raygo.go
 
 realist: realist.cpp vec.h CSDL.h
 
