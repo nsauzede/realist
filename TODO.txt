@@ -22,6 +22,8 @@ TODO:
 
 
 Stats: spyr.json, linux
+(see here for interesting post about C, Rust, Go, .. :
+http://www.viva64.com/en/b/0324/)
 
 -1000x1000:
 raypy : 0:55.11 = 56 = 56x
@@ -36,9 +38,10 @@ raycpp:
 Stats: spyr.json, windows, write to rayXX.ppm
 
 -1000x1000:
-raypy : 1:06.72 = 72 = 72x
-raygo : 0:01.61 = 2 = 2x
-raycpp: 0:00.93 = 1
+raypy : 1:05.46 = 72 => 90.92x
+raygo : 0:01.58 = 2 => 2.19x
+raycpp: 0:00.88 = 1 => 1.22x
+rayc  : 0:00.72 = 1 => 1x
 
 -1000x10000:
 raypy :10:52.79 = 657 => 126.75x		code: 101
