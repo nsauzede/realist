@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include <assert.h>
 
 #include <vector>
 #include <iostream>
 #include <fstream>
 
 #include "vec.h"
+#include "veccpp.h"
 
 enum { OT_NONE = -1, OT_SPHERE = 0, OT_PLANE };
 class CObject {
@@ -100,7 +100,7 @@ public:
 		b = 2 * (v % t);
 		c = (t % t) - sr2;
 		double t1 = 0, t2 = 0;
-		int sol = solvetri( a, b, c, t1, t2);
+		int sol = solvetri( a, b, c, &t1, &t2);
 		if (sol >= 1) {
 			if (sol > 1) {
 				if (t1 < t2) {

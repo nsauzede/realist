@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "vec.h"
+#include "vecc.h"
 
 enum { SPHCENT, SPHX = SPHCENT, SPHY, SPHZ, SPHRAD, SPHCOL, SPHR = SPHCOL, SPHG, SPHB};
 // scene

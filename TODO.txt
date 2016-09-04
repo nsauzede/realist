@@ -36,12 +36,13 @@ raycpp:
 Stats: spyr.json, windows, write to rayXX.ppm
 
 -1000x1000:
-raypy : 1:11.50 = 72 = 72x
+raypy : 1:06.72 = 72 = 72x
 raygo : 0:01.61 = 2 = 2x
 raycpp: 0:00.93 = 1
 
 -1000x10000:
-raypy :10:56.79 = 657 = 43.8x
-raygo : 0:15.68 = 16 = 2.28x
-raycpp: 0:06.85 = 7
+raypy :10:52.79 = 657 => 126.75x		code: 101
+raygo : 0:14.32 = 16 => 2.78x			code: 173
+raycpp: 0:06.86 = 7 => 1.33x			code: 706
+rayc  : 0:05.15 = 5 => 1x				code: 190
 
