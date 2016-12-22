@@ -24,7 +24,7 @@ if len(sys.argv) > 3:
 if len(sys.argv) > 4:
 	fnameout=sys.argv[4]
 if len(sys.argv) > 5:
-	ratiox=float(sys.argv[4])
+	ratiox=float(sys.argv[5])
 if len(sys.argv) > 6:
 	ratioy=float(sys.argv[6])
 ww=1.*ratiox
