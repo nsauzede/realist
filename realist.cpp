@@ -716,11 +716,15 @@ public:
 								switch (dir) {
 									case 2:
 										phi *= -1;
+										u = m_u;
+										break;
 									case 1:
 										u = m_u;
 										break;
 									case 3:
 										phi *= -1;
+										u = m_r;
+										break;
 									case 4:
 										u = m_r;
 										break;
