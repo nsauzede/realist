@@ -28,6 +28,18 @@ impl Add for V3 {
     }
 }
 
+impl<'a,'b> Add<&'b V3> for &'a V3 {
+    type Output = V3;
+    fn add(self, other: &V3) -> V3 {
+        V3 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+
+
 impl Sub for V3 {
     type Output = V3;
     fn sub(self, other: V3) -> V3 {
@@ -39,7 +51,29 @@ impl Sub for V3 {
     }
 }
 
+impl<'a, 'b> Sub<&'b V3> for &'a V3 {
+    type Output = V3;
+    fn sub(self, other: &V3) -> V3 {
+        V3 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
+    }
+}
+
 impl Mul<f64> for V3 {
+    type Output = V3;
+    fn mul(self, other: f64) -> V3 {
+        V3 {
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
+        }
+    }
+}
+
+impl<'b> Mul<f64> for &'b V3 {
     type Output = V3;
     fn mul(self, other: f64) -> V3 {
         V3 {
@@ -61,6 +95,16 @@ impl Mul<V3> for f64 {
     }
 }
 
+impl<'a> Mul<&'a V3> for f64 {
+    type Output = V3;
+    fn mul(self, other: &V3) -> V3 {
+        V3 {
+            x: self * other.x,
+            y: self * other.y,
+            z: self * other.z,
+        }
+    }
+}
 
 
 #[cfg(test)]
@@ -75,10 +119,23 @@ mod tests {
         assert_eq!(cross.x, 0f64);
         assert_eq!(cross.y, 0f64);
         assert_eq!(cross.z, 0f64);
+        //test if input moves
+        drop(a);
+        drop(b);
     }
 
     #[test]
-    fn test_add() {
+    fn test_add_func() {
+        let a =  V3 {x: 2f64, y: 2f64, z: 2f64};
+        let b =  V3 {x: 2f64, y: 2f64, z: 2f64};
+        let sum = <&V3 as Add<&V3>>::add(&a,&b);
+        assert_eq!(sum.x, 4f64);
+        assert_eq!(sum.y, 4f64);
+        assert_eq!(sum.z, 4f64);
+    }
+
+    #[test]
+    fn test_add_val() {
         let a =  V3 {x: 2f64, y: 2f64, z: 2f64};
         let b =  V3 {x: 2f64, y: 2f64, z: 2f64};
         let sum = a + b;
@@ -88,7 +145,17 @@ mod tests {
     }
 
     #[test]
-    fn test_sub() {
+    fn test_add_ref() {
+        let a =  V3 {x: 2f64, y: 2f64, z: 2f64};
+        let b =  V3 {x: 2f64, y: 2f64, z: 2f64};
+        let sum = &a + &b;
+        assert_eq!(sum.x, 4f64);
+        assert_eq!(sum.y, 4f64);
+        assert_eq!(sum.z, 4f64);
+    }
+
+    #[test]
+    fn test_sub_val() {
         let a =  V3 {x: 4f64, y: 4f64, z: 4f64};
         let b =  V3 {x: 3f64, y: 2f64, z: 1f64};
         let res = a - b;
@@ -98,22 +165,51 @@ mod tests {
     }
 
     #[test]
-    fn test_mul() {
+    fn test_sub_ref() {
+        let a =  V3 {x: 4f64, y: 4f64, z: 4f64};
+        let b =  V3 {x: 3f64, y: 2f64, z: 1f64};
+        let res = &a - &b;
+        assert_eq!(res.x, 1f64);
+        assert_eq!(res.y, 2f64);
+        assert_eq!(res.z, 3f64);
+    }
+
+    #[test]
+    fn test_mul_val1() {
         let a =  V3 {x: 1f64, y: 2f64, z: 3f64};
         let res = a * 5f64;
         assert_eq!(res.x, 5f64);
         assert_eq!(res.y, 10f64);
         assert_eq!(res.z, 15f64);
     }
-    
+
     #[test]
-    fn test_mul2() {
+    fn test_mul_ref1() {
+        let a =  V3 {x: 1f64, y: 2f64, z: 3f64};
+        let res = &a * 5f64;
+        assert_eq!(res.x, 5f64);
+        assert_eq!(res.y, 10f64);
+        assert_eq!(res.z, 15f64);
+    }
+
+    #[test]
+    fn test_mul_val2() {
         let a =  V3 {x: 1f64, y: 2f64, z: 3f64};
         let res = 5f64 * a;
         assert_eq!(res.x, 5f64);
         assert_eq!(res.y, 10f64);
         assert_eq!(res.z, 15f64);
     }
+
+    #[test]
+    fn test_mul_ref2() {
+        let a =  V3 {x: 1f64, y: 2f64, z: 3f64};
+        let res = 5f64 * &a;
+        assert_eq!(res.x, 5f64);
+        assert_eq!(res.y, 10f64);
+        assert_eq!(res.z, 15f64);
+    }
+
 
 
     #[test]
