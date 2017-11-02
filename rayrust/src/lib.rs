@@ -15,6 +15,10 @@ impl V3 {
             z: self.x * other.y - self.y * other.x,
         }
     }
+
+    pub fn dot(&self, other: &V3) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
 }
 
 impl Add for V3 {
@@ -125,6 +129,18 @@ mod tests {
     }
 
     #[test]
+    fn test_dot() {
+        let a =  V3 {x: 1f64, y: 2f64, z: 2f64};
+        let b =  V3 {x: 2f64, y: 2f64, z: 3f64};
+        let res = V3::dot(&a,&b);
+        assert_eq!(res, 12f64);
+        //test if input moves
+        drop(a);
+        drop(b);
+    }
+
+
+    #[test]
     fn test_add_func() {
         let a =  V3 {x: 2f64, y: 2f64, z: 2f64};
         let b =  V3 {x: 2f64, y: 2f64, z: 2f64};
@@ -209,8 +225,6 @@ mod tests {
         assert_eq!(res.y, 10f64);
         assert_eq!(res.z, 15f64);
     }
-
-
 
     #[test]
     fn test_clone() {
