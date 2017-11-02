@@ -1,4 +1,4 @@
-use std::ops::{Add,Sub};
+use std::ops::{Add,Sub,Mul};
 
 #[derive(Clone)]
 pub struct V3 {
@@ -39,6 +39,29 @@ impl Sub for V3 {
     }
 }
 
+impl Mul<f64> for V3 {
+    type Output = V3;
+    fn mul(self, other: f64) -> V3 {
+        V3 {
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
+        }
+    }
+}
+
+impl Mul<V3> for f64 {
+    type Output = V3;
+    fn mul(self, other: V3) -> V3 {
+        V3 {
+            x: self * other.x,
+            y: self * other.y,
+            z: self * other.z,
+        }
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {
@@ -73,6 +96,25 @@ mod tests {
         assert_eq!(res.y, 2f64);
         assert_eq!(res.z, 3f64);
     }
+
+    #[test]
+    fn test_mul() {
+        let a =  V3 {x: 1f64, y: 2f64, z: 3f64};
+        let res = a * 5f64;
+        assert_eq!(res.x, 5f64);
+        assert_eq!(res.y, 10f64);
+        assert_eq!(res.z, 15f64);
+    }
+    
+    #[test]
+    fn test_mul2() {
+        let a =  V3 {x: 1f64, y: 2f64, z: 3f64};
+        let res = 5f64 * a;
+        assert_eq!(res.x, 5f64);
+        assert_eq!(res.y, 10f64);
+        assert_eq!(res.z, 15f64);
+    }
+
 
     #[test]
     fn test_clone() {
