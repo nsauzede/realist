@@ -1,5 +1,6 @@
 use std::ops::{Add,Sub};
 
+#[derive(Clone)]
 pub struct V3 {
     x: f64,
     y: f64,
@@ -68,6 +69,16 @@ mod tests {
         let a =  V3 {x: 4f64, y: 4f64, z: 4f64};
         let b =  V3 {x: 3f64, y: 2f64, z: 1f64};
         let res = a - b;
+        assert_eq!(res.x, 1f64);
+        assert_eq!(res.y, 2f64);
+        assert_eq!(res.z, 3f64);
+    }
+
+    #[test]
+    fn test_clone() {
+        let a =  V3 {x: 1f64, y: 2f64, z: 3f64};
+        let res = a.clone();
+        drop(a);
         assert_eq!(res.x, 1f64);
         assert_eq!(res.y, 2f64);
         assert_eq!(res.z, 3f64);
