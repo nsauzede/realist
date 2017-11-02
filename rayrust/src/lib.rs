@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add,Sub};
 
 pub struct V3 {
     x: f64,
@@ -27,6 +27,17 @@ impl Add for V3 {
     }
 }
 
+impl Sub for V3 {
+    type Output = V3;
+    fn sub(self, other: V3) -> V3 {
+        V3 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -50,5 +61,15 @@ mod tests {
         assert_eq!(sum.x, 4f64);
         assert_eq!(sum.y, 4f64);
         assert_eq!(sum.z, 4f64);
+    }
+
+    #[test]
+    fn test_sub() {
+        let a =  V3 {x: 4f64, y: 4f64, z: 4f64};
+        let b =  V3 {x: 3f64, y: 2f64, z: 1f64};
+        let res = a - b;
+        assert_eq!(res.x, 1f64);
+        assert_eq!(res.y, 2f64);
+        assert_eq!(res.z, 3f64);
     }
 }
