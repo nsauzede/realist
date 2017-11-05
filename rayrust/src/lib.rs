@@ -19,6 +19,13 @@ impl V3 {
     pub fn dot(&self, other: &V3) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
+
+    pub fn normalize(&mut self) {
+        let norm = f64::sqrt(V3::dot(&self, &self));
+        self.x /= norm;
+        self.y /= norm;
+        self.z /= norm;
+    }
 }
 
 impl Add for V3 {
@@ -139,6 +146,14 @@ mod tests {
         drop(b);
     }
 
+    #[test]
+    fn test_normalize() {
+        let mut a =  V3 {x: 16f64, y: 0f64, z: 0f64};
+        a.normalize();
+        assert_eq!(a.x, 1f64);
+        //test if input moves
+        drop(a);
+    }
 
     #[test]
     fn test_add_func() {
