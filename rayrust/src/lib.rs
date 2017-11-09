@@ -2,9 +2,9 @@ use std::ops::{Add,Sub,Mul};
 
 #[derive(Clone)]
 pub struct V3 {
-    x: f64,
-    y: f64,
-    z: f64,
+   pub x: f64,
+   pub y: f64,
+   pub z: f64,
 }
 
 impl V3 {
