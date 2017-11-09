@@ -117,6 +117,27 @@ impl<'a> Mul<&'a V3> for f64 {
     }
 }
 
+pub enum Sol {
+    S2(f64, f64),
+    S1(f64),
+    None,
+}
+
+pub fn solvetri(a: f64, b: f64, c:f64) -> Sol {
+    let d = b * b - 4f64 * a * c;
+    if d > 0f64 {
+        let sd = f64::sqrt( d);
+        let t1 = (-b - sd) / 2f64 / a;
+        let t2 = (-b + sd) / 2f64 / a;
+        return Sol::S2(t1, t2);
+    } else if d == 0f64 {
+        let t1 = -b / 2f64 / a;
+        return Sol::S1(t1)
+    } else {
+        return Sol::None;
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
