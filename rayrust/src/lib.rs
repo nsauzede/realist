@@ -1,6 +1,7 @@
 use std::ops::{Add,Sub,Mul};
 
 #[derive(Clone)]
+#[derive(Debug)]
 pub struct V3 {
    pub x: f64,
    pub y: f64,
