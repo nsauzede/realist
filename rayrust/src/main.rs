@@ -21,7 +21,7 @@ const SPH:[Sphere;9] = [
     Sphere { center: V3 {x: 0.0 , y:-0.5 , z: 0.5} , radius: 0.02, color: [1.0, 1.0, 0.0]},
 ];
 
-fn Intersec( sph1: &Sphere,  o: &V3,  v: &V3) -> f64 {
+fn intersec( sph1: &Sphere,  o: &V3,  v: &V3) -> f64 {
     let m_r = sph1.radius;
     let m_c = &sph1.center;
     let sr2 = m_r * m_r;
@@ -37,13 +37,13 @@ fn Intersec( sph1: &Sphere,  o: &V3,  v: &V3) -> f64 {
     }
 }
 
-fn Trace( o: &V3, v: &V3) -> [f64; 3] {
+fn trace( o: &V3, v: &V3) -> [f64; 3] {
     const TMAX:f64 = 1E10f64;
 	let mut tmin = f64::INFINITY;
 	let mut omin = [0f64;3];
 	//unsigned imin = 0;
 	for elem in SPH.iter() {
-        let tres = Intersec( elem, o, v);
+        let tres = intersec( elem, o, v);
         if (tres > 0f64) && (tres < tmin) {
             tmin = tres;
             omin = elem.color;
