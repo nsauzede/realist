@@ -9,7 +9,7 @@ struct Sphere {
     color: [f64;3],
 }
 
-const sph:[Sphere;9] = [
+const SPH:[Sphere;9] = [
     Sphere { center: V3 {x: 0.0 , y:-0.1 , z: 0.0} , radius: 0.05, color: [0.8, 0.8, 0.8]},
     Sphere { center: V3 {x: 0.0 , y: 0.0 , z: 0.0} , radius: 0.05, color: [0.8, 0.8, 0.8]},
     Sphere { center: V3 {x: 0.0 , y: 0.1 , z: 0.0} , radius: 0.05, color: [0.8, 0.8, 0.8]},
@@ -35,6 +35,24 @@ fn Intersec( sph1: &Sphere,  o: &V3,  v: &V3) -> f64 {
         Sol::S1(t) => {return t;},
         Sol::None => {return f64::INFINITY;},
     }
+}
+
+fn Trace( o: &V3, v: &V3) -> [f64; 3] {
+    const TMAX:f64 = 1E10f64;
+	let mut tmin = f64::INFINITY;
+	let mut omin = [0f64;3];
+	//unsigned imin = 0;
+	for elem in SPH.iter() {
+        let tres = Intersec( elem, o, v);
+        if (tres > 0f64) && (tres < tmin) {
+            tmin = tres;
+            omin = elem.color;
+        }
+    }
+    if tmin < TMAX {
+        omin = [0f64;3];
+    }
+    return omin;
 }
 
 fn main() {
