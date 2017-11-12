@@ -118,5 +118,4 @@ fn main() {
                      .expect("height missing or incorrect");
     let file_name = args.next().expect("require file output");
     render(w, h, file_name);
-    println!("Hello, world!");
 }
