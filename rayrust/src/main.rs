@@ -52,7 +52,7 @@ fn trace( o: &V3, v: &V3) -> [f64; 3] {
             omin = elem.color;
         }
     }
-    if tmin < TMAX {
+    if tmin > TMAX {
         omin = [0f64;3];
     }
     return omin;
