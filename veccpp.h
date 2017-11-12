@@ -5,9 +5,16 @@
 #include <vector>
 #include <iostream>
 
+#if 0
 template<int n> class vec;
 typedef vec<3> v3;
 template<int n> class vec {
+#else
+class vec;
+typedef vec v3;
+class vec {
+	static const int n = 3;
+#endif
 public:
 	vec( double d1 = 0, double d2 = 0, double d3 = 0) {
 		m_d[0] = d1;
@@ -121,7 +128,7 @@ public:
 		}
 		out << "]";
 	}
-	friend std::ostream& operator<<( std::ostream& out, const vec<n>& v) {
+	friend std::ostream& operator<<( std::ostream& out, const vec& v) {
 		for (unsigned ii = 0; ii < n; ii++) {
 			if (ii > 0)
 				out << " ";
