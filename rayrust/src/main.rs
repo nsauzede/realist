@@ -2,6 +2,7 @@ extern crate rayrust;
 use rayrust::{V3, solvetri, Sol};
 
 use std::f64;
+use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -105,5 +106,17 @@ fn render( w: u32, h: u32, fnameout: String) {
 
 
 fn main() {
+    let mut args = env::args();
+    args.next();
+    let w: u32 = args.next()
+                     .unwrap()
+                     .parse()
+                     .expect("width missing or incorrect");
+    let h: u32 = args.next()
+                     .unwrap()
+                     .parse()
+                     .expect("height missing or incorrect");
+    let file_name = args.next().expect("require file output");
+    render(w, h, file_name);
     println!("Hello, world!");
 }
