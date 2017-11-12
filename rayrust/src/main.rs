@@ -96,8 +96,8 @@ fn render( w: u32, h: u32, fnameout: String) {
             v = &v + &m_f;
             v.normalize();
             let color = trace( &m_e, &v);
-            let _ = write!(fout, "{} {} {}   ", 100 * (color[0] as u8),
-                100 * (color[1] as u8), 100 * (color[2] as u8));
+            let _ = write!(fout, "{:3.0} {:3.0} {:3.0}   ", 100.0 * color[0],
+                100.0 * color[1], 100.0 * color[2]);
         }
         let _ = write!(fout, "\n");
     }
