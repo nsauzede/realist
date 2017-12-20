@@ -87,6 +87,34 @@ public:
 		return m_color;
 	}
 	virtual v3 Color(const v3& pos) const {
+		if (!m_flags)
+			return m_color;
+		v3 p = pos - m_c;
+		double rh = !p;
+		double _ph = acos(p[2] / rh);
+		double _th = atan(p[1] / p[0]);
+		int ph = _ph * 180 / 3.1415;
+		int th = _th * 180 / 3.1415;
+		if (ph < 0)
+			ph += 360;
+		if (th < 0)
+			th += 360;
+//		printf( "ph=%f th=%f\n", ph, th);
+#define IY 2
+#define IX 2
+		v3 img[IY][IX] = {
+			{
+				{1, 0, 0},
+				{0, 0, 0},
+			},
+			{
+				{0, 0, 0},
+				{1, 0, 0},
+			},
+		};
+		return img[ph % IY][th % IX];
+	}
+	virtual v3 ColorCheckboard(const v3& pos) const {
 		v3 p = pos - m_c;
 		double rh = !p;
 		double ph = acos(p[2] / rh) * 180 / 3.1415;
