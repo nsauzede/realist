@@ -54,7 +54,18 @@ public:
 		}
 		return *this;
 	}
+	const vec& operator*=( const vec& r) {
+		for (unsigned ii = 0; ii < n; ii++) {
+			m_d[ii] *= r.m_d[ii];
+		}
+		return *this;
+	}
 	vec operator*( const double& r) const {
+		vec res = *this;
+		res *= r;
+		return res;
+	}
+	vec operator*( const vec& r) const {
 		vec res = *this;
 		res *= r;
 		return res;

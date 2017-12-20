@@ -27,6 +27,12 @@ public:
 	virtual const v3& Color() const {
 		return m_color;
 	}
+	virtual v3 Color(const v3& pos) const {
+		static v3 foo = pos;
+		foo *= 0;
+		foo += m_color;
+		return foo;
+	}
 	virtual v3& Center() {
 		return m_c;
 	}
@@ -70,11 +76,39 @@ public:
 		CObject( OT_SPHERE, MAX),
 		m_r( params[RADIUS]) {
 		m_c = &params[CENTER];
+		m_flags = params[FLAGS];
 		SetColor( &params[COLOR]);
 //		std::cout << *this << std::endl;
 	}
 	const double& Radius() const {
 		return m_r;
+	}
+	virtual const v3& Color() const {
+		return m_color;
+	}
+	virtual v3 Color(const v3& pos) const {
+		v3 p = pos - m_c;
+		double rh = !p;
+		double ph = acos(p[2] / rh) * 180 / 3.1415;
+		double th = atan(p[1] / p[0]) * 180 / 3.1415;
+		if (ph < 0)
+			ph += 360;
+		if (th < 0)
+			th += 360;
+//		printf( "ph=%f th=%f\n", ph, th);
+		v3 color = {0, 0, 0};
+#define L 60
+		int yy = ((int)ph % L) < (L/2);
+		int yx = ((int)th % L) < (L/2);
+//		if ((((int)ph % L) < (L/2)) 		&& (((int)th % L) < (L/2))		)
+		if ((yy && !yx) || (!yy && yx))
+			return m_color;
+		else
+			return color;
+//		if (!m_flags)
+//			return m_color + pos;
+//		else
+//			return m_color;
 	}
 	std::ostream& Serialize( std::ostream& out) const {
 		CObject::Serialize( out);
@@ -451,13 +485,16 @@ public:
 #else
 			energy += 1.0;
 #endif
-			// intersected object color
-			color = omin->Color() * 1.0;
 #if defined USE_FLASH || defined USE_REFL || defined USE_LAMP
 			// coords of intersec
 			vint = o + v * tmin;
 			// normal at intersec
 			nv = ~omin->Normal( vint);
+			// intersected object color
+			color = omin->Color(vint) * 1.0;
+#else
+			// intersected object color
+			color = omin->Color() * 1.0;
 #endif
 #ifdef USE_FLASH
 			// camera flash
