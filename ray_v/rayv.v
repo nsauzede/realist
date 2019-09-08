@@ -132,12 +132,7 @@ fn render(w, h int, fnameout string) {
                         rr := int(f64(100.) * rgb.r)
                         gg := int(f64(100.) * rgb.g)
                         bb := int(f64(100.) * rgb.b)
-                        if rr < 10 {picturestring.write(init_space)} // FIXME : impl formatting width ?
-                        picturestring.write('$rr ')
-                        if gg < 10 {picturestring.write(init_space)}
-                        picturestring.write('$gg ')
-                        if bb < 10 {picturestring.write(init_space)}
-                        picturestring.write('$bb   ')
+                        picturestring.write('${rr:2d} ${gg:2d} ${bb:2d}   ')
                 }
                 picturestring.writeln('')
         }
