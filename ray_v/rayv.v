@@ -27,9 +27,9 @@ mut:
 }
 
 const (
-  math_MaxFloat64 = 9999999999999999999.
+  HUGE_VAL = f64(C.HUGE_VAL)
   init_t12 = [f64(0.); 2]
-  init_omin = [f64(0.); 7]
+  init_omin = [f64(0.); 7]       // WARNING : needs to be big enough for any obj
   init_space = ' '
   black_color = RgbColor{ f64(0.), f64(0.), f64(0.) }
 )
@@ -50,7 +50,7 @@ fn solve_tri(a, b, c f64, t mut []f64) int {
 }
 
 fn intersec(s &f64, o, v vec.Vector) f64 {
-        mut t := f64(0.)
+        mut t := HUGE_VAL
         center := vec.Vector{s[0], s[1], s[2]}
         rad := s[3]
         vt := o.sub(center)
@@ -67,17 +67,13 @@ fn intersec(s &f64, o, v vec.Vector) f64 {
                 }
         } else if sol == 1 {
                 t = t12[0]
-        } else {
-//                t = math.MaxFloat64
-                t = math_MaxFloat64
         }
         return t
 }
 
 fn trace(scene &Scene, o, v vec.Vector) RgbColor {
-//        tmin := math.MaxFloat64
-        mut tmin := math_MaxFloat64
-        mut omin := init_omin       // FIXME : needs to be big enough for any obj
+        mut tmin := HUGE_VAL
+        mut omin := init_omin
         for s in scene.objects {
                 t := intersec(s.points.data, o, v)
                 if t > 0 && t < tmin {
@@ -85,7 +81,7 @@ fn trace(scene &Scene, o, v vec.Vector) RgbColor {
                         omin = s.points
                 }
         }
-        if tmin < math_MaxFloat64 {
+        if tmin < HUGE_VAL {
                 return RgbColor{ omin[4], omin[5], omin[6] }
         }
         return black_color
