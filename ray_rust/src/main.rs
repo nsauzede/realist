@@ -41,7 +41,6 @@ fn intersec( sph1: &Sphere,  o: &V3,  v: &V3) -> f64 {
 }
 
 fn trace( o: &V3, v: &V3) -> [f64; 3] {
-    const TMAX:f64 = 1E10f64;
     let mut tmin = f64::INFINITY;
     let mut omin = [0f64;3];
     //unsigned imin = 0;
@@ -52,7 +51,7 @@ fn trace( o: &V3, v: &V3) -> [f64; 3] {
             omin = elem.color;
         }
     }
-    if tmin > TMAX {
+    if tmin < f64::INFINITY {
         omin = [0f64;3];
     }
     return omin;

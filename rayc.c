@@ -53,7 +53,6 @@ double Intersec( double *sph, const v3 o, const v3 v) {
 }
 
 void Trace( const v3 o, const v3 v, v3 color) {
-#define TMAX 1E10
 	double tmin = HUGE_VAL;
 	double *omin = NULL;
 //	unsigned imin = 0;
@@ -65,7 +64,7 @@ void Trace( const v3 o, const v3 v, v3 color) {
 //			imin = ii;
 		}
 	}
-	if (tmin < TMAX) {
+	if (tmin < HUGE_VAL) {
 //		printf( "[HIT %u]", imin);
 		// intersected object color
 		vcopy( color, omin);

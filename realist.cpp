@@ -495,7 +495,6 @@ public:
 	void Trace( int depth, const v3 &o, const v3 &v, v3 &color) const {
 		if (depth > MAX_DEPTH)
 			return;
-#define TMAX 1E10
 		double tmin = HUGE_VAL;
 		CObject *omin = 0;
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
@@ -507,7 +506,7 @@ public:
 		}
 		double def_color = 0;
 		color *= def_color;
-		if (tmin < TMAX) {
+		if (tmin < HUGE_VAL) {
 			double energy = 0;
 			// ambient
 #if defined USE_FLASH || defined USE_REFL || defined USE_LAMP
