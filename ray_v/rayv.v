@@ -11,11 +11,27 @@ import (
         strings
 )
 
+struct RgbColor{
+	r f64
+	g f64
+	b f64
+}
+
+struct Thing {
+	points []f64
+}
+
+struct Scene {
+mut:
+	objects []Thing
+}
+
 const (
-  init_rgb = [f64(0.), f64(0.), f64(0.)]
+  math_MaxFloat64 = 9999999999999999999.
   init_t12 = [f64(0.); 2]
   init_omin = [f64(0.); 7]
   init_space = ' '
+  black_color = RgbColor{ f64(0.), f64(0.), f64(0.) }
 )
 
 fn solve_tri(a, b, c f64, t mut []f64) int {
@@ -32,10 +48,6 @@ fn solve_tri(a, b, c f64, t mut []f64) int {
         }
         return sol
 }
-
-const (
-        math_MaxFloat64 = 9999999999999999999.
-)
 
 fn intersec(s &f64, o, v vec.Vector) f64 {
         mut t := f64(0.)
@@ -62,24 +74,22 @@ fn intersec(s &f64, o, v vec.Vector) f64 {
         return t
 }
 
-fn trace(sphs [][]f64, o, v vec.Vector, rgb mut []f64) {
+fn trace(scene &Scene, o, v vec.Vector) RgbColor {
 //        tmin := math.MaxFloat64
         mut tmin := math_MaxFloat64
         mut omin := init_omin       // FIXME : needs to be big enough for any obj
-        for s in sphs {
-                t := intersec(s.data, o, v)
+        for s in scene.objects {
+                t := intersec(s.points.data, o, v)
                 if t > 0 && t < tmin {
                         tmin = t
-                        omin = s
+                        omin = s.points
                 }
         }
         if tmin < math_MaxFloat64 {
-                rgb[0] = omin[4]
-                rgb[1] = omin[5]
-                rgb[2] = omin[6]
+                return RgbColor{ omin[4], omin[5], omin[6] }
         }
+        return black_color
 }
-
 
 fn render(w, h int, fnameout string) {
         ratiox := 1.
@@ -89,16 +99,17 @@ fn render(w, h int, fnameout string) {
         e := vec.Vector{0.4, 0, 0.4}
         mut f := vec.Vector{-1, 0, -1}
         mut u := vec.Vector{-0.707107, 0, 0.707107}
-        mut sphs := [[]f64; 0]
-        sphs << [f64(0), -0.1, 0, 0.05, 0.8, 0.8, 0.8]
-        sphs << [f64(0), 0, 0, 0.05,   0.8, 0.8, 0.8]
-        sphs << [f64(0), 0.1, 0,   0.05,   0.8, 0.8, 0.8]
-        sphs << [f64(0.1), -0.05, 0,   0.05,   0.8, 0, 0]
-        sphs << [f64(0.1), 0.05, 0,    0.05,   0, 0, 0.8]
-        sphs << [f64(0.2), 0, 0,   0.05,   0, 0.8, 0]
-        sphs << [f64(0.05), -0.05, 0.1,    0.05,   0.8, 0.8, 0.8]
-        sphs << [f64(0.05), 0.05, 0.1, 0.05,   0.8, 0.8, 0.8]
-        sphs << [f64(0), -0.5, 0.5,    0.02,   1, 1, 0]
+
+        mut scene := Scene{}
+        scene.objects << Thing{ [f64(0), -0.1, 0, 0.05, 0.8, 0.8, 0.8] }
+        scene.objects << Thing{ [f64(0), 0, 0, 0.05,   0.8, 0.8, 0.8] }
+        scene.objects << Thing{ [f64(0), 0.1, 0,   0.05,   0.8, 0.8, 0.8] }
+        scene.objects << Thing{ [f64(0.1), -0.05, 0,   0.05,   0.8, 0, 0] }
+        scene.objects << Thing{ [f64(0.1), 0.05, 0,    0.05,   0, 0, 0.8] }
+        scene.objects << Thing{ [f64(0.2), 0, 0,   0.05,   0, 0.8, 0] }
+        scene.objects << Thing{ [f64(0.05), -0.05, 0.1,    0.05,   0.8, 0.8, 0.8] }
+        scene.objects << Thing{ [f64(0.05), 0.05, 0.1, 0.05,   0.8, 0.8, 0.8] }
+        scene.objects << Thing{ [f64(0), -0.5, 0.5,    0.02,   1, 1, 0] }
 
         u.normalize()
         mut r := f.cross(u)
@@ -117,11 +128,10 @@ fn render(w, h int, fnameout string) {
                         vr := r.mult((f64(i) - f64(w) / 2) / f64(w) * ww)
                         mut v := f.add(vu.add( vr))
                         v.normalize()
-                        mut rgb := init_rgb
-                        trace(sphs, e, v, mut rgb)
-                        rr := int(f64(100.) * rgb[0])
-                        gg := int(f64(100.) * rgb[1])
-                        bb := int(f64(100.) * rgb[2])
+                        rgb := trace(scene, e, v)
+                        rr := int(f64(100.) * rgb.r)
+                        gg := int(f64(100.) * rgb.g)
+                        bb := int(f64(100.) * rgb.b)
                         if rr < 10 {picturestring.write(init_space)} // FIXME : impl formatting width ?
                         picturestring.write('$rr ')
                         if gg < 10 {picturestring.write(init_space)}
@@ -131,7 +141,13 @@ fn render(w, h int, fnameout string) {
                 }
                 picturestring.writeln('')
         }
-        print( picturestring.str() )
+        
+        if fnameout == '' {
+                print( picturestring.str() )
+        }else{
+                os.write_file( fnameout, picturestring.str() )
+        }
+        
         picturestring.free()
 }
 
