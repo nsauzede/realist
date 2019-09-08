@@ -115,10 +115,10 @@ bench: rayc rayv raygo
 
 clean:
 	@$(RM) $(TARGET)
-	@$(RM) *_v.c
 
 clobber: clean
 	@$(RM) *~
+	@$(RM) *_v.c
 	@$(RM) *.ppm
 
 mrproper: clobber
