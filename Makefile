@@ -97,8 +97,9 @@ v/v:
 	git clone https://github.com/vlang/v
 	(cd $(@D) ; $(MAKE) ; cd -)
 
+#VFLAGS:=-show_c_cmd
 rayv_v.c: $(V)
-	cd ray_v ; ../$(V) -debug -show_c_cmd -o ../$@ . ; cd ..
+	cd ray_v ; ../$(V) -debug $(VFLAGS) -o ../$@ . ; cd ..
 
 rayv: rayv_v.c
 	$(CC) $(CFLAGS)  $(LDFLAGS) $^ -lm -o $@ -w
@@ -112,6 +113,7 @@ bench: rayc rayv raygo
 
 clean:
 	@$(RM) $(TARGET)
+	@$(RM) *_v.c
 
 clobber: clean
 	@$(RM) *~
