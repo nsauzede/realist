@@ -1,3 +1,7 @@
+/*
+ * Copyright(c) 2016-2019 Nicolas Sauzede (nsauzede@laposte.net)
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 package vec
 
 import (

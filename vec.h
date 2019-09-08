@@ -1,3 +1,7 @@
+/*
+ * Copyright(c) 2016-2019 Nicolas Sauzede (nsauzede@laposte.net)
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include <math.h>
 
 int solvetri( const double a, const double b, const double c, double *t1, double *t2) {
