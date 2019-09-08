@@ -102,7 +102,7 @@ fn render(w, h int, fnameout string) {
         u.normalize()
         r.normalize()
 
-        mut picturestring := strings.new_builder(20*1000*1000)
+        mut picturestring := strings.new_builder(1024)
         picturestring.writeln('P3')
         picturestring.writeln('$w $h')
         picturestring.writeln('100')
