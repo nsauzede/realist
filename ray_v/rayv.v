@@ -4,6 +4,13 @@ import (
         vec
         os
         math
+        strings
+)
+
+const (
+  init_rgb = [f64(0.), f64(0.), f64(0.)]
+  init_t12 = [f64(0.); 2]
+  init_omin = [f64(0.); 7]
 )
 
 fn solve_tri(a, b, c f64, t mut []f64) int {
@@ -25,7 +32,7 @@ const (
         math_MaxFloat64 = 9999999999999999999.
 )
 
-fn intersec(s []f64, o, v vec.Vector) f64 {
+fn intersec(s &f64, o, v vec.Vector) f64 {
         mut t := f64(0.)
         center := vec.Vector{s[0], s[1], s[2]}
         rad := s[3]
@@ -33,7 +40,7 @@ fn intersec(s []f64, o, v vec.Vector) f64 {
         a := v.dot(v)
         b := 2. * v.dot(vt)
         c := vt.dot(vt) - rad * rad
-        mut t12 := [f64(0.); 2]
+        mut t12 := init_t12
         sol := solve_tri(a, b, c, mut t12)
         if sol == 2 {
                 if t12[0] < t12[1] {
@@ -53,9 +60,9 @@ fn intersec(s []f64, o, v vec.Vector) f64 {
 fn trace(sphs [][]f64, o, v vec.Vector, rgb mut []f64) {
 //        tmin := math.MaxFloat64
         mut tmin := math_MaxFloat64
-        mut omin := [f64(0.); 7]        // FIXME : needs to be big enough for any obj
+        mut omin := init_omin       // FIXME : needs to be big enough for any obj
         for s in sphs {
-                t := intersec(s, o, v)
+                t := intersec(s.data, o, v)
                 if t > 0 && t < tmin {
                         tmin = t
                         omin = s
@@ -67,6 +74,7 @@ fn trace(sphs [][]f64, o, v vec.Vector, rgb mut []f64) {
                 rgb[2] = omin[6]
         }
 }
+
 
 fn render(w, h int, fnameout string) {
         ratiox := 1.
@@ -93,9 +101,10 @@ fn render(w, h int, fnameout string) {
         u.normalize()
         r.normalize()
 
-        println('P3')
-        println('$w $h')
-        println(100)
+        mut picturestring := strings.new_builder(20*1000*1000)
+        picturestring.writeln('P3')
+        picturestring.writeln('$w $h')
+        picturestring.writeln('100')
         for j := 0; j < h; j++ {
                 vu := u.mult((f64(h) - f64(j) - 1 - f64(h) / 2) / f64(h) * hh)
 
@@ -103,20 +112,21 @@ fn render(w, h int, fnameout string) {
                         vr := r.mult((f64(i) - f64(w) / 2) / f64(w) * ww)
                         mut v := f.add(vu.add( vr))
                         v.normalize()
-                        mut rgb := [f64(0.), f64(0.), f64(0.)]
+                        mut rgb := init_rgb
                         trace(sphs, e, v, mut rgb)
                         rr := int(f64(100.) * rgb[0])
                         gg := int(f64(100.) * rgb[1])
                         bb := int(f64(100.) * rgb[2])
-                        if rr < 10 {print(' ')} // FIXME : impl formatting width ?
-                        print('$rr ')
-                        if gg < 10 {print(' ')}
-                        print('$gg ')
-                        if bb < 10 {print(' ')}
-                        print('$bb   ')
+                        if rr < 10 {picturestring.write(' ')} // FIXME : impl formatting width ?
+                        picturestring.write('$rr ')
+                        if gg < 10 {picturestring.write(' ')}
+                        picturestring.write('$gg ')
+                        if bb < 10 {picturestring.write(' ')}
+                        picturestring.write('$bb   ')
                 }
-                println('')
+                picturestring.writeln('')
         }
+        print( picturestring.str() )
 }
 
 fn main() {
