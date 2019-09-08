@@ -28,6 +28,7 @@ mut:
 
 const (
   HUGE_VAL = f64(C.HUGE_VAL)
+  math_MaxFloat64 = 1.797693134862315708145274237317043567981e+308
   init_t12 = [f64(0.); 2]
   init_omin = [f64(0.); 7]       // WARNING : needs to be big enough for any obj
   init_space = ' '
@@ -36,7 +37,7 @@ const (
 
 fn solve_tri(a, b, c f64, t mut []f64) int {
         mut sol := 0
-        d := b * b - 4. * a * c
+        d := b * b - f64(4.) * a * c
         if d > 0 {
                 sd := math.sqrt(d)
                 t[0] = (-b - sd) / 2 / a
@@ -55,7 +56,7 @@ fn intersec(s &f64, o, v vec.Vector) f64 {
         rad := s[3]
         vt := o.sub(center)
         a := v.dot(v)
-        b := 2. * v.dot(vt)
+        b := f64(2.) * v.dot(vt)
         c := vt.dot(vt) - rad * rad
         mut t12 := init_t12
         sol := solve_tri(a, b, c, mut t12)
@@ -88,24 +89,24 @@ fn trace(scene &Scene, o, v vec.Vector) RgbColor {
 }
 
 fn render(w, h int, fnameout string) {
-        ratiox := 1.
-        ratioy := 1.
-        ww := 1. * ratiox
+        ratiox := f64(1.)
+        ratioy := f64(1.)
+        ww := ratiox
         hh := ww * f64(h) / f64(w) * ratioy
-        e := vec.Vector{0.4, 0, 0.4}
-        mut f := vec.Vector{-1, 0, -1}
-        mut u := vec.Vector{-0.707107, 0, 0.707107}
+        e := vec.Vector{f64(0.4), f64(0), f64(0.4)}
+        mut f := vec.Vector{f64(-1), f64(0), f64(-1)}
+        mut u := vec.Vector{f64(-0.707107), f64(0), f64(0.707107)}
 
         mut scene := Scene{}
-        scene.objects << Thing{ [f64(0), -0.1, 0, 0.05, 0.8, 0.8, 0.8] }
-        scene.objects << Thing{ [f64(0), 0, 0, 0.05,   0.8, 0.8, 0.8] }
-        scene.objects << Thing{ [f64(0), 0.1, 0,   0.05,   0.8, 0.8, 0.8] }
-        scene.objects << Thing{ [f64(0.1), -0.05, 0,   0.05,   0.8, 0, 0] }
-        scene.objects << Thing{ [f64(0.1), 0.05, 0,    0.05,   0, 0, 0.8] }
-        scene.objects << Thing{ [f64(0.2), 0, 0,   0.05,   0, 0.8, 0] }
-        scene.objects << Thing{ [f64(0.05), -0.05, 0.1,    0.05,   0.8, 0.8, 0.8] }
-        scene.objects << Thing{ [f64(0.05), 0.05, 0.1, 0.05,   0.8, 0.8, 0.8] }
-        scene.objects << Thing{ [f64(0), -0.5, 0.5,    0.02,   1, 1, 0] }
+        scene.objects << Thing{ [f64(0),    f64(-0.1),  f64(0),   f64(0.05), f64(0.8), f64(0.8), f64(0.8) ] }
+        scene.objects << Thing{ [f64(0),    f64(0),     f64(0),   f64(0.05), f64(0.8), f64(0.8), f64(0.8) ] }
+        scene.objects << Thing{ [f64(0),    f64(0.1),   f64(0),   f64(0.05), f64(0.8), f64(0.8), f64(0.8) ] }
+        scene.objects << Thing{ [f64(0.1),  f64(-0.05), f64(0),   f64(0.05), f64(0.8), f64(0),   f64(0)   ] }
+        scene.objects << Thing{ [f64(0.1),  f64(0.05),  f64(0),   f64(0.05), f64(0),   f64(0),   f64(0.8) ] }
+        scene.objects << Thing{ [f64(0.2),  f64(0),     f64(0),   f64(0.05), f64(0),   f64(0.8), f64(0)   ] }
+        scene.objects << Thing{ [f64(0.05), f64(-0.05), f64(0.1), f64(0.05), f64(0.8), f64(0.8), f64(0.8) ] }
+        scene.objects << Thing{ [f64(0.05), f64(0.05),  f64(0.1), f64(0.05), f64(0.8), f64(0.8), f64(0.8) ] }
+        scene.objects << Thing{ [f64(0),    f64(-0.5),  f64(0.5), f64(0.02), f64(1),   f64(1),   f64(0)   ] }
 
         u.normalize()
         mut r := f.cross(u)
