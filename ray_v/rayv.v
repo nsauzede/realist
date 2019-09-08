@@ -128,6 +128,7 @@ fn render(w, h int, fnameout string) {
                 picturestring.writeln('')
         }
         print( picturestring.str() )
+        picturestring.free()
 }
 
 fn main() {
