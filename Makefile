@@ -8,7 +8,12 @@ HAVE_GO=1
 endif
 
 ifdef HAVE_GO
-TARGET+=raygo.exe
+TARGET+=raygo
+endif
+
+HAVE_V:=1
+ifdef HAVE_V
+TARGET+=rayv
 endif
 
 CFLAGS=-Wall -Werror
@@ -83,13 +88,30 @@ SDL_LDLIBS+=$(SDL_LIBS)
 realist: CXXFLAGS+=$(SDL_CXXFLAGS)
 realist: LDLIBS+=$(SDL_LDLIBS)
 
-raygo.exe:
-	GOPATH=$(shell pwd)/go $(GO) build -o $@ go/raygo.go
+raygo:
+	GOPATH=$(shell pwd)/ray_go $(GO) build -o $@ ray_go/raygo.go
+
+V:=v/v
+v/v:
+	git clone https://github.com/vlang/v
+	(cd $(@D) ; $(MAKE) ; cd -)
+
+rayv: $(V)
+	cd ray_v ; ../$(V) -o ../$@ . ; cd ..
 
 realist: realist.cpp vec.h CSDL.h
+
+bench: rayc raygo rayv
+	/usr/bin/time ./rayc 1000 1000 > rayc.ppm
+	/usr/bin/time ./raygo 1000 1000 > raygo.ppm
+	/usr/bin/time ./rayv 1000 1000 > rayv.ppm
 
 clean:
 	$(RM) $(TARGET)
 
 clobber: clean
 	$(RM) *~
+	$(RM) *.ppm
+
+mrproper: clobber
+	$(RM) -Rf v
