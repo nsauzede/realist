@@ -11,6 +11,7 @@ const (
   init_rgb = [f64(0.), f64(0.), f64(0.)]
   init_t12 = [f64(0.); 2]
   init_omin = [f64(0.); 7]
+  init_space = ' '
 )
 
 fn solve_tri(a, b, c f64, t mut []f64) int {
@@ -117,11 +118,11 @@ fn render(w, h int, fnameout string) {
                         rr := int(f64(100.) * rgb[0])
                         gg := int(f64(100.) * rgb[1])
                         bb := int(f64(100.) * rgb[2])
-                        if rr < 10 {picturestring.write(' ')} // FIXME : impl formatting width ?
+                        if rr < 10 {picturestring.write(init_space)} // FIXME : impl formatting width ?
                         picturestring.write('$rr ')
-                        if gg < 10 {picturestring.write(' ')}
+                        if gg < 10 {picturestring.write(init_space)}
                         picturestring.write('$gg ')
-                        if bb < 10 {picturestring.write(' ')}
+                        if bb < 10 {picturestring.write(init_space)}
                         picturestring.write('$bb   ')
                 }
                 picturestring.writeln('')
