@@ -106,10 +106,12 @@ rayv: rayv_v.c
 
 realist: realist.cpp vec.h CSDL.h
 
+BENCH_SIZE:=1000
+BENCH_ARGS:=$(BENCH_SIZE) $(BENCH_SIZE)
 bench: rayc rayv raygo
-	/usr/bin/time ./rayc 1000 1000 > rayc.ppm
-	/usr/bin/time ./rayv 1000 1000 > rayv.ppm
-	/usr/bin/time ./raygo 1000 1000 > raygo.ppm
+	/usr/bin/time ./rayc $(BENCH_ARGS) > rayc.ppm
+	/usr/bin/time ./rayv $(BENCH_ARGS) > rayv.ppm
+	/usr/bin/time ./raygo $(BENCH_ARGS) > raygo.ppm
 
 clean:
 	@$(RM) $(TARGET)
