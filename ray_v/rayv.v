@@ -29,8 +29,8 @@ mut:
 const (
   HUGE_VAL = f64(C.HUGE_VAL)
   math_MaxFloat64 = 1.797693134862315708145274237317043567981e+308
-  init_t12 = [f64(0.); 2]
-  init_omin = [f64(0.); 7]       // WARNING : needs to be big enough for any obj
+  init_t12 = [f64(0.)].repeat(2)
+  init_omin = [f64(0.)].repeat(7)	// WARNING : needs to be big enough for any obj
   init_space = ' '
   black_color = RgbColor{ f64(0.), f64(0.), f64(0.) }
 )
