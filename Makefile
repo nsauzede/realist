@@ -112,6 +112,7 @@ bench: rayc rayv raygo
 	/usr/bin/time ./rayc $(BENCH_ARGS) > rayc.ppm && md5sum rayc.ppm
 	/usr/bin/time ./rayv $(BENCH_ARGS) > rayv.ppm && md5sum rayv.ppm
 	/usr/bin/time ./raygo $(BENCH_ARGS) > raygo.ppm && md5sum raygo.ppm
+	/usr/bin/time ./raypy.py $(BENCH_ARGS) > raypy.ppm && md5sum raypy.ppm
 
 clean:
 	@$(RM) $(TARGET)

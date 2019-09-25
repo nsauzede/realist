@@ -7,38 +7,39 @@ import math
 import numpy.matlib as np
 import sys
 
-fin=open(sys.argv[1],"r")
-try:
-	json=eval(fin.read())
-finally:
-	fin.close()
-screen=json['screen']
-camera=json['camera']
-objects=json['objects']
-
+w=10
+h=10
 fnameout=""
-w=screen['w']
-h=screen['h']
-ratiox=screen['ratiox']
-ratioy=screen['ratioy']
-if len(sys.argv) > 2:
-	w=int(sys.argv[2])
-if len(sys.argv) > 3:
-	h=int(sys.argv[3])
-if len(sys.argv) > 4:
-	fnameout=sys.argv[4]
-if len(sys.argv) > 5:
-	ratiox=float(sys.argv[5])
-if len(sys.argv) > 6:
-	ratioy=float(sys.argv[6])
+ratiox=1.
+ratioy=1.
 ww=1.*ratiox
 hh=ww*h/w*ratioy
-e=np.array(camera['loc'],dtype=float)
-f=np.array(camera['front'],dtype=float)
-u=np.array(camera['up'],dtype=float)
+
+if len(sys.argv) > 1:
+	w=int(sys.argv[1])
+if len(sys.argv) > 2:
+	h=int(sys.argv[2])
+if len(sys.argv) > 3:
+	fnameout=sys.argv[3]
+if len(sys.argv) > 4:
+	ratiox=float(sys.argv[4])
+if len(sys.argv) > 5:
+	ratioy=float(sys.argv[5])
+
 sphs=[]
-for sph in objects:
-	sphs += [np.array(sph['data'],dtype=float)]
+sphs += [np.array([0, -0.1, 0,0.05,0.8, 0.8, 0.8],dtype=float)]
+sphs += [np.array([0, 0, 0,0.05,0.8, 0.8, 0.8],dtype=float)]
+sphs += [np.array([0, 0.1, 0,0.05,0.8, 0.8, 0.8],dtype=float)]
+sphs += [np.array([0.1, -0.05, 0,0.05,0.8, 0, 0],dtype=float)]
+sphs += [np.array([0.1, 0.05, 0,0.05,0, 0, 0.8],dtype=float)]
+sphs += [np.array([0.2, 0, 0,0.05,0, 0.8, 0],dtype=float)]
+sphs += [np.array([0.05, -0.05, 0.1,0.05,0.8, 0.8, 0.8],dtype=float)]
+sphs += [np.array([0.05, 0.05, 0.1,0.05,0.8, 0.8, 0.8],dtype=float)]
+sphs += [np.array([0, -0.5, 0.5,0.02,1, 1, 0],dtype=float)]
+
+e=np.array([0.4,0,0.4],dtype=float)
+f=np.array([-1,0,-1],dtype=float)
+u=np.array([-0.707107,0,0.707107],dtype=float)
 u/=np.linalg.norm(u)
 r=np.cross(f,u)
 u=np.cross(r,f)
