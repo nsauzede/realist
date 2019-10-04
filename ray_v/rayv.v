@@ -114,10 +114,10 @@ fn render(w, h int, fnameout string) {
         u.normalize()
         r.normalize()
 
-        mut picturestring := strings.new_builder(1024)
-        picturestring.writeln('P3')
-        picturestring.writeln('$w $h')
-        picturestring.writeln('100')
+        mut picture_string := strings.new_builder(1024)
+        picture_string.writeln('P3')
+        picture_string.writeln('$w $h')
+        picture_string.writeln('100')
         for j := 0; j < h; j++ {
                 vu := u.mult((f64(h) - f64(j) - 1 - f64(h) / 2) / f64(h) * hh)
 
@@ -129,18 +129,18 @@ fn render(w, h int, fnameout string) {
                         rr := int(f64(100.) * rgb.r)
                         gg := int(f64(100.) * rgb.g)
                         bb := int(f64(100.) * rgb.b)
-                        picturestring.write('${rr:2d} ${gg:2d} ${bb:2d}   ')
+                        picture_string.write('${rr:2d} ${gg:2d} ${bb:2d}   ')
                 }
-                picturestring.writeln('')
+                picture_string.writeln('')
         }
         
         if fnameout == '' {
-                print( picturestring.str() )
+                print( picture_string.str() )
         }else{
-                os.write_file( fnameout, picturestring.str() )
+                os.write_file( fnameout, picture_string.str() )
         }
         
-        picturestring.free()
+        picture_string.free()
 }
 
 fn main() {
