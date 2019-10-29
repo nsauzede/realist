@@ -478,7 +478,8 @@ public:
 #define LAMP_RAD 0.02
 #define LAMP_COL 1.0
 			1.0 * LAMP_COL, 1.0 * LAMP_COL, 0.0 * LAMP_COL,
-			0.0 * LAMP_DIST, -1.0 * LAMP_DIST, 1.0 * LAMP_DIST,
+//			0.0 * LAMP_DIST, -1.0 * LAMP_DIST, 1.0 * LAMP_DIST,
+			0.200000,0.100000,0.500000,
 			LAMP_RAD,
 		};
 		CSphere *lamp = new CLamp( slamp);
@@ -546,6 +547,66 @@ public:
 					continue;
 				v3 plamp = m_lamps.at( jj)->Center();
 				v3 vlamp = plamp - vint;
+//				vprint("plamp", plamp);
+//				vprint("vlamp", vlamp);
+//				vprint("poslamp", plamp + vlamp);
+				v3 poslamp = plamp + vlamp;
+				static double posxlampmin = 10000;
+				static double posxlampmax = -10000;
+				if (poslamp[0] < posxlampmin) posxlampmin = poslamp[0];
+				if (poslamp[0] > posxlampmax) posxlampmax = poslamp[0];
+//				printf("posxlampmin=%f posxlampmax=%f\n", posxlampmin, posxlampmax);
+				static double posylampmin = 10000;
+				static double posylampmax = -10000;
+				if (poslamp[1] < posylampmin) posylampmin = poslamp[1];
+				if (poslamp[1] > posylampmax) posylampmax = poslamp[1];
+//				printf("posylampmin=%f posylampmax=%f\n", posylampmin, posylampmax);
+				static double poszlampmin = 10000;
+				static double poszlampmax = -10000;
+				if (poslamp[2] < poszlampmin) poszlampmin = poslamp[2];
+				if (poslamp[2] > poszlampmax) poszlampmax = poslamp[2];
+//				printf("poszlampmin=%f poszlampmax=%f\n", poszlampmin, poszlampmax);
+				// test if lamp intersection is in the aperture
+#if 1
+/*
+posxlampmin= -0.445822 posxlampmax= 0.396050
+posylampmin= -1.366719 posylampmax= -0.694907
+poszlampmin= 0.700000 poszlampmax= 1.046431
+*/
+#if 0
+#define POSXLAMPMIN -0.445822
+#define POSXLAMPMAX 0.396050
+#define POSYLAMPMIN -1.366719
+#define POSYLAMPMAX -0.694907
+#define POSZLAMPMIN 0.700000
+#define POSZLAMPMAX 1.046431
+#else
+#define POSXLAMPMIN posxlampmin
+#define POSXLAMPMAX posxlampmax
+#define POSYLAMPMIN posylampmin
+#define POSYLAMPMAX posylampmax
+#define POSZLAMPMIN poszlampmin
+#define POSZLAMPMAX poszlampmax
+#endif
+//#define POSDELT 0*10.01
+#define POSXDELT ((POSXLAMPMAX - POSXLAMPMIN) / 2.8)
+#define POSYDELT ((POSYLAMPMAX - POSYLAMPMIN) / 112.9)
+#define POSZDELT ((POSZLAMPMAX - POSZLAMPMIN) / 114.8)
+#define POSXMIN (POSXLAMPMIN + POSXDELT)
+#define POSXMAX (POSXLAMPMAX - POSXDELT)
+#define POSYMIN (POSYLAMPMIN + POSXDELT)
+#define POSYMAX (POSYLAMPMAX - POSXDELT)
+#define POSZMIN (POSZLAMPMIN + POSZDELT)
+#define POSZMAX (POSZLAMPMAX - POSZDELT)
+				if (!(
+				(poslamp[0] > POSXMIN) && (poslamp[0] < POSXMAX) &&
+				(poslamp[1] > POSYMIN) && (poslamp[1] < POSYMAX) &&
+				(poslamp[2] > POSZMIN) && (poslamp[2] < POSZMAX)
+				)) {
+					continue;
+				}
+#else
+#endif
 				// is normal dot vlamp <= 0 (surface not exposed to light)
 				if ((vlamp % nv) <= 0)
 					continue;
@@ -775,9 +836,10 @@ public:
 					if (quit)
 						break;
 					if (modif) {
-						if (!ctrl && !shift)
+						if (!ctrl && !shift) {
 							m_lamps.at( 0)->Center() += rv;
-						else {
+							vprint("lamp", m_lamps.at( 0)->Center());
+						} else {
 							if (ctrl) {
 								double phi = 3.14159265 * 10.0 / 180.0;
 								v3 u;

@@ -107,12 +107,19 @@ rayv: rayv_v.c
 realist: realist.cpp vec.h CSDL.h
 
 BENCH_SIZE:=1000
-BENCH_ARGS:=$(BENCH_SIZE) $(BENCH_SIZE)
+BENCH_ARGS=$(BENCH_SIZE) $(BENCH_SIZE)
 bench: rayc rayv raygo
 	/usr/bin/time ./rayc $(BENCH_ARGS) > rayc.ppm && md5sum rayc.ppm
 	/usr/bin/time ./rayv $(BENCH_ARGS) > rayv.ppm && md5sum rayv.ppm
 	/usr/bin/time ./raygo $(BENCH_ARGS) > raygo.ppm && md5sum raygo.ppm
+
+benchpy: bench
 	/usr/bin/time ./raypy.py $(BENCH_ARGS) > raypy.ppm && md5sum raypy.ppm
+
+vgcheck: BENCH_SIZE=100
+vgcheck: rayc rayv
+	valgrind ./rayc $(BENCH_ARGS) rayc.ppm
+	valgrind ./rayv $(BENCH_ARGS) rayv.ppm
 
 clean:
 	@$(RM) $(TARGET)
