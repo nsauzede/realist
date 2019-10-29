@@ -6,7 +6,7 @@ module vec
 
 import math
 
-struct Vector {
+pub struct Vector {
 
         x f64
         y f64
