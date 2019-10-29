@@ -117,9 +117,10 @@ benchpy: bench
 	/usr/bin/time ./raypy.py $(BENCH_ARGS) > raypy.ppm && md5sum raypy.ppm
 
 vgcheck: BENCH_SIZE=100
+VGOPTS:=--leak-check=full
 vgcheck: rayc rayv
-	valgrind ./rayc $(BENCH_ARGS) rayc.ppm
-	valgrind ./rayv $(BENCH_ARGS) rayv.ppm
+	valgrind $(VGOPTS) ./rayc $(BENCH_ARGS) rayc.ppm
+	valgrind $(VGOPTS) ./rayv $(BENCH_ARGS) rayv.ppm
 
 clean:
 	@$(RM) $(TARGET)
