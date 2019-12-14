@@ -94,7 +94,7 @@ fn render(w, h int, fnameout string) {
         ww := ratiox
         hh := ww * f64(h) / f64(w) * ratioy
         e := vec.Vector{f64(0.4), f64(0), f64(0.4)}
-        mut f := vec.Vector{f64(-1), f64(0), f64(-1)}
+        /*mut*/ f := vec.Vector{f64(-1), f64(0), f64(-1)}
         mut u := vec.Vector{f64(-0.707107), f64(0), f64(0.707107)}
 
         mut scene := Scene{}
