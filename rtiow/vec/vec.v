@@ -48,6 +48,10 @@ pub fn (v Vec3) length() f32 {
 	return math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
 }
 
+pub fn (v Vec3) squared_length() f32 {
+	return v.x * v.x + v.y * v.y + v.z * v.z
+}
+
 pub fn (v Vec3) unit_vector() Vec3 {
 	return div(v, v.length())
 }
