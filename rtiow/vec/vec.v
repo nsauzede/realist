@@ -28,6 +28,14 @@ pub fn (a Vec3) *(b Vec3) Vec3 {
 	}
 }
 
+pub fn (v Vec3) cross(ov Vec3) Vec3 {
+	return Vec3 {
+		v.y * ov.z - v.z * ov.y,
+		v.z * ov.x - v.x * ov.z,
+		v.x * ov.y - v.y * ov.x
+	}
+}
+
 pub fn (a Vec3) -(b Vec3) Vec3 {
 	return Vec3 {
 		a.x - b.x,
