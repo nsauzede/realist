@@ -20,6 +20,14 @@ pub fn (a Vec3) +(b Vec3) Vec3 {
 	}
 }
 
+pub fn (a Vec3) *(b Vec3) Vec3 {
+	return Vec3 {
+		a.x * b.x,
+		a.y * b.y,
+		a.z * b.z
+	}
+}
+
 pub fn (a Vec3) -(b Vec3) Vec3 {
 	return Vec3 {
 		a.x - b.x,
@@ -42,6 +50,10 @@ pub fn div(v Vec3, k f32) Vec3 {
 		v.y / k,
 		v.z / k
 	}
+}
+
+pub fn (v Vec3) reflect(n Vec3) Vec3 {
+	return v - mult(2. * v.dot(n), n)
 }
 
 pub fn (v Vec3) length() f32 {
