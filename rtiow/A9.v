@@ -16,38 +16,41 @@ enum MType {
 	metal
 }
 
+struct MGeneric {
+	mtype MType
+}
+
 struct MLambertian {
+	mtype MType = MType.lambertian
 	albedo vec.Vec3
 }
 
 struct MMetal {
+	mtype MType = MType.metal
 	albedo vec.Vec3
 	fuzz f32 = 0.
 }
 
-union MData {
+union Material {
+	generic MGeneric
 	lambertian MLambertian
 	metal MMetal
 }
 
-struct Material {
-	mtype MType
-	u MData
+struct HGeneric {
+	htype HType
 }
 
 struct HSphere {
+	htype HType = HType.sphere
 	center vec.Vec3
 	radius f32
 	material Material
 }
 
-union HData {
+union Hittable {
+	generic HGeneric
 	sphere HSphere
-}
-
-struct Hittable {
-	htype HType
-	u HData
 }
 
 struct HitRec {
@@ -55,6 +58,7 @@ mut:
 	t f32			// hit time
 	p vec.Vec3		// hit point coords
 	normal vec.Vec3		// normal at hit point
+	// mat should be a ref ! (but does not work)
 	mat Material		// material at hit point
 }
 
@@ -88,8 +92,8 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 }
 
 fn (h Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
-	if h.htype == .sphere {
-		return h.u.sphere.hit(r, t_min, t_max, mut rec)
+	if h.generic.htype == .sphere {
+		return h.sphere.hit(r, t_min, t_max, mut rec)
 	}
 	return false
 }
@@ -109,15 +113,6 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	return hit_anything
 }
 
-fn (s HSphere) make() Hittable {
-	return Hittable {
-		htype:.sphere
-		u:HData{
-			sphere: s
-		}
-	}
-}
-
 fn random_in_unit_sphere() vec.Vec3 {
 	mut p := vec.Vec3{}
 	for {
@@ -129,18 +124,18 @@ fn random_in_unit_sphere() vec.Vec3 {
 	return p
 }
 
-fn (l Material) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
-	if l.mtype == .lambertian {
+fn (m Material) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
+	if m.generic.mtype == .lambertian {
 		target := rec.p + rec.normal + random_in_unit_sphere()
 		*scattered = ray.Ray{rec.p, target - rec.p}
-		*attenuation = l.u.lambertian.albedo
-//		eprintln('Hello !!!!!!! lambertian')
+		*attenuation = m.lambertian.albedo
+//		eprintln('Hello !!!!!!! lambertian ${m.lambertian.mtype}')
 		return true
 	} else {
 		reflected := r_in.direction().unit_vector().reflect(rec.normal)
-		*scattered = ray.Ray{rec.p, reflected + vec.mult(l.u.metal.fuzz, random_in_unit_sphere())}
-		*attenuation = l.u.metal.albedo
-//		eprintln('Hello !!!!!!! non-lambertian')
+		*scattered = ray.Ray{rec.p, reflected + vec.mult(m.metal.fuzz, random_in_unit_sphere())}
+		*attenuation = m.metal.albedo
+//		eprintln('Hello !!!!!!! non-lambertian ${m.metal.mtype}')
 		return scattered.direction().dot(rec.normal) > 0
 	}
 }
@@ -195,27 +190,23 @@ fn main() {
 		origin : vec.Vec3 {0., 0., 0.}
 	}
 	world := [
-		HSphere{
+		Hittable(HSphere{
 			center: vec.Vec3{0, 0, -1}, radius: 0.5,
-			material: Material{
-				mtype: .lambertian,
-				u: MData{lambertian:MLambertian{albedo: vec.Vec3{0.8, 0.3, 0.3}}}}
-		}.make(),
-		HSphere{center: vec.Vec3{0, -100.5, -1}, radius: 100
-			material: Material{
-				mtype: .lambertian,
-				u: MData{lambertian:MLambertian{albedo: vec.Vec3{0.8, 0.8, 0.0}}}}
-		}.make(),
-		HSphere{center: vec.Vec3{1, 0, -1}, radius: 0.5
-			material: Material{
-				mtype: .metal,
-u: MData{metal:MMetal{albedo: vec.Vec3{0.8, 0.6, 0.2}, fuzz: 1.}}}
-		}.make(),
-		HSphere{center: vec.Vec3{-1, 0, -1}, radius: 0.5
-			material: Material{
-				mtype: .metal,
-u: MData{metal:MMetal{albedo: vec.Vec3{0.8, 0.8, 0.8}, fuzz: 0.3}}}
-		}.make()
+			material: Material(
+				MLambertian{albedo: vec.Vec3{0.8, 0.3, 0.3}})
+		}),
+		Hittable(HSphere{center: vec.Vec3{0, -100.5, -1}, radius: 100
+			material: Material(
+				MLambertian{albedo: vec.Vec3{0.8, 0.8, 0.0}})
+		}),
+		Hittable(HSphere{center: vec.Vec3{1, 0, -1}, radius: 0.5
+			material: Material(
+				MMetal{albedo: vec.Vec3{0.8, 0.6, 0.2}, fuzz: 1.})
+		}),
+		Hittable(HSphere{center: vec.Vec3{-1, 0, -1}, radius: 0.5
+			material: Material(
+				MMetal{albedo: vec.Vec3{0.8, 0.8, 0.8}, fuzz: 0.3})
+		})
 	]
 	for j := ny-1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
