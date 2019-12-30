@@ -8,9 +8,9 @@ pub:
 //	x Scalar y Scalar z Scalar
 	x f32 y f32 z f32
 }
-//pub fn (a Vec3) str() string {
-//	return '{$a.x, $a.y, $a.z}'
-//}
+pub fn (a Vec3) str() string {
+	return '{$a.x, $a.y, $a.z}'
+}
 
 pub fn (a Vec3) +(b Vec3) Vec3 {
 	return Vec3 {
