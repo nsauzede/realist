@@ -56,6 +56,18 @@ pub fn (v Vec3) reflect(n Vec3) Vec3 {
 	return v - mult(2. * v.dot(n), n)
 }
 
+pub fn (v Vec3) refract(n Vec3, ni_over_nt f32, refracted mut Vec3) bool {
+	uv := v.unit_vector()
+	dt := uv.dot(n)
+	discriminant := 1. - ni_over_nt * ni_over_nt * (1. - dt * dt)
+	if discriminant > 0 {
+		*refracted = mult(ni_over_nt, uv - mult(dt, n)) - mult(math.sqrt(discriminant), n)
+		return true
+	} else {
+		return false
+	}
+}
+
 pub fn (v Vec3) length() f32 {
 	return math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
 }
