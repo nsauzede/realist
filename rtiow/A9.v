@@ -16,9 +16,23 @@ enum MType {
 	metal
 }
 
+struct MLambertian {
+	albedo vec.Vec3
+}
+
+struct MMetal {
+	albedo vec.Vec3
+	fuzz f32 = 0.
+}
+
+union MData {
+	lambertian MLambertian
+	metal MMetal
+}
+
 struct Material {
 	mtype MType
-	albedo vec.Vec3
+	u MData
 }
 
 struct HSphere {
@@ -33,7 +47,7 @@ union HData {
 
 struct Hittable {
 	htype HType
-	data HData
+	u HData
 }
 
 struct HitRec {
@@ -75,7 +89,7 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 
 fn (h Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	if h.htype == .sphere {
-		return h.data.sphere.hit(r, t_min, t_max, mut rec)
+		return h.u.sphere.hit(r, t_min, t_max, mut rec)
 	}
 	return false
 }
@@ -98,7 +112,7 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 fn (s HSphere) make() Hittable {
 	return Hittable {
 		htype:.sphere
-		data:HData{
+		u:HData{
 			sphere: s
 		}
 	}
@@ -119,13 +133,13 @@ fn (l Material) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scat
 	if l.mtype == .lambertian {
 		target := rec.p + rec.normal + random_in_unit_sphere()
 		*scattered = ray.Ray{rec.p, target - rec.p}
-		*attenuation = l.albedo
+		*attenuation = l.u.lambertian.albedo
 //		eprintln('Hello !!!!!!! lambertian')
 		return true
 	} else {
 		reflected := r_in.direction().unit_vector().reflect(rec.normal)
-		*scattered = ray.Ray{rec.p, reflected}
-		*attenuation = l.albedo
+		*scattered = ray.Ray{rec.p, reflected + vec.mult(l.u.metal.fuzz, random_in_unit_sphere())}
+		*attenuation = l.u.metal.albedo
 //		eprintln('Hello !!!!!!! non-lambertian')
 		return scattered.direction().dot(rec.normal) > 0
 	}
@@ -185,22 +199,22 @@ fn main() {
 			center: vec.Vec3{0, 0, -1}, radius: 0.5,
 			material: Material{
 				mtype: .lambertian,
-				albedo: vec.Vec3{0.8, 0.3, 0.3}}
+				u: MData{lambertian:MLambertian{albedo: vec.Vec3{0.8, 0.3, 0.3}}}}
 		}.make(),
 		HSphere{center: vec.Vec3{0, -100.5, -1}, radius: 100
 			material: Material{
 				mtype: .lambertian,
-				albedo: vec.Vec3{0.8, 0.8, 0.0}}
+				u: MData{lambertian:MLambertian{albedo: vec.Vec3{0.8, 0.8, 0.0}}}}
 		}.make(),
 		HSphere{center: vec.Vec3{1, 0, -1}, radius: 0.5
 			material: Material{
 				mtype: .metal,
-				albedo: vec.Vec3{0.8, 0.6, 0.2}}
+u: MData{metal:MMetal{albedo: vec.Vec3{0.8, 0.6, 0.2}, fuzz: 1.}}}
 		}.make(),
 		HSphere{center: vec.Vec3{-1, 0, -1}, radius: 0.5
 			material: Material{
 				mtype: .metal,
-				albedo: vec.Vec3{0.8, 0.8, 0.8}}
+u: MData{metal:MMetal{albedo: vec.Vec3{0.8, 0.8, 0.8}, fuzz: 0.3}}}
 		}.make()
 	]
 	for j := ny-1; j >= 0; j-- {
