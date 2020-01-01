@@ -278,16 +278,97 @@ fn (c Camera) get_ray(s f32, t f32) ray.Ray {
 	}
 }
 
+fn new_world() []Hittable {
+	mut world := []Hittable
+	world << Hittable(HSphere{
+		center: vec.Vec3{0, -1000, 0}, radius: 1000,
+		material: Material(MLambertian{albedo: vec.Vec3{0.5, 0.5, 0.5}})
+	})
+	n := 11 //11
+//	mut i := 1
+	for a := -n; a < n; a++ {
+		for b := -n; b < n; b++ {
+			choose_mat := random_double()
+/*			if i < 3 {
+				eprintln('choose_mat=$choose_mat')
+			}
+			i++
+*/			r01 := random_double()
+			r02 := random_double()
+			center := vec.Vec3{
+				f32(a)+0.9*r02,
+				0.2,
+				f32(b)+0.9*r01}
+//			eprintln('a=$a b=$b center=$center')
+			if (center - vec.Vec3{4,0.2,0}).length() > 0.9 {
+				if choose_mat < 0.8 {  // diffuse
+					r1 := random_double()
+					r2 := random_double()
+					r3 := random_double()
+					r4 := random_double()
+					r5 := random_double()
+					r6 := random_double()
+world << Hittable(HSphere{
+	center: center, radius: 0.2,
+	material: Material(MLambertian{albedo: vec.Vec3{
+		r6*r5,r4*r3,r2*r1}})
+})
+				} else if choose_mat < 0.95 { // metal
+					r1 := random_double()
+					r2 := random_double()
+					r3 := random_double()
+					r4 := random_double()
+world << Hittable(HSphere{
+	center: center, radius: 0.2
+	material: Material(MMetal{albedo: vec.Vec3{
+		0.5 * (1. + r4),
+		0.5 * (1. + r3),
+		0.5 * (1. + r2)},
+		fuzz: 0.5 * r1})
+})
+				} else {  // glass
+world << Hittable(HSphere{
+	center: center, radius: 0.2
+	material: Material(MDielectric{ref_idx: 1.5})
+})
+				}
+			}
+		}
+	}
+	world <<
+		Hittable(HSphere{center: vec.Vec3{-4, 1, 0}, radius: 1
+                        material: Material(
+                                MLambertian{albedo: vec.Vec3{0.4, 0.2, 0.1}})
+                })
+	world <<
+                Hittable(HSphere{center: vec.Vec3{0, 1, 0}, radius: 1
+                        material: Material(
+                                MDielectric{ref_idx: 1.5})
+                })
+	world <<
+                Hittable(HSphere{center: vec.Vec3{4, 1, 0}, radius: 1
+                        material: Material(
+                                MMetal{albedo: vec.Vec3{0.7, 0.6, 0.5}, fuzz: 0.0})
+                })
+	return world
+}
+
 fn main() {
 	rand.seed(0)
-	nx := 200
-	ny := 100
-	ns := 100
+	mut rnd := rand.next(C.RAND_MAX)
+	rnd = rand.next(C.RAND_MAX)
+	eprintln('rnd=$rnd')
+	rndd := random_double()
+	eprintln('rndd=$rndd')
+//	nx := 200 ny := 100 ns := 100
+	nx := 200 ny := 100 ns := 100
+//	nx := 400 ny := 200 ns := 100
+//	nx := 1200 ny := 800 ns := 100
 	println('P3') println('$nx $ny') println(255)
-	lookfrom := vec.Vec3{10, 2, 3}
-	lookat := vec.Vec3{0, 1, 0}
+	lookfrom := vec.Vec3{9, 2, 2.6}
+	lookat := vec.Vec3{3, 0.8, 1}
 	dist_to_focus := (lookfrom - lookat).length()
-	aperture := f32(0)
+	aperture := f32(0.)
 	cam := new_camera(
 		lookfrom,
 		lookat,
@@ -296,26 +377,8 @@ fn main() {
 		aperture,
 		dist_to_focus)
 //	eprintln(cam.str())
-	world := [
-		Hittable(HSphere{
-			center: vec.Vec3{0, -1000, 0}, radius: 1000,
-			material: Material(
-				MLambertian{albedo: vec.Vec3{0.5, 0.5, 0.5}})
-		}),
-                Hittable(HSphere{center: vec.Vec3{0, 1, 0}, radius: 1
-                        material: Material(
-                                MDielectric{ref_idx: 1.5})
-                }),
-		Hittable(HSphere{center: vec.Vec3{-4, 1, 0}, radius: 1
-                        material: Material(
-                                MLambertian{albedo: vec.Vec3{0.4, 0.2, 0.1}})
-                }),
-                Hittable(HSphere{center: vec.Vec3{4, 1, 0}, radius: 1
-                        material: Material(
-                                MMetal{albedo: vec.Vec3{0.7, 0.6, 0.5}, fuzz: 0.0})
-                }),
-	]
-	for j := ny-1; j >= 0; j-- {
+	world := new_world()
+	for j := ny - 1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
 			mut col := vec.Vec3{0,0,0}
 			for s := 0; s < ns; s++ {

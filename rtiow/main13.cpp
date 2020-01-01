@@ -127,25 +127,39 @@ hitable *random_scene() {
     hitable **list = new hitable*[n+1];
     list[0] =  new sphere(vec3(0,-1000,0), 1000, new lambertian(vec3(0.5, 0.5, 0.5)));
     int i = 1;
-    for (int a = -11; a < 11; a++) {
-        for (int b = -11; b < 11; b++) {
+    const int N = 11; //11
+    for (int a = -N; a < N; a++) {
+        for (int b = -N; b < N; b++) {
             float choose_mat = random_double();
-            vec3 center(a+0.9*random_double(),0.2,b+0.9*random_double());
+//    if (i < 3)fprintf(stderr, "choose_mat=%f\n", choose_mat);
+//            vec3 center(a+0.9*random_double(),0.2,b+0.9*random_double());
+            double r1 = random_double();
+            double r2 = random_double();
+            vec3 center(a+0.9*r2,0.2,b+0.9*r1);
+//            fprintf(stderr, "a=%d b=%d center={%f, %f. %f}\n", a, b, center.x(), center.y(), center.z());
             if ((center-vec3(4,0.2,0)).length() > 0.9) {
                 if (choose_mat < 0.8) {  // diffuse
+            double r1 = random_double();
+            double r2 = random_double();
+            double r3 = random_double();
+            double r4 = random_double();
+            double r5 = random_double();
+            double r6 = random_double();
                     list[i++] = new sphere(center, 0.2,
-                        new lambertian(vec3(random_double()*random_double(),
-                                            random_double()*random_double(),
-                                            random_double()*random_double())
+                        new lambertian(vec3(r6*r5,r4*r3,r2*r1)
                         )
                     );
                 }
                 else if (choose_mat < 0.95) { // metal
+            double r1 = random_double();
+            double r2 = random_double();
+            double r3 = random_double();
+            double r4 = random_double();
                     list[i++] = new sphere(center, 0.2,
-                            new metal(vec3(0.5*(1 + random_double()),
-                                           0.5*(1 + random_double()),
-                                           0.5*(1 + random_double())),
-                                      0.5*random_double()));
+                            new metal(vec3(0.5*(1 + r4),
+                                           0.5*(1 + r3),
+                                           0.5*(1 + r2)),
+                                      0.5*r1));
                 }
                 else {  // glass
                     list[i++] = new sphere(center, 0.2, new dielectric(1.5));
@@ -162,15 +176,33 @@ hitable *random_scene() {
 }
 //#define DEBUG
 int main() {
+    srand(0);
+    int rnd = rand();
+    rnd = rand();
+    fprintf(stderr, "rnd=%d\n", rnd);
+    float rndd = random_double();
+    fprintf(stderr, "rndd=%f\n", rndd);
 #ifdef DEBUG
-    int nx = 200;
-    int ny = 100;
-    int ns = 100;
+#if 0
+    int nx = 2;//200
+    int ny = 1;//100
+    int ns = 1;//100
 #else
+    int nx = 200;//200
+    int ny = 100;//100
+    int ns = 100;//100
+#endif
+#else
+#if 0
     int nx = 800;
     int ny = 600;
 //    int ns = 4;
     int ns = 100;
+#else
+    int nx = 200;//200
+    int ny = 100;//100
+    int ns = 100;//100
+#endif
 #endif
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 #ifdef DEBUG
@@ -184,9 +216,9 @@ int main() {
     hitable *world = random_scene();
 #endif
 //vec3 lookfrom(4,2,2);
-vec3 lookfrom(10,2,3);
+vec3 lookfrom(9,2,2.6);
 //vec3 lookat(0,0,-1);
-vec3 lookat(0,1,0);
+vec3 lookat(3,0.8,1);
 float dist_to_focus = (lookfrom-lookat).length();
 float aperture = 0.0;
 
