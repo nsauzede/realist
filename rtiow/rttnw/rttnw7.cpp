@@ -5,6 +5,9 @@
 #include "float.h"
 #include "random.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #if 0
 vec3 color(const ray& r, hittable *world, int depth) {
     hit_record rec;
@@ -188,6 +191,29 @@ class dielectric : public material {
         float ref_idx;
 };
 
+class image_texture : public texture {
+    public:
+        image_texture() {}
+        image_texture(unsigned char *pixels, int A, int B)
+            : data(pixels), nx(A), ny(B) {}
+        virtual vec3 value(float u, float v, const vec3& p) const;
+        unsigned char *data;
+        int nx, ny;
+};
+
+vec3 image_texture::value(float u, float v, const vec3& p) const {
+     int i = (  u) * nx;
+     int j = (1-v) * ny - 0.001;
+     if (i < 0) i = 0;
+     if (j < 0) j = 0;
+     if (i > nx-1) i = nx-1;
+     if (j > ny-1) j = ny-1;
+     float r = int(data[3*i + 3*nx*j]  ) / 255.0;
+     float g = int(data[3*i + 3*nx*j+1]) / 255.0;
+     float b = int(data[3*i + 3*nx*j+2]) / 255.0;
+     return vec3(r, g, b);
+}
+
 hittable *random_scene() {
     int n = 50000;
     hittable **list = new hittable*[n+1];
@@ -200,10 +226,14 @@ hittable *random_scene() {
 #else
     texture *checker = new constant_texture(vec3(0.5, 0.5, 0.5));
 #endif
-#if 0
-    list[i++] =  new sphere(vec3(0,-1000,0), 1000, new lambertian(checker));
-#else
+#if 1
+    list[i++] =  new sphere(vec3(0,-1000,0), 1000, new diffuse_light(checker));
+#elif 1
     list[i++] =  new sphere(vec3(0,-1000,0), 1000, new diffuse_light(new constant_texture(vec3(4,4,4))));
+#else
+int nx, ny, nn;
+unsigned char *tex_data = stbi_load("earthmap.jpg", &nx, &ny, &nn, 0);
+    list[i++] =  new sphere(vec3(0,-1000,0), 1000, new diffuse_light(new image_texture(tex_data, nx, ny)));
 #endif
     int si = 0;
 /*
@@ -277,8 +307,11 @@ hittable *two_spheres() {
     );
     int n = 50;
     hittable **list = new hittable*[n+1];
-    list[0] =  new sphere(vec3(0,-1000,0), 1000, new lambertian(checker));
+//    list[0] =  new sphere(vec3(0,-1000,0), 1000, new lambertian(checker));
+//    list[0] =  new sphere(vec3(0,-1000,0), 1000, new diffuse_light(new constant_texture(vec3(4,4,4))));
+    list[0] =  new sphere(vec3(0,-1000,0), 1000, new diffuse_light(checker));
     list[1] = new sphere(vec3(0, 1, 0), 1.0, new lambertian(checker));
+//    list[1] = new sphere(vec3(0, 1, 0), 1.0, new diffuse_light(new constant_texture(vec3(4,4,4))));
     return new hittable_list(list,2);
 }
 
@@ -403,29 +436,6 @@ class noise_texture : public texture {
         float scale;
 };
 
-class image_texture : public texture {
-    public:
-        image_texture() {}
-        image_texture(unsigned char *pixels, int A, int B)
-            : data(pixels), nx(A), ny(B) {}
-        virtual vec3 value(float u, float v, const vec3& p) const;
-        unsigned char *data;
-        int nx, ny;
-};
-
-vec3 image_texture::value(float u, float v, const vec3& p) const {
-     int i = (  u) * nx;
-     int j = (1-v) * ny - 0.001;
-     if (i < 0) i = 0;
-     if (j < 0) j = 0;
-     if (i > nx-1) i = nx-1;
-     if (j > ny-1) j = ny-1;
-     float r = int(data[3*i + 3*nx*j]  ) / 255.0;
-     float g = int(data[3*i + 3*nx*j+1]) / 255.0;
-     float b = int(data[3*i + 3*nx*j+2]) / 255.0;
-     return vec3(r, g, b);
-}
-
 hittable *two_perlin_spheres() {
 #if 1
     texture *pertext = new noise_texture(4);
@@ -441,9 +451,6 @@ hittable *two_perlin_spheres() {
     return new hittable_list(list, 2);
 }
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 hittable *two_tex_spheres() {
 int nx, ny, nn;
 unsigned char *tex_data = stbi_load("earthmap.jpg", &nx, &ny, &nn, 0);
@@ -458,11 +465,15 @@ material *mat = new lambertian(new image_texture(tex_data, nx, ny));
 int sph_hit = 0;
 int msph_hit = 0;
 
-int main() {
+int main(int argc, char *argv[]) {
     srand(0);
     int nx = 500;//200
     int ny = 300;//100
     int ns = 100;//100
+    int arg = 1;
+    if (arg < argc) {
+        sscanf(argv[arg++], "%d", &ns);
+    }
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 #if 1
     hittable *world = random_scene();
@@ -476,7 +487,7 @@ camera cam(
     lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture,
     dist_to_focus, 0.0, 1.0
 );
-#elif 0
+#elif 1
     hittable *world = two_spheres();
 
 vec3 lookfrom(10,1.5,3);
