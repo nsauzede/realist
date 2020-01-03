@@ -299,6 +299,19 @@ class perlin {
         static int *perm_x;
         static int *perm_y;
         static int *perm_z;
+
+float turb(const vec3& p, int depth=7) const {
+    float accum = 0;
+    vec3 temp_p = p;
+    float weight = 1.0;
+    for (int i = 0; i < depth; i++) {
+        accum += weight*noise(temp_p);
+        weight *= 0.5;
+        temp_p *= 2;
+    }
+    return fabs(accum);
+}
+
 };
 
 static vec3* perlin_generate() {
@@ -337,10 +350,11 @@ int *perlin::perm_z = perlin_generate_perm();
 
 class noise_texture : public texture {
     public:
-//        noise_texture() {}
-        noise_texture(float sc = 5.0) : scale(sc) {}
+        noise_texture() {}
+        noise_texture(float sc) : scale(sc) {}
         virtual vec3 value(float u, float v, const vec3& p) const {
-            return vec3(1,1,1) * noise.noise(scale * p);
+//            return vec3(1,1,1) * noise.noise(scale * p);
+            return vec3(1,1,1) * 0.5 * (1 + sin(scale*p.z() + 10*noise.turb(p)));
         }
         perlin noise;
         float scale;
@@ -348,7 +362,7 @@ class noise_texture : public texture {
 
 hittable *two_perlin_spheres() {
 #if 1
-    texture *pertext = new noise_texture();
+    texture *pertext = new noise_texture(4);
 #else
     texture *pertext = new checker_texture(
         new constant_texture(vec3(0.2, 0.3, 0.1)),
