@@ -235,6 +235,18 @@ hittable *random_scene() {
     return new hittable_list(list,i);
 }
 
+hittable *two_spheres() {
+    texture *checker = new checker_texture(
+        new constant_texture(vec3(0.2, 0.3, 0.1)),
+        new constant_texture(vec3(0.9, 0.9, 0.9))
+    );
+    int n = 50;
+    hittable **list = new hittable*[n+1];
+    list[0] = new sphere(vec3(0,-10, 0), 10, new lambertian(checker));
+    list[1] = new sphere(vec3(0, 10, 0), 10, new lambertian(checker));
+    return new hittable_list(list,2);
+}
+
 int sph_hit = 0;
 int msph_hit = 0;
 
@@ -244,6 +256,7 @@ int main() {
     int ny = 100;//100
     int ns = 100;//100
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+#if 0
     hittable *world = random_scene();
 
 vec3 lookfrom(13,2,3);
@@ -255,6 +268,16 @@ camera cam(
     lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture,
     dist_to_focus, 0.0, 1.0
 );
+#else
+    hittable *world = two_spheres();
+vec3 lookfrom(13,2,3);
+vec3 lookat(0,0,0);
+float dist_to_focus = 10.0;
+float aperture = 0.0;
+
+camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny),
+           aperture, dist_to_focus, 0.0, 1.0);
+#endif
 
     int gsph_hit = 0, gmsph_hit = 0;
     time_t t0 = time(0);
