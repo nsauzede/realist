@@ -15,6 +15,13 @@ class sphere: public hittable  {
         material *mat_ptr; /* NEW */
 };
 
+void get_sphere_uv(const vec3& p, float& u, float& v) {
+    float phi = atan2(p.z(), p.x());
+    float theta = asin(p.y());
+    u = 1-(phi + M_PI) / (2*M_PI);
+    v = (theta + M_PI/2) / M_PI;
+}
+
 bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const {
 sph_hit++;
     vec3 oc = r.origin() - center;
@@ -29,6 +36,7 @@ sph_hit++;
             rec.p = r.point_at_parameter(rec.t);
             rec.normal = (rec.p - center) / radius;
             rec.mat_ptr = mat_ptr; /* NEW */
+            get_sphere_uv((rec.p-center)/radius, rec.u, rec.v);
             return true;
         }
         temp = (-b + sqrt(discriminant)) / a;
@@ -37,6 +45,7 @@ sph_hit++;
             rec.p = r.point_at_parameter(rec.t);
             rec.normal = (rec.p - center) / radius;
             rec.mat_ptr = mat_ptr; /* NEW */
+            get_sphere_uv((rec.p-center)/radius, rec.u, rec.v);
             return true;
         }
     }

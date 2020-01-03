@@ -14,6 +14,8 @@ struct hit_record
     vec3 p;
     vec3 normal;
     material *mat_ptr;
+    float u;
+    float v;
 };
 
 inline float ffmin(float a, float b) { return a < b ? a : b; }
