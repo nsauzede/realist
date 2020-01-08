@@ -1,4 +1,4 @@
-Ray tracing in one weekend
+# Ray tracing in one weekend
 ==========================
 See here : https://raytracing.github.io
 This repo contains my experiments following the excellent book above,
