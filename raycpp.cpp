@@ -345,6 +345,36 @@ public:
 			}
 		}
 		else {
+#if 1
+			// camera
+			v3 cam[] = {
+				{ 0.4, 0, 0.4},        // eye
+				{ -1, 0, -1},        // front towards screen
+				{ -0.707107, 0, 0.707107},             // up along screen
+			};
+			// scene
+//FLAGS, COLOR_RED, COLOR_GREEN, COLOR_BLUE, CENTER_X, CENTER_Y, CENTER_Z, RADIUS,
+			double sph[][CSphere::MAX] = {
+				{0, 0.8, 0.8, 0.8, 0, -0.1, 0, 0.05},
+				{0, 0.8, 0.8, 0.8, 0, 0, 0, 0.05   },
+				{0,   0.8, 0.8, 0.8, 0, 0.1, 0,   0.05},
+				{0,   0.8, 0, 0, 0.1, -0.05, 0,   0.05},
+				{0,   0, 0, 0.8, 0.1, 0.05, 0,    0.05},
+				{0,   0, 0.8, 0, 0.2, 0, 0,   0.05},
+				{0,   0.8, 0.8, 0.8, 0.05, -0.05, 0.1,    0.05},
+				{0,   0.8, 0.8, 0.8, 0.05, 0.05, 0.1, 0.05},
+				{0,   1, 1, 0, 0, -0.5, 0.5,    0.02},
+			};
+
+			int i = 0;
+			m_e = cam[i++];
+			m_f = cam[i++];
+			m_u = cam[i++];
+
+			for (unsigned ii = 0; ii < (sizeof(sph) / sizeof(sph[0])); ii++) {
+				m_objs.push_back( new CSphere( sph[ii]));
+			}
+#else
 // default scene : origins (unit vectors)
 			// camera
 			v3 cam[] = {
@@ -393,6 +423,7 @@ public:
 			for (unsigned ii = 0; ii < (sizeof(pl) / sizeof(pl[0])); ii++) {
 				m_objs.push_back( new CPlane( pl[ii]));
 			}
+#endif
 		}
 		if (m_r[0] == 0 && m_r[1] == 0 && m_r[2] == 0) {
 			m_u = ~m_u;
@@ -588,13 +619,13 @@ int main( int argc, char *argv[]) {
 	char *scene = 0;
 	int arg = 1;
 	if (arg < argc) {
-		scene = argv[arg++];
+		sscanf( argv[arg++], "%d", &w);
 		if (arg < argc) {
-			sscanf( argv[arg++], "%d", &w);
+			sscanf( argv[arg++], "%d", &h);
 			if (arg < argc) {
-				sscanf( argv[arg++], "%d", &h);
+				fnameout = argv[arg++];
 				if (arg < argc) {
-					fnameout = argv[arg++];
+					scene = argv[arg++];
 				}
 			}
 		}
