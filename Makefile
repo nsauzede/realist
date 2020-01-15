@@ -41,13 +41,13 @@ USE_OPT=1
 ifdef USE_OPT
 CXXFLAGS+=-O3
 CFLAGS+=-O3
-CXXFLAGS+=-DUSE_OPT
+#CXXFLAGS+=-DUSE_OPT
 else
 CXXFLAGS+=-O0
 CFLAGS+=-O0
 endif
 
-USE_VEC=1
+#USE_VEC=1
 ifdef USE_VEC
 CXXFLAGS+=-DUSE_VEC
 endif
@@ -106,10 +106,11 @@ rayv: rayv_v.c
 
 realist: realist.cpp vec.h CSDL.h
 
-BENCH_SIZE:=1000
+BENCH_SIZE:=3000
 BENCH_ARGS=$(BENCH_SIZE) $(BENCH_SIZE)
-bench: rayc rayv raygo
+bench: rayc raycpp rayv raygo
 	/usr/bin/time ./rayc $(BENCH_ARGS) > rayc.ppm && md5sum rayc.ppm
+	/usr/bin/time ./raycpp $(BENCH_ARGS) > raycpp.ppm && md5sum raycpp.ppm
 	/usr/bin/time ./rayv $(BENCH_ARGS) > rayv.ppm && md5sum rayv.ppm
 	/usr/bin/time ./raygo $(BENCH_ARGS) > raygo.ppm && md5sum raygo.ppm
 
