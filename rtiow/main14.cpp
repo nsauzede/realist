@@ -182,9 +182,6 @@ int main(int argc, char *argv[]) {
     if (arg < argc) {
         fnameout = argv[arg++];
     }
-    if (fnameout) {
-        fout = fopen(fnameout, "wb");
-    }
     srand(0);
 #ifdef DEBUG
 #if 0
@@ -208,7 +205,16 @@ int main(int argc, char *argv[]) {
     int ns = 100;//100
 #endif
 #endif
-    fprintf(fout, "P3\n");
+	unsigned char *bytes = 0;
+	size_t nbytes = 0;
+	if (fnameout) {
+	fout = fopen(fnameout, "wb");
+		fprintf(fout, "P6\n");
+		nbytes = 3 * ny * nx;
+		bytes = (unsigned char *)malloc(nbytes);
+	} else {
+		fprintf(fout, "P3\n");
+	}
     fprintf(fout, "%d %d\n", nx, ny);
     fprintf(fout, "255\n");
 #ifdef DEBUG
@@ -245,13 +251,22 @@ camera cam(lookfrom, lookat, vec3(0,1,0), 30,
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);
             int ib = int(255.99*col[2]);
+		if (fnameout) {
+			bytes[(j * nx + i) * 3 + 0] = ir;
+			bytes[(j * nx + i) * 3 + 1] = ig;
+			bytes[(j * nx + i) * 3 + 2] = ib;
+		} else {
 //            std::cout << ir << " " << ig << " " << ib << "\n";
             fprintf(fout, "%d %d %d   ", ir, ig, ib);
+		}
         }
-        fprintf(fout, "\n");
-    }
-    if (fout != 0 && fout != stdout) {
-        fflush(fout);
-        fclose(fout);
-    }
+		if (!fnameout) {
+			fprintf(fout, "\n");
+		}
+	}
+	if (fnameout) {
+		fwrite(bytes, nbytes, 1, fout);
+		fclose(fout);
+		free(bytes);
+	}
 }
