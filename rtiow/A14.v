@@ -46,22 +46,6 @@ union Material {
 	dielectric MDielectric
 }
 
-struct HGeneric {
-	htype HType
-}
-
-struct HSphere {
-	htype HType = HType.sphere
-	center vec.Vec3
-	radius f32
-	material Material
-}
-
-union Hittable {
-	generic HGeneric
-	sphere HSphere
-}
-
 struct HitRec {
 mut:
 	t f32			// hit time
@@ -71,7 +55,30 @@ mut:
 	mat Material		// material at hit point
 }
 
-fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
+type ScatterCallback fn(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool
+
+type HitCallback fn(obj voidptr, r ray.Ray, t_min f32, closest f32, rec mut HitRec) bool
+
+struct HGeneric {
+	htype HType
+	hitcb HitCallback
+	material Material
+}
+
+struct HSphere {
+	htype HType = HType.sphere
+	hitcb HitCallback = HitCallback(cb_sphere_hit)
+	material Material
+	center vec.Vec3
+	radius f32
+}
+
+union Hittable {
+	generic HGeneric
+	sphere HSphere
+}
+
+fn (s HSphere) hit0(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	oc := r.origin() - s.center
 	a := r.direction().dot(r.direction())
 	b := oc.dot(r.direction())
@@ -100,22 +107,45 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	return false
 }
 
-fn (h Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
-	if h.generic.htype == .sphere {
-		return h.sphere.hit(r, t_min, t_max, mut rec)
+fn cb_sphere_hit(obj voidptr, r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
+	s := &HSphere(obj)
+//	return s.hit(r, t_min, t_max, mut rec)
+	oc := r.origin() - s.center
+	a := r.direction().dot(r.direction())
+	b := oc.dot(r.direction())
+	c := oc.dot(oc) - s.radius * s.radius
+	discriminant := b * b - a * c
+	if discriminant > 0 {
+		mut temp := (-b - math.sqrt(discriminant)) / a
+		if temp < t_max && temp > t_min {
+			rec.t = temp
+			rec.p = r.point_at_parameter(rec.t)
+			rec.normal = vec.div(rec.p - s.center, s.radius)
+//			eprintln('mat type ${s.material.mtype}')
+			rec.mat = s.material
+			return true
+		}
+		temp = (-b + math.sqrt(discriminant)) / a
+		if temp < t_max && temp > t_min {
+			rec.t = temp
+			rec.p = r.point_at_parameter(rec.t)
+			rec.normal = vec.div(rec.p - s.center, s.radius)
+//			eprintln('mat type ${s.material.mtype}')
+			rec.mat = s.material
+			return true
+		}
 	}
 	return false
 }
 
-fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
-//	mut temp_rec := HitRec{mat:0}
+fn (hh []Hittable) hit0(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	mut temp_rec := HitRec{}
 	mut hit_anything := false
 	mut closest_so_far := t_max
 	for h in hh {
 		mut is_hit := false
 		if h.generic.htype == .sphere {
-			is_hit = h.sphere.hit(r, t_min, closest_so_far, mut temp_rec)
+			is_hit = h.sphere.hit0(r, t_min, closest_so_far, mut temp_rec)
 		}
 		if is_hit {
 			hit_anything = true
@@ -126,16 +156,13 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	return hit_anything
 }
 
-fn (hh []Hittable) hit0(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
-//	mut temp_rec := HitRec{mat:0}
-	mut temp_rec := HitRec{}
+fn (hh []Hittable) hit1(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	mut hit_anything := false
 	mut closest_so_far := t_max
 	for h in hh {
-		if h.hit(r, t_min, closest_so_far, mut temp_rec) {
+		if h.generic.hitcb(h, r, t_min, closest_so_far, mut rec) {
 			hit_anything = true
-			closest_so_far = temp_rec.t
-			*rec = temp_rec
+			closest_so_far = rec.t
 		}
 	}
 	return hit_anything
@@ -159,7 +186,23 @@ fn (l MLambertian) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, s
 	return true
 }
 
+fn cb_scatter_lambertian(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
+	l := &MLambertian(obj)
+	target := rec.p + rec.normal + random_in_unit_sphere()
+	*scattered = ray.Ray{rec.p, target - rec.p}
+	*attenuation = l.albedo
+	return true
+}
+
 fn (m MMetal) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
+	reflected := r_in.direction().unit_vector().reflect(rec.normal)
+	*scattered = ray.Ray{rec.p, reflected + vec.mult(m.fuzz, random_in_unit_sphere())}
+	*attenuation = m.albedo
+	return scattered.direction().dot(rec.normal) > 0
+}
+
+fn cb_scatter_metal(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
+	m := &MMetal(obj)
 	reflected := r_in.direction().unit_vector().reflect(rec.normal)
 	*scattered = ray.Ray{rec.p, reflected + vec.mult(m.fuzz, random_in_unit_sphere())}
 	*attenuation = m.albedo
@@ -202,7 +245,38 @@ fn (d MDielectric) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, s
 	return true
 }
 
-fn (m Material) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
+fn cb_scatter_dielectric(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
+	d := &MDielectric(obj)
+	mut outward_normal := vec.Vec3{}
+	reflected := r_in.direction().reflect(rec.normal)
+	mut ni_over_nt := f32(0)
+	*attenuation = vec.Vec3{1., 1., 1.}
+	mut refracted := vec.Vec3{}
+	mut reflect_prob := f32(1)
+	mut cosine := f32(0)
+	dot := r_in.direction().dot(rec.normal)
+	len := r_in.direction().length()
+	if dot > 0 {
+		outward_normal = vec.mult(-1., rec.normal)
+		ni_over_nt = d.ref_idx
+		cosine = d.ref_idx * dot / len
+	} else {
+		outward_normal = rec.normal
+		ni_over_nt = 1. / d.ref_idx
+		cosine = -dot / len
+	}
+	if r_in.direction().refract(outward_normal, ni_over_nt, mut refracted) {
+		reflect_prob = schlick(cosine, d.ref_idx)
+	}
+	if random_double() < reflect_prob {
+		*scattered = ray.Ray{rec.p, reflected}
+	} else {
+		*scattered = ray.Ray{rec.p, refracted}
+	}
+	return true
+}
+
+fn (m Material) scatter0(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
 	if m.generic.mtype == .lambertian {
 		return m.lambertian.scatter(r_in, rec, mut attenuation, mut scattered)
 	} else if m.generic.mtype == .metal {
@@ -214,14 +288,28 @@ fn (m Material) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scat
 	}
 }
 
+const (
+	cbs_scatter = [
+		ScatterCallback(cb_scatter_lambertian),
+		ScatterCallback(cb_scatter_metal),
+		ScatterCallback(cb_scatter_dielectric),
+	]
+)
+
+fn (m Material) scatter1(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
+	cb_scatter := cbs_scatter[m.generic.mtype]
+	return cb_scatter(&m, r_in, rec, mut attenuation, mut scattered)
+}
+
 fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 //	mut rec := HitRec{mat:0}
 	mut rec := HitRec{}
 	// remove acne by starting at 0.001
-	if world.hit(r, 0.001, math.max_f32, mut rec) {
+	if world.hit1(r, 0.001, math.max_f32, mut rec) {
+//	if world.hit0(r, 0.001, math.max_f32, mut rec) {
 		mut scattered := ray.Ray{}
 		mut attenuation := vec.Vec3{}
-		if depth < 50 && rec.mat.scatter(r, rec, mut attenuation, mut scattered) {
+		if depth < 50 && rec.mat.scatter0(r, rec, mut attenuation, mut scattered) {
 			return attenuation * world.color(scattered, depth + 1)
 		} else {
 			return vec.Vec3{0,0,0}
@@ -376,12 +464,25 @@ fn main() {
 	if arg < os.args.len {
 		fnameout = os.args[arg++]
 	}
+	// clean next line condition when sub block os.create bug is fixed
+	mut fout := os.create(fnameout) or { exit }
+	mut bytes := byteptr(0)
+	mut nbytes := 0
 //	nx := 200 ny := 100 ns := 100
 	nx := 200 ny := 100 ns := 100
 //	nx := 400 ny := 200 ns := 100
 //	nx := 1200 ny := 800 ns := 100
-	mut picstr := strings.new_builder(1024)
-	picstr.writeln('P3') picstr.writeln('$nx $ny') picstr.writeln('255')
+	if fnameout != '' {
+		fout.writeln('P6')
+		nbytes = 3 * ny * nx
+		bytes = malloc(nbytes)
+		fout.writeln('$nx $ny')
+		fout.writeln('255')
+	} else {
+		println('P3')
+		println('$nx $ny')
+		println('255')
+	}
 	lookfrom := vec.Vec3{9, 2, 2.6}
 	lookat := vec.Vec3{3, 0.8, 1}
 	dist_to_focus := (lookfrom - lookat).length()
@@ -396,7 +497,9 @@ fn main() {
 //	eprintln(cam.str())
 	world := new_world()
 	for j := ny - 1; j >= 0; j-- {
+//		println('j=$j')
 		for i := 0; i < nx; i++ {
+//			println('i=$i')
 			mut col := vec.Vec3{0,0,0}
 			for s := 0; s < ns; s++ {
 				u := (f32(i) + random_double()) / f32(nx)
@@ -410,14 +513,23 @@ fn main() {
 			ir := int(255.99 * col.x)
 			ig := int(255.99 * col.y)
 			ib := int(255.99 * col.z)
-			picstr.write('$ir $ig $ib  ')
+			if fnameout != '' {
+				bytes[(j * nx + i) * 3 + 0] = ir
+				bytes[(j * nx + i) * 3 + 1] = ig
+				bytes[(j * nx + i) * 3 + 2] = ib
+			} else {
+				print('$ir $ig $ib  ')
+			}
 		}
-		picstr.writeln('')
+		if fnameout == '' {
+			println('')
+		}
 	}
-	if fnameout == '' {
-		print(picstr.str())
-	} else {
-		os.write_file(fnameout, picstr.str())
+	if fnameout != '' {
+		fout.write_bytes(bytes, nbytes)
+		fout.close()
+		unsafe {
+			free(bytes)
+		}
 	}
-	picstr.free()
 }
