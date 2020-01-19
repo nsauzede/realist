@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <malloc.h>
 
 #include "vec.h"
 #include "vecc.h"
@@ -96,12 +97,20 @@ void Render( unsigned w, unsigned h, char *fnameout) {
 	vnormalize( m_u);
 	vnormalize( m_r);
 	FILE *fout = stdout;
+	unsigned char *bytes = 0;
+	size_t nbytes = 0;
 	if (fnameout) {
 		fout = fopen( fnameout, "wb");
+//		fprintf( fout, "P3\n");
+		fprintf( fout, "P6\n");
+		nbytes = 3 * h * w;
+		bytes = malloc(nbytes);
+	} else {
+		fprintf( fout, "P3\n");
 	}
-	fprintf( fout, "P3\n");
 	fprintf( fout, "%d %d\n", w, h);
-	fprintf( fout, "%d\n", 100);
+	int max = 255;
+	fprintf( fout, "%d\n", max);
 
 	v3 v;
 	for (unsigned jj = 0; jj < h; jj++) {
@@ -117,13 +126,31 @@ void Render( unsigned w, unsigned h, char *fnameout) {
 			vnormalize( v);
 			v3 color = { 0, 0, 0};
 			Trace( m_e, v, color);
-			fprintf( fout, "%2.lf %2.lf %2.lf   ", 100*color[0], 100*color[1], 100*color[2]);
+			if (fnameout) {
+				bytes[(jj * w + ii) * 3 + 0] = max*color[0];
+				bytes[(jj * w + ii) * 3 + 1] = max*color[1];
+				bytes[(jj * w + ii) * 3 + 2] = max*color[2];
+			} else {
+				fprintf( fout, "%2.lf %2.lf %2.lf   ", max*color[0], max*color[1], max*color[2]);
+			}
+#if 0
+			double rr = max*color[0];
+			double gg = max*color[1];
+			double bb = max*color[2];
+			if (rr > max || gg > max || bb > max) {
+				printf("BOOM! %f %f %f\n", color[0], color[1], color[2]);
+				return;
+			}
+#endif
 		}
-		fprintf( fout, "\n");
+		if (!fnameout) {
+			fprintf( fout, "\n");
+		}
 	}
-	if (fout != 0 && fout != stdout) {
-		fflush( fout);
-		fclose( fout);
+	if (fnameout) {
+		fwrite(bytes, nbytes, 1, fout);
+		fclose(fout);
+		free(bytes);
 	}
 }
 

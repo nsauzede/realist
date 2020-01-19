@@ -553,21 +553,25 @@ public:
 			m_w = w;
 			m_h = h;
 		}
-//		m_sz = sizeof( *m_arr) * 3 * m_w * m_h;
-//		m_arr = (double *)malloc( m_sz);
 
 		// screen
 		m_ww = 1;
 		m_hh = m_ww * m_h / m_w;
 		FILE *fout = stdout;
+		unsigned char *bytes = 0;
+		size_t nbytes = 0;
 		if (fnameout) {
 			fout = fopen( fnameout, "wb");
+			fprintf( fout, "P6\n");
+			nbytes = 3 * h * w;
+			bytes = (unsigned char *)malloc(nbytes);
+		} else {
+			fprintf( fout, "P3\n");
 		}
-		fprintf( fout, "P3\n");
 		fprintf( fout, "%d %d\n", m_w, m_h);
-		fprintf( fout, "%d\n", 100);
+		int max = 255;
+		fprintf( fout, "%d\n", max);
 
-//		memset( m_arr, 0, m_sz);
 		// ray
 		v3 v;
 //		printf( "tr=%f\n", tr);
@@ -582,18 +586,23 @@ public:
 				v = ~(m_f + vu + vr);
 				v3 color = { 1, 1, 1};
 				Trace( 0, m_e, v, color);
-//				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 0] = color[0];
-//				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 1] = color[1];
-//				m_arr[(((m_h - jj - 1) * m_w + ii) * 3) + 2] = color[2];
-				fprintf( fout, "%2.lf %2.lf %2.lf   ", 100*color[0], 100*color[1], 100*color[2]);
+				if (fnameout) {
+					bytes[(jj * w + ii) * 3 + 0] = max*color[0];
+					bytes[(jj * w + ii) * 3 + 1] = max*color[1];
+					bytes[(jj * w + ii) * 3 + 2] = max*color[2];
+				} else {
+					fprintf( fout, "%2.lf %2.lf %2.lf   ", max*color[0], max*color[1], max*color[2]);
+				}
 			}
-			fprintf( fout, "\n");
+			if (!fnameout) {
+				fprintf( fout, "\n");
+			}
 		}
-		if (fout != 0 && fout != stdout) {
-			fflush( fout);
+		if (fnameout) {
+			fwrite(bytes, nbytes, 1, fout);
 			fclose( fout);
+			free(bytes);
 		}
-//		free( m_arr);
 		for (unsigned ii = 0; ii < m_objs.size(); ii++) {
 			delete m_objs.at( ii);
 			m_objs.at( ii) = 0;
@@ -601,8 +610,6 @@ public:
 	}
 private:
 	unsigned m_w, m_h;	// screen pixel dimensions
-//	double *m_arr;
-//	unsigned m_sz;
 	std::vector<CObject *> m_objs;
 	std::vector<CLamp *> m_lamps;
 

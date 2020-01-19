@@ -103,9 +103,18 @@ func Render( w, h int, fnameout string) {
 	buf := bufio.NewWriter(fout)
 //	buf = bufio.NewWriter(fout)
 //	fmt.Println( reflect.TypeOf(buf));
-	fmt.Fprintf(buf,"P3\n")
+	var bytes []byte
+	var nbytes = 0
+	if fnameout != "" {
+		fmt.Fprintf(buf,"P6\n")
+		nbytes = 3 * w * h
+		bytes = make([]byte, nbytes)
+	} else {
+		fmt.Fprintf(buf,"P3\n")
+	}
 	fmt.Fprintf(buf,"%d %d\n", w, h)
-	fmt.Fprintf(buf,"%d\n",100)
+	max := 255
+	fmt.Fprintf(buf,"%d\n",max)
 	for j := 0; j < h; j++ {
 		vu := u.Mult((float64(h) - float64(j) - 1 - float64(h) / 2) / float64(h) * hh)
 
@@ -119,11 +128,22 @@ func Render( w, h int, fnameout string) {
 			v := f.Add( vu.Add( vr))
 			v.Normalize()
 			rr, gg, bb := Trace(e, v)
-			fmt.Fprintf(buf,"%2.f %2.f %2.f   ", 100*rr, 100*gg, 100*bb)
+			if fnameout != "" {
+				bytes[(j * w + i) * 3 + 0] = byte(float64(max)*rr)
+				bytes[(j * w + i) * 3 + 1] = byte(float64(max)*gg)
+				bytes[(j * w + i) * 3 + 2] = byte(float64(max)*bb)
+			} else {
+				fmt.Fprintf(buf,"%2.f %2.f %2.f   ", float64(max)*rr, float64(max)*gg, float64(max)*bb)
+			}
 		}
-		fmt.Fprintf(buf,"\n")
+		if fnameout == "" {
+			fmt.Fprintf(buf,"\n")
+		}
 	}
-	buf.Flush()
+	if fnameout != "" {
+		buf.Write(bytes)
+	}
+	buf.Flush()	// ???
 }
 
 func main() {
