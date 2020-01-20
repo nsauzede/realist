@@ -252,9 +252,9 @@ camera cam(lookfrom, lookat, vec3(0,1,0), 30,
             int ig = int(255.99*col[1]);
             int ib = int(255.99*col[2]);
 		if (fnameout) {
-			bytes[(j * nx + i) * 3 + 0] = ir;
-			bytes[(j * nx + i) * 3 + 1] = ig;
-			bytes[(j * nx + i) * 3 + 2] = ib;
+			bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir;
+			bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig;
+			bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib;
 		} else {
 //            std::cout << ir << " " << ig << " " << ib << "\n";
             fprintf(fout, "%d %d %d   ", ir, ig, ib);

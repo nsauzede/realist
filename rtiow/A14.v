@@ -514,9 +514,9 @@ fn main() {
 			ig := int(255.99 * col.y)
 			ib := int(255.99 * col.z)
 			if fnameout != '' {
-				bytes[(j * nx + i) * 3 + 0] = ir
-				bytes[(j * nx + i) * 3 + 1] = ig
-				bytes[(j * nx + i) * 3 + 2] = ib
+				bytes[((ny -1 - j) * nx + i) * 3 + 0] = ir
+				bytes[((ny -1 - j) * nx + i) * 3 + 1] = ig
+				bytes[((ny -1 - j) * nx + i) * 3 + 2] = ib
 			} else {
 				print('$ir $ig $ib  ')
 			}
