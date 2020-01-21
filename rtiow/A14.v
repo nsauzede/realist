@@ -7,7 +7,6 @@ import ray
 import math
 import rand
 import os
-import strings
 
 enum HType {
 	sphere
@@ -29,7 +28,7 @@ struct MLambertian {
 }
 
 struct MMetal {
-	mtype MType = MType.metal
+	mtype MType = .metal
 	albedo vec.Vec3
 	fuzz f32 = 0.
 }
@@ -44,6 +43,10 @@ union Material {
 	lambertian MLambertian
 	metal MMetal
 	dielectric MDielectric
+}
+
+pub fn (m Material) str() string {
+	return '*material type=$m.generic.mtype*'
 }
 
 struct HitRec {
@@ -108,13 +111,18 @@ fn (s HSphere) hit0(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 }
 
 fn cb_sphere_hit(obj voidptr, r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
+//	print(r)
 	s := &HSphere(obj)
 //	return s.hit(r, t_min, t_max, mut rec)
 	oc := r.origin() - s.center
+//	print(oc)
+//	print(r.direction())
 	a := r.direction().dot(r.direction())
 	b := oc.dot(r.direction())
 	c := oc.dot(oc) - s.radius * s.radius
 	discriminant := b * b - a * c
+//	print('a=$a b=$b c=$c d=$discriminant ')
+//	C.exit(0)
 	if discriminant > 0 {
 		mut temp := (-b - math.sqrt(discriminant)) / a
 		if temp < t_max && temp > t_min {
@@ -171,7 +179,8 @@ fn (hh []Hittable) hit1(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 fn random_in_unit_sphere() vec.Vec3 {
 	mut p := vec.Vec3{}
 	for {
-		p = vec.mult(2, vec.Vec3{random_double(), random_double(), random_double()}) - vec.Vec3{1,1,1}
+		r1 := random_double() r2:= random_double() r3 := random_double()
+		p = vec.mult(2, vec.Vec3{r1, r2, r3}) - vec.Vec3{1,1,1}
 		if p.squared_length() < 1.0 {
 			break
 		}
@@ -304,9 +313,11 @@ fn (m Material) scatter1(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, sca
 fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 //	mut rec := HitRec{mat:0}
 	mut rec := HitRec{}
+//	println('$math.max_f32')
 	// remove acne by starting at 0.001
-	if world.hit1(r, 0.001, math.max_f32, mut rec) {
 //	if world.hit0(r, 0.001, math.max_f32, mut rec) {
+	if world.hit1(r, 0.001, math.max_f32, mut rec) {
+//		println(rec)
 		mut scattered := ray.Ray{}
 		mut attenuation := vec.Vec3{}
 		if depth < 50 && rec.mat.scatter0(r, rec, mut attenuation, mut scattered) {
@@ -328,7 +339,8 @@ fn random_double() f32 {
 fn random_in_unit_disk() vec.Vec3 {
 	mut p := vec.Vec3{}
 	for {
-		p = vec.mult(2, vec.Vec3{random_double(), random_double(), 0}) - vec.Vec3{1, 1, 0}
+		r1 := random_double() r2 := random_double()
+		p = vec.mult(2, vec.Vec3{r1, r2, 0}) - vec.Vec3{1, 1, 0}
 		if p.dot(p) < 1.0 {
 			break
 		}
@@ -362,6 +374,7 @@ fn new_camera(lookfrom vec.Vec3, lookat vec.Vec3, vup vec.Vec3, vfov f32, aspect
 	w := (lookfrom - lookat).unit_vector()
 	u := vup.cross(w).unit_vector()
 	v := w.cross(u)
+//	println('HERE')
 	return Camera {
 		lens_radius: aperture / 2.
 		lower_left_corner: lookfrom
@@ -376,6 +389,7 @@ fn new_camera(lookfrom vec.Vec3, lookat vec.Vec3, vup vec.Vec3, vfov f32, aspect
 }
 
 fn (c Camera) get_ray(s f32, t f32) ray.Ray {
+//	println('s=$s t=$t')
 	rd := vec.mult(c.lens_radius, random_in_unit_disk())
 	offset := vec.mult(rd.x, c.u) + vec.mult(rd.y, c.v)
 	return ray.Ray {
@@ -440,14 +454,14 @@ world << Hittable(HSphere{
 		}
 	}
 	world <<
-		Hittable(HSphere{center: vec.Vec3{-4, 1, 0}, radius: 1
-                        material: Material(
-                                MLambertian{albedo: vec.Vec3{0.4, 0.2, 0.1}})
-                })
-	world <<
                 Hittable(HSphere{center: vec.Vec3{0, 1, 0}, radius: 1
                         material: Material(
                                 MDielectric{ref_idx: 1.5})
+                })
+	world <<
+		Hittable(HSphere{center: vec.Vec3{-4, 1, 0}, radius: 1
+                        material: Material(
+                                MLambertian{albedo: vec.Vec3{0.4, 0.2, 0.1}})
                 })
 	world <<
                 Hittable(HSphere{center: vec.Vec3{4, 1, 0}, radius: 1
@@ -458,21 +472,27 @@ world << Hittable(HSphere{
 }
 
 fn main() {
-	rand.seed(0)
 	mut fnameout := ''
+	mut nx := 5
+	mut ny := 5
+	ns := 100
 	mut arg := 1
 	if arg < os.args.len {
-		fnameout = os.args[arg++]
+		nx = os.args[arg++].int()
+		if arg < os.args.len {
+			ny = os.args[arg++].int()
+			if arg < os.args.len {
+				fnameout = os.args[arg++]
+			}
+		}
 	}
-	// clean next line condition when sub block os.create bug is fixed
-	mut fout := os.create(fnameout) or { exit }
+	rand.seed(0)
+	mut fout := os.File{cfile: 0}
 	mut bytes := byteptr(0)
 	mut nbytes := 0
-//	nx := 200 ny := 100 ns := 100
-	nx := 200 ny := 100 ns := 100
-//	nx := 400 ny := 200 ns := 100
-//	nx := 1200 ny := 800 ns := 100
 	if fnameout != '' {
+		t := os.create(fnameout) or { exit }
+		fout = t
 		fout.writeln('P6')
 		nbytes = 3 * ny * nx
 		bytes = malloc(nbytes)
@@ -486,7 +506,7 @@ fn main() {
 	lookfrom := vec.Vec3{9, 2, 2.6}
 	lookat := vec.Vec3{3, 0.8, 1}
 	dist_to_focus := (lookfrom - lookat).length()
-	aperture := f32(0.)
+	aperture := f32(0)
 	cam := new_camera(
 		lookfrom,
 		lookat,
@@ -494,19 +514,22 @@ fn main() {
 		30., f32(nx) / f32(ny),
 		aperture,
 		dist_to_focus)
-//	eprintln(cam.str())
 	world := new_world()
 	for j := ny - 1; j >= 0; j-- {
-//		println('j=$j')
 		for i := 0; i < nx; i++ {
-//			println('i=$i')
 			mut col := vec.Vec3{0,0,0}
 			for s := 0; s < ns; s++ {
 				u := (f32(i) + random_double()) / f32(nx)
 				v := (f32(j) + random_double()) / f32(ny)
+//				print('u=$u v=$v ')
 				r := cam.get_ray(u, v)
-				col = col + world.color(r, 0)
+//				print('r=$r ')
+//				col = col + world.color(r, 0)
+				c0 := world.color(r, 0)
+//				print(c0)
+				col = col + c0
 			}
+//			print(col)
 			col = vec.div(col, ns)
 			// Gamma 2 correction (square root)
 			col = vec.Vec3{math.sqrt(col.x),math.sqrt(col.y),math.sqrt(col.z)}

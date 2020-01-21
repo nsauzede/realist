@@ -1,14 +1,22 @@
 #ifndef VEC3_H__
 #define VEC3_H__
 
-#include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
 #include <iostream>
 
 class vec3 {
 public:
     vec3() {}
     vec3(float e0, float e1, float e2) { e[0] = e0; e[1] = e1; e[2] = e2; }
+	void print() const {
+		printf("{%f, %f, %f}",
+			e[0], e[1], e[2]
+		);
+	}
+
     inline float x() const { return e[0]; }
     inline float y() const { return e[1]; }
     inline float z() const { return e[2]; }
@@ -79,7 +87,17 @@ inline vec3 operator*(const vec3 &v, float t) {
 }
 
 inline float dot(const vec3 &v1, const vec3 &v2) {
-    return v1.e[0] *v2.e[0] + v1.e[1] *v2.e[1]  + v1.e[2] *v2.e[2];
+#if 1
+	return v1.e[0] *v2.e[0] + v1.e[1] *v2.e[1]  + v1.e[2] *v2.e[2];
+#else
+	printf("DOT %f,%f,%f;%f,%f,%f",
+		v1.x(), v1.y(), v1.z(),
+		v2.x(), v2.y(), v2.z()
+	);
+	float ret = v1.e[0] *v2.e[0] + v1.e[1] *v2.e[1]  + v1.e[2] *v2.e[2];
+	printf(" => %f\n", ret);
+	return ret;
+#endif
 }
 
 inline vec3 cross(const vec3 &v1, const vec3 &v2) {

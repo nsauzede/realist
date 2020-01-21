@@ -15,11 +15,16 @@ class sphere: public hitable  {
 };
 
 bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const {
+//    r.print();
     vec3 oc = r.origin() - center;
+//    oc.print();
+//    r.direction().print();
     float a = dot(r.direction(), r.direction());
     float b = dot(oc, r.direction());
     float c = dot(oc, oc) - radius*radius;
     float discriminant = b*b - a*c;
+//    printf("a=%f b=%f c=%f d=%f ", a, b, c, discriminant);
+//    exit(0);
     if (discriminant > 0) {
         float temp = (-b - sqrt(discriminant))/a;
         if (temp < t_max && temp > t_min) {
