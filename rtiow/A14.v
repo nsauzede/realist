@@ -329,14 +329,17 @@ fn main() {
 	mut fnameout := ''
 	mut nx := 5
 	mut ny := 5
-	ns := 100
+	mut ns := 1
 	mut arg := 1
 	if arg < os.args.len {
 		nx = os.args[arg++].int()
 		if arg < os.args.len {
 			ny = os.args[arg++].int()
 			if arg < os.args.len {
-				fnameout = os.args[arg++]
+				ns = os.args[arg++].int()
+				if arg < os.args.len {
+					fnameout = os.args[arg++]
+				}
 			}
 		}
 	}

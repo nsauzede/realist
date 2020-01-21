@@ -196,14 +196,17 @@ int main(int argc, char *argv[]) {
 	FILE *fout = stdout;
 	int nx = 5;
 	int ny = 5;
-	int ns = 100;
+	int ns = 1;
 	int arg = 1;
 	if (arg < argc) {
 		sscanf(argv[arg++], "%d", &nx);
 		if (arg < argc) {
 			sscanf(argv[arg++], "%d", &ny);
 			if (arg < argc) {
-				fnameout = argv[arg++];
+				sscanf(argv[arg++], "%d", &ns);
+				if (arg < argc) {
+					fnameout = argv[arg++];
+				}
 			}
 		}
 	}
@@ -257,7 +260,7 @@ int main(int argc, char *argv[]) {
 				bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig;
 				bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib;
 			} else {
-				fprintf(fout, "%d %d %d   ", ir, ig, ib);
+				fprintf(fout, "%d %d %d  ", ir, ig, ib);
 			}
 		}
 		if (!fnameout) {
