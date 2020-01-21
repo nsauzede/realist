@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "ray.h"
 
 vec3 color(const ray& r

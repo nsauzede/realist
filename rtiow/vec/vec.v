@@ -92,4 +92,12 @@ pub fn (a Vec3) dot(b Vec3) f32 {
 	return a.x * b.x +
 		a.y * b.y +
 		a.z * b.z
+/*
+	print('DOT $a.x,$a.y,$a.z;$b.x,$b.y,$b.z')
+	ret := a.x * b.x +
+		a.y * b.y +
+		a.z * b.z
+	println(' => $ret')
+	return ret
+*/
 }

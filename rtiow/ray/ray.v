@@ -7,6 +7,10 @@ pub struct Ray {
 	b vec.Vec3
 }
 
+pub fn (r Ray) str() string {
+	return '{${r.a.str()}, ${r.b.str()}}'
+}
+
 pub fn (r Ray) origin() vec.Vec3 {
 	return r.a
 }
