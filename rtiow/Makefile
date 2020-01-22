@@ -5,7 +5,7 @@ TARGET+=CPP/main14
 all: $(TARGET)
 
 CPP/main14: CPP/main14.cpp
-	(cd CPP; g++ -o main14 main14.cpp -I-O3 -lm)
+	(cd CPP; g++ -o main14 main14.cpp -O3 -lm)
 
 V/A14_v: V/A14_v.c
 	(cd V; gcc -o A14_v A14_v.c -O3 -lm)
