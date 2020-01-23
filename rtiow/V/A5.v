@@ -6,28 +6,21 @@ import vec
 import ray
 import math
 
-fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) f32 {
+fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) bool {
 	oc := r.origin() - center
 	a := r.direction().dot(r.direction())
 	b := 2. * oc.dot(r.direction())
 	c := oc.dot(oc) - radius * radius
 	discriminant := b * b - 4. * a * c
-	if discriminant < 0 {
-		return -1
-	} else {
-		return (-b - math.sqrt(discriminant)) / (2. * a)
-	}
+	return discriminant > 0
 }
 
 fn color(r ray.Ray) vec.Vec3 {
-	mut t := hit_sphere(vec.Vec3{0, 0, -1}, .5, r)
-	if t > 0 {
-		n := r.point_at_parameter(t) - vec.Vec3{0, 0, -1}
-		un := n.unit_vector()
-		return vec.mult(.5, vec.Vec3{un.x + 1, un.y + 1, un.z + 1})
+	if hit_sphere(vec.Vec3{0, 0, -1}, .5, r) {
+		return vec.Vec3{1, 0, 0}
 	}
 	unit_direction := r.direction().unit_vector()
-	t = .5 * (unit_direction.y + 1.)
+	t := .5 * (unit_direction.y + 1.)
 	return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 }
 

@@ -1,4 +1,10 @@
 all:
 
+%.elf: %.cpp
+	$(CXX) -o $@ $^ -O3 -lm
+
+%.ppm: %.elf
+	./$^ > $@
+
 clean:
-	$(RM) main14 *.ppm
+	$(RM) *.elf *.ppm
