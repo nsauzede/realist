@@ -1,7 +1,9 @@
+SRC:=$(wildcard *.v)
+PPM:=$(patsubst %.v,%.ppm,$(SRC))
 
 V:=v
 
-all:
+all: $(PPM)
 
 %_v.c: %.v
 	$(V) -o $@ $^
