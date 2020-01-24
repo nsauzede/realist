@@ -25,3 +25,6 @@ clobber: clean
 
 mrproper: clobber
 	$(RM) *.ppm
+	$(MAKE) -C C clean
+	$(MAKE) -C V clean
+	$(MAKE) -C CPP clean
