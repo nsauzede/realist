@@ -4,7 +4,6 @@ module main
 
 import vec
 import ray
-import math
 
 fn color(r ray.Ray) vec.Vec3 {
 	unit_direction := r.direction().unit_vector()
