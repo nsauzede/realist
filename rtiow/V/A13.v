@@ -355,13 +355,13 @@ world << Hittable(HSphere{
 
 fn main() {
 	rand.seed(0)
-	mut rnd := rand.next(C.RAND_MAX)
-	rnd = rand.next(C.RAND_MAX)
-	eprintln('rnd=$rnd')
-	rndd := random_double()
-	eprintln('rndd=$rndd')
+//	mut rnd := rand.next(C.RAND_MAX)
+//	rnd = rand.next(C.RAND_MAX)
+//	eprintln('rnd=$rnd')
+//	rndd := random_double()
+//	eprintln('rndd=$rndd')
 //	nx := 200 ny := 100 ns := 100
-	nx := 200 ny := 100 ns := 100
+	nx := 200 ny := 100 ns := 1
 //	nx := 400 ny := 200 ns := 100
 //	nx := 1200 ny := 800 ns := 100
 	println('P3') println('$nx $ny') println(255)

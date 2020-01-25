@@ -4,6 +4,7 @@ PPM:=$(patsubst %.v,%.ppm,$(SRC))
 V:=v
 
 all: $(PPM)
+	md5sum *.ppm
 
 %_v.c: %.v
 	$(V) -o $@ $^
