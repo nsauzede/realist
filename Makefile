@@ -133,3 +133,4 @@ clobber: clean
 
 mrproper: clobber
 	@$(RM) -Rf v
+	@$(MAKE) -C rtiow $@
