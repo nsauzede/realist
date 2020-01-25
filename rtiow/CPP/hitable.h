@@ -24,7 +24,9 @@ class material  {
         virtual bool scatter(
             const ray& r_in, const hit_record& rec, vec3& attenuation,
             ray& scattered) const = 0;
-        virtual int type() const = 0;
+        virtual int type() const {
+        	return -1;
+        }
 };
 #endif
 

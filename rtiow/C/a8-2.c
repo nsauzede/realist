@@ -12,6 +12,16 @@ inline float random_double() {
     return rand() / (RAND_MAX + 1.0);
 }
 
+void random_in_unit_sphere(vec3 p) {
+	do {
+		float r1 = random_double();
+		float r2 = random_double();
+		float r3 = random_double();
+		vmul(p, 2.0, VEC3(r1,r2,r3));
+		vsub(p, p, VEC3(1,1,1));
+	} while (vsqlen(p) >= 1.0);
+}
+
 typedef struct hit_record_s {
 	float t;
 	vec3 p;
@@ -86,8 +96,14 @@ bool sphere_hit(hittable *p, const ray *r, float t_min, float t_max, hit_record 
 void color(vec3 col, const ray *r, hittable *world) {
 	if (!world->hit) return;
 	hit_record rec;
-	if (world->hit(world, r, 0.0, FLT_MAX, &rec)) {
-		vadd(col, rec.normal, VEC3(1, 1, 1));
+	// remove acne by starting at 0.001
+	if (world->hit(world, r, 0.001, FLT_MAX, &rec)) {
+		ray ray0;
+		vec3 target;
+		random_in_unit_sphere(target);
+		vadd(target, rec.normal, target);
+		rmake(&ray0, rec.p, target);
+		color(col, &ray0, world);
 		vmul(col, 0.5, col);
 	} else {
 		vec3 unit_direction;
@@ -140,8 +156,8 @@ int main() {
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
 			for (int s = 0; s < ns; s++) {
-				float u = (i + random_double()) / (float)nx;
-				float v = (j + random_double()) / (float)ny;
+				float u = ((float)i + random_double()) / (float)nx;
+				float v = ((float)j + random_double()) / (float)ny;
 				ray r;
 				get_ray(&cam, &r, u, v);
 				vec3 col0;
@@ -149,6 +165,10 @@ int main() {
 				vadd(col, col, col0);
 			}
 			vdiv(col, col, (float)ns);
+			// Gamma 2 correction (square root)
+			col[0] = sqrt(col[0]);
+			col[1] = sqrt(col[1]);
+			col[2] = sqrt(col[2]);
 
 			int ir = (int)(255.99*col[0]);
 			int ig = (int)(255.99*col[1]);
