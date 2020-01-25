@@ -12,6 +12,16 @@ inline float random_double() {
     return rand() / (RAND_MAX + 1.0);
 }
 
+void random_in_unit_sphere(vec3 p) {
+	do {
+		float r1 = random_double();
+		float r2 = random_double();
+		float r3 = random_double();
+		vmul(p, 2.0, VEC3(r1,r2,r3));
+		vsub(p, p, VEC3(1,1,1));
+	} while (vsqlen(p) >= 1.0);
+}
+
 typedef struct hit_record_s {
 	float t;
 	vec3 p;
@@ -87,7 +97,12 @@ void color(vec3 col, const ray *r, hittable *world) {
 	if (!world->hit) return;
 	hit_record rec;
 	if (world->hit(world, r, 0.0, FLT_MAX, &rec)) {
-		vadd(col, rec.normal, VEC3(1, 1, 1));
+		ray ray0;
+		vec3 target;
+		random_in_unit_sphere(target);
+		vadd(target, rec.normal, target);
+		rmake(&ray0, rec.p, target);
+		color(col, &ray0, world);
 		vmul(col, 0.5, col);
 	} else {
 		vec3 unit_direction;

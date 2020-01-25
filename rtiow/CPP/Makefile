@@ -1,4 +1,4 @@
-SRC:=$(wildcard *.cpp)
+SRC:=$(wildcard main*.cpp)
 PPM:=$(patsubst %.cpp,%.ppm,$(SRC))
 
 all: $(PPM)

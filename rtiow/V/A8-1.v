@@ -101,8 +101,7 @@ fn random_in_unit_sphere() vec.Vec3 {
 
 fn (world []Hittable) color(r ray.Ray) vec.Vec3 {
 	mut rec := HitRec{}
-	// remove acne by starting at 0.001
-	if world.hit(r, 0.001, math.max_f32, mut rec) {
+	if world.hit(r, 0, math.max_f32, mut rec) {
 		target := rec.p + rec.normal + random_in_unit_sphere()
 		return vec.mult(0.5, world.color(ray.Ray{rec.p, target - rec.p}))
 	} else {
@@ -156,8 +155,6 @@ fn main() {
 				col = col + world.color(r)
 			}
 			col = vec.div(col, ns)
-			// Gamma 2 correction (square root)
-			col = vec.Vec3{math.sqrt(col.x),math.sqrt(col.y),math.sqrt(col.z)}
 			ir := int(255.99 * col.x)
 			ig := int(255.99 * col.y)
 			ib := int(255.99 * col.z)

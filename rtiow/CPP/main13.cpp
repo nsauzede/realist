@@ -177,11 +177,11 @@ hitable *random_scene() {
 //#define DEBUG
 int main() {
     srand(0);
-    int rnd = rand();
-    rnd = rand();
-    fprintf(stderr, "rnd=%d\n", rnd);
-    float rndd = random_double();
-    fprintf(stderr, "rndd=%f\n", rndd);
+//    int rnd = rand();
+//    rnd = rand();
+//    fprintf(stderr, "rnd=%d\n", rnd);
+//    float rndd = random_double();
+//    fprintf(stderr, "rndd=%f\n", rndd);
 #ifdef DEBUG
 #if 0
     int nx = 2;//200
@@ -201,7 +201,7 @@ int main() {
 #else
     int nx = 200;//200
     int ny = 100;//100
-    int ns = 100;//100
+    int ns = 1;//100
 #endif
 #endif
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
