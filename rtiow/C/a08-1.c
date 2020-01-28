@@ -47,7 +47,7 @@ typedef struct hittable_s {
 bool list_hit(hittable *p, const ray *r, float t_min, float t_max, hit_record *rec) {
 	hit_record temp_rec;
 	bool hit_anything = false;
-	float closest_so_far = t_max;
+	double closest_so_far = t_max;
 	while (1) {
 		p++;
 		if (!p->hit) break;
@@ -155,16 +155,17 @@ int main() {
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
 			for (int s = 0; s < ns; s++) {
-				float u = (i + random_double()) / (float)nx;
-				float v = (j + random_double()) / (float)ny;
+				float u = (float)(i + random_double()) / (float)nx;
+				float v = (float)(j + random_double()) / (float)ny;
 				ray r;
 				get_ray(&cam, &r, u, v);
+//				rprint(&r); // 
 				vec3 col0;
 				color(col0, &r, world);
 				vadd(col, col, col0);
+				printf("  u=%f v=%f\n", u, v); // 
 			}
 			vdiv(col, col, (float)ns);
-
 			int ir = (int)(255.99*col[0]);
 			int ig = (int)(255.99*col[1]);
 			int ib = (int)(255.99*col[2]);

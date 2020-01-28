@@ -57,7 +57,9 @@ int main() {
                 float u = float(i + random_double()) / float(nx);
                 float v = float(j + random_double()) / float(ny);
                 ray r = cam.get_ray(u, v);
+//                r.print(); // 
                 col += color(r, world);
+                printf("  u=%f v=%f\n", u, v); // OK : identical
             }
             col /= float(ns);
             int ir = int(255.99*col[0]);
@@ -67,4 +69,3 @@ int main() {
         }
     }
 }
-

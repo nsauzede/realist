@@ -47,7 +47,7 @@ typedef struct hittable_s {
 bool list_hit(hittable *p, const ray *r, float t_min, float t_max, hit_record *rec) {
 	hit_record temp_rec;
 	bool hit_anything = false;
-	float closest_so_far = t_max;
+	double closest_so_far = t_max;
 	while (1) {
 		p++;
 		if (!p->hit) break;
