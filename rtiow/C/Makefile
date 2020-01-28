@@ -1,5 +1,7 @@
-SRC:=$(wildcard *.c)
+SRC:=$(wildcard a*.c)
 PPM:=$(patsubst %.c,%.ppm,$(SRC))
+
+#CC=$(CXX)
 
 all: $(PPM)
 	md5sum *.ppm
@@ -8,7 +10,7 @@ all: $(PPM)
 	$(CC) -o $@ $^ -O3 -lm
 
 %.ppm: %.elf
-	./$^ > $@
+	./$^ $(ARGS) > $@
 
 clean:
 	$(RM) *.elf *.ppm

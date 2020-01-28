@@ -1,6 +1,7 @@
 #ifndef VEC3_H__
 #define VEC3_H__
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -12,9 +13,20 @@ public:
     vec3() {}
     vec3(float e0, float e1, float e2) { e[0] = e0; e[1] = e1; e[2] = e2; }
 	void print() const {
+#if 0
 		printf("{%f, %f, %f}",
 			e[0], e[1], e[2]
 		);
+#else
+		union {
+			float v[3];
+			uint32_t i[3];
+		} u;
+		u.v[0] = e[0];
+		u.v[1] = e[1];
+		u.v[2] = e[2];
+		printf("{0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", u.i[0], u.i[1], u.i[2]);
+#endif
 	}
 
     inline float x() const { return e[0]; }
@@ -36,7 +48,7 @@ public:
     inline vec3& operator*=(const float t);
     inline vec3& operator/=(const float t);
 
-    inline float length() const { return sqrt(e[0]*e[0] + e[1]*e[1] + e[2]*e[2]); }
+    inline float length() const { return sqrtf(e[0]*e[0] + e[1]*e[1] + e[2]*e[2]); }
     inline float squared_length() const { return e[0]*e[0] + e[1]*e[1] + e[2]*e[2]; }
     inline void make_unit_vector();
 
@@ -49,12 +61,23 @@ inline std::istream& operator>>(std::istream &is, vec3 &t) {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const vec3 &t) {
+#if 1
     os << t.e[0] << " " << t.e[1] << " " << t.e[2];
+#else
+    union {
+    float v[3];
+    uint32_t i[3];
+    } u;
+    u.v[0] = t.e[0];
+    u.v[1] = t.e[1];
+    u.v[2] = t.e[2];
+    os << u.v[0] << " " << u.v[1] << " " << u.v[2];
+#endif
     return os;
 }
 
 inline void vec3::make_unit_vector() {
-    float k = 1.0 / sqrt(e[0]*e[0] + e[1]*e[1] + e[2]*e[2]);
+    float k = 1.0 / sqrtf(e[0]*e[0] + e[1]*e[1] + e[2]*e[2]);
     e[0] *= k; e[1] *= k; e[2] *= k;
 }
 
@@ -142,11 +165,17 @@ inline vec3& vec3::operator*=(const float t) {
 }
 
 inline vec3& vec3::operator/=(const float t) {
+#if 0
     float k = 1.0/t;
 
     e[0]  *= k;
     e[1]  *= k;
     e[2]  *= k;
+#else
+    e[0]  /= t;
+    e[1]  /= t;
+    e[2]  /= t;
+#endif
     return *this;
 }
 

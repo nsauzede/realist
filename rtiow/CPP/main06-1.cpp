@@ -12,7 +12,7 @@ float hit_sphere(const vec3& center, float radius, const ray& r) {
         return -1.0;
     }
     else {
-        return (-b - sqrt(discriminant) ) / (2.0*a);
+        return (-b - sqrtf(discriminant) ) / (2.0*a);
     }
 }
 

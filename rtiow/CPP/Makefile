@@ -8,7 +8,7 @@ all: $(PPM)
 	$(CXX) -o $@ $^ -O3 -lm
 
 %.ppm: %.elf
-	./$^ > $@
+	./$^ $(ARGS) > $@
 
 clean:
 	$(RM) *.elf *.ppm

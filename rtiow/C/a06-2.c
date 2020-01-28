@@ -55,7 +55,7 @@ bool sphere_hit(hittable *p, const ray *r, float t_min, float t_max, hit_record 
 	float c = vdot(oc, oc) - s->radius*s->radius;
 	float discriminant = b*b - a*c;
 	if (discriminant > 0) {
-		float temp = (-b - sqrt(discriminant))/a;
+		float temp = (-b - sqrtf(discriminant))/a;
 		if (temp < t_max && temp > t_min) {
 			rec->t = temp;
 			point_at_parameter(rec->p, r, rec->t);
@@ -63,7 +63,7 @@ bool sphere_hit(hittable *p, const ray *r, float t_min, float t_max, hit_record 
 			vdiv(rec->normal, rec->normal, s->radius);
 			return true;
 		}
-		temp = (-b + sqrt(discriminant))/a;
+		temp = (-b + sqrtf(discriminant))/a;
 		if (temp < t_max && temp > t_min) {
 			rec->t = temp;
 			point_at_parameter(rec->p, r, rec->t);

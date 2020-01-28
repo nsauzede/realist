@@ -1,13 +1,35 @@
 #include <iostream>
-#include "camera.h"
 #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
 #include "random.h"
 
+#if 1
+class camera {
+    public:
+        camera() {
+            lower_left_corner = vec3(-2.0, -1.0, -1.0);
+            horizontal = vec3(4.0, 0.0, 0.0);
+            vertical = vec3(0.0, 2.0, 0.0);
+            origin = vec3(0.0, 0.0, 0.0);
+        }
+        ray get_ray(float u, float v) {
+            return ray(origin,
+                       lower_left_corner + u*horizontal + v*vertical - origin);
+        }
+
+        vec3 origin;
+        vec3 lower_left_corner;
+        vec3 horizontal;
+        vec3 vertical;
+};
+#else
+#include "camera.h"
+#endif
+
 vec3 color(const ray& r, hitable *world/*, int depth*/) {
     hit_record rec;
-    if (world->hit(r, 0.001, MAXFLOAT, rec)) {
+    if (world->hit(r, 0.0, FLT_MAX, rec)) {
         vec3 target = rec.p + rec.normal + random_in_unit_sphere();
         return 0.5 * color(ray(rec.p, target - rec.p), world);
     }
@@ -18,6 +40,7 @@ vec3 color(const ray& r, hitable *world/*, int depth*/) {
     }
 }
 int main() {
+    srand(0);
     int nx = 200;
     int ny = 100;
     int ns = 100;
@@ -37,7 +60,6 @@ int main() {
                 col += color(r, world);
             }
             col /= float(ns);
-            col = vec3( sqrt(col[0]), sqrt(col[1]), sqrt(col[2]) );
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);
             int ib = int(255.99*col[2]);
