@@ -79,12 +79,8 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
             for (int s=0; s < ns; s++) {
-//                float u = (float)(i + random_double()) / float(nx);
-//                float v = (float)(j + random_double()) / float(ny);
-                double r1 = random_double();
-                double r2 = random_double();
-                double u = (i + r1) / nx;
-                double v = (j + r2) / ny;
+                float u = (float)(i + random_double()) / float(nx);
+                float v = (float)(j + random_double()) / float(ny);
 //                printf("r1=%f r2=%f u=%f v=%f\n", r1, r2, u, v);
                 ray r = cam.get_ray(u, v);
 //                r.print(); // OK : identical
