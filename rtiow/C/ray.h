@@ -16,8 +16,11 @@ typedef struct ray_s {
 } ray;
 
 API void rprint(const ray *r) {
+	printf("{");
 	vprint(r->origin);
+	printf(", ");
 	vprint(r->direction);
+	printf("}");
 }
 
 API void rmake(ray *l, const vec3 r1, const vec3 r2) {

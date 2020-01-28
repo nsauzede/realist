@@ -8,8 +8,27 @@ pub:
 //	x Scalar y Scalar z Scalar
 	x f32 y f32 z f32
 }
+
+union U0 {
+	v [3]f32
+	i [3]u32
+}
+
+struct S0 {
+	u U0
+}
+
 pub fn (a Vec3) str() string {
-	return '{$a.x, $a.y, $a.z}'
+//	return '{$a.x, $a.y, $a.z}'
+//	mut s0 := S0{}
+	mut u0 := U0{}
+	u0.v[0] = a.x
+	u0.v[1] = a.y
+	u0.v[2] = a.z
+	p1 := u0.i[0].hex()
+	p2 := u0.i[1].hex()
+	p3 := u0.i[2].hex()
+	return '{$p1, $p2, $p3}'
 }
 
 pub fn (a Vec3) +(b Vec3) Vec3 {

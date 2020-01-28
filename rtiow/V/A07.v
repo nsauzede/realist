@@ -96,8 +96,9 @@ fn color(r ray.Ray, world []Hittable) vec.Vec3 {
 	}
 }
 
-fn random_double() f32 {
-	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.)
+[inline]
+fn random_double() f64 {
+	return f64(rand.next(C.RAND_MAX)) / (f64(C.RAND_MAX) + f64(1.))
 }
 
 struct Camera {
@@ -134,12 +135,18 @@ fn main() {
 		for i := 0; i < nx; i++ {
 			mut col := vec.Vec3{0,0,0}
 			for s := 0; s < ns; s++ {
-				u := (f32(i) + random_double()) / f32(nx)
-				v := (f32(j) + random_double()) / f32(ny)
+				u := f32(f64(i) + random_double()) / f32(nx)
+				v := f32(f64(j) + random_double()) / f32(ny)
 				r := cam.get_ray(u, v)
+//				println('$r j=$j i=$i')
+//				println('$r u=$u v=$v')
+//				C.exit(0)
 				col = col + color(r, world)
 			}
+//			print('  j=$j i=$i')
+//			print(col)
 			col = vec.div(col, ns)
+//			print(col)
 			ir := int(255.99 * col.x)
 			ig := int(255.99 * col.y)
 			ib := int(255.99 * col.z)

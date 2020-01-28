@@ -122,6 +122,7 @@ class dielectric : public material {
         float ref_idx;
 };
 int main() {
+    srand(0);
     int nx = 200;
     int ny = 100;
     int ns = 100;

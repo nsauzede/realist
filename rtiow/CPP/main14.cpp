@@ -192,11 +192,12 @@ hitable *random_scene() {
 }
 //#define DEBUG
 int main(int argc, char *argv[]) {
+	srand(0);
 	char *fnameout = 0;
 	FILE *fout = stdout;
-	int nx = 5;
-	int ny = 5;
-	int ns = 1;
+	int nx = 200;
+	int ny = 100;
+	int ns = 4;
 	int arg = 1;
 	if (arg < argc) {
 		sscanf(argv[arg++], "%d", &nx);
@@ -210,7 +211,6 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-	srand(0);
 	unsigned char *bytes = 0;
 	size_t nbytes = 0;
 	if (fnameout) {

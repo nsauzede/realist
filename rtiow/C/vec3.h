@@ -1,15 +1,36 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include <inttypes.h>
+
 #include <math.h>
 
 typedef float vec3[3];
 #define VEC3(x,y,z) ((vec3){x, y, z})
 
 #define API static inline
+//#define API
 
 API void vprint(const vec3 r) {
+#if 0
 	printf("{%f, %f, %f}", r[0], r[1], r[2]);
+#else
+#if 1
+	union {
+		float v[3];
+		uint32_t i[3];
+	} u;
+	u.v[0] = r[0];
+	u.v[1] = r[1];
+	u.v[2] = r[2];
+	printf("{0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", u.i[0], u.i[1], u.i[2]);
+#else
+	printf("pointer : %d\n", (int)sizeof(void *));
+	printf("float : %d\n", (int)sizeof(float));
+	printf("double : %d\n", (int)sizeof(double));
+	exit(0);
+#endif
+#endif
 }
 
 API void vcopy(vec3 l, const vec3 r) {
@@ -23,7 +44,7 @@ API float vsqlen(const vec3 r) {
 }
 
 API float vlen(const vec3 r) {
-	return sqrt(vsqlen(r));
+	return sqrtf(vsqlen(r));
 }
 
 API void vadd(vec3 l, const vec3 r1, const vec3 r2) {
