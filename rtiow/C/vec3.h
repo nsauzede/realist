@@ -65,6 +65,12 @@ API void vmul(vec3 l, float r1, const vec3 r2) {
 	l[2] = r1 * r2[2];
 }
 
+API void vmulv(vec3 l, const vec3 r1, const vec3 r2) {
+	l[0] = r1[0] * r2[0];
+	l[1] = r1[1] * r2[1];
+	l[2] = r1[2] * r2[2];
+}
+
 API void vdiv(vec3 l, const vec3 r1, float r2) {
 	l[0] = r1[0] / r2;
 	l[1] = r1[1] / r2;
