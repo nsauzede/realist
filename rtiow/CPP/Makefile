@@ -4,8 +4,10 @@ PPM:=$(patsubst %.cpp,%.ppm,$(SRC))
 all: $(PPM)
 	md5sum *.ppm
 
+OPT=-O3
+#OPT=-O0 -g
 %.elf: %.cpp
-	$(CXX) -o $@ $^ -O3 -lm
+	$(CXX) -o $@ $^ $(OPT) -lm
 
 %.ppm: %.elf
 	./$^ $(ARGS) > $@

@@ -109,7 +109,7 @@ class dielectric : public material {
                reflect_prob = 1.0;
             }
 
-            if (random_double() < reflect_prob) {
+            if (random_f() < reflect_prob) {
                scattered = ray(rec.p, reflected);
             }
             else {
@@ -135,25 +135,25 @@ list[2] = new sphere(vec3(1,0,-1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3));
 list[3] = new sphere(vec3(-1,0,-1), 0.5, new dielectric(1.5));
 list[4] = new sphere(vec3(-1,0,-1), -0.45, new dielectric(1.5));
     hitable *world = new hitable_list(list,5);
-camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 30, float(nx)/float(ny));
+camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 30, (float)nx/(float)ny);
 #else
 float R = cos(M_PI/4);
 list[0] = new sphere(vec3(-R,0,-1), R, new lambertian(vec3(0, 0, 1)));
 list[1] = new sphere(vec3( R,0,-1), R, new lambertian(vec3(1, 0, 0)));
 hitable *world = new hitable_list(list,2);
-camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 90, float(nx)/float(ny));
+camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 90, (float)nx/(float)ny);
 #endif
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
             for (int s=0; s < ns; s++) {
-                float u = float(i + random_double()) / float(nx);
-                float v = float(j + random_double()) / float(ny);
+                float u = ((float)i + random_f()) / (float)nx;
+                float v = ((float)j + random_f()) / (float)ny;
                 ray r = cam.get_ray(u, v);
                 vec3 p = r.point_at_parameter(2.0);
                 col += color(r, world,0);
             }
-            col /= float(ns);
+            col /= (float)ns;
             col = vec3( sqrt(col[0]), sqrt(col[1]), sqrt(col[2]) );
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);

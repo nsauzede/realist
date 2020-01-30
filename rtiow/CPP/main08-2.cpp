@@ -4,7 +4,6 @@
 #include "float.h"
 #include "random.h"
 
-#if 1
 class camera {
     public:
         camera() {
@@ -23,15 +22,13 @@ class camera {
         vec3 horizontal;
         vec3 vertical;
 };
-#else
-#include "camera.h"
-#endif
 
-vec3 color(const ray& r, hitable *world/*, int depth*/) {
+vec3 color(const ray& r, hitable *world) {
     hit_record rec;
+    // remove acne by starting at 0.001
     if (world->hit(r, 0.001, FLT_MAX, rec)) {
-        vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-        return 0.5 * color(ray(rec.p, target - rec.p), world);
+        vec3 target = rec.normal + random_in_unit_sphere();
+        return 0.5 * color(ray(rec.p, target), world);
     }
     else {
         vec3 unit_direction = unit_vector(r.direction());
@@ -54,12 +51,12 @@ int main() {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
             for (int s=0; s < ns; s++) {
-                float u = float(i + random_double()) / float(nx);
-                float v = float(j + random_double()) / float(ny);
+                float u = ((float)i + random_f()) / (float)nx;
+                float v = ((float)j + random_f()) / (float)ny;
                 ray r = cam.get_ray(u, v);
                 col += color(r, world);
             }
-            col /= float(ns);
+            col /= (float)ns;
             col = vec3( sqrtf(col[0]), sqrtf(col[1]), sqrtf(col[2]) );
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);

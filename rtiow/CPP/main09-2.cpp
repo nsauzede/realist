@@ -76,13 +76,13 @@ int main() {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
             for (int s=0; s < ns; s++) {
-                float u = float(i + random_double()) / float(nx);
-                float v = float(j + random_double()) / float(ny);
+                float u = ((float)i + random_f()) / (float)nx;
+                float v = ((float)j + random_f()) / (float)ny;
                 ray r = cam.get_ray(u, v);
                 vec3 p = r.point_at_parameter(2.0);
                 col += color(r, world,0);
             }
-            col /= float(ns);
+            col /= (float)ns;
             col = vec3( sqrtf(col[0]), sqrtf(col[1]), sqrtf(col[2]) );
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);

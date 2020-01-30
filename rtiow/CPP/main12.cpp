@@ -109,7 +109,7 @@ class dielectric : public material {
                reflect_prob = 1.0;
             }
 
-            if (random_double() < reflect_prob) {
+            if (random_f() < reflect_prob) {
                scattered = ray(rec.p, reflected);
             }
             else {
@@ -142,18 +142,18 @@ float dist_to_focus = (lookfrom-lookat).length();
 float aperture = 2.0;
 
 camera cam(lookfrom, lookat, vec3(0,1,0), 20,
-           float(nx)/float(ny), aperture, dist_to_focus);
+           (float)nx/(float)ny, aperture, dist_to_focus);
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
             for (int s=0; s < ns; s++) {
-                float u = float(i + random_double()) / float(nx);
-                float v = float(j + random_double()) / float(ny);
+                float u = ((float)i + random_f()) / (float)nx;
+                float v = ((float)j + random_f()) / (float)ny;
                 ray r = cam.get_ray(u, v);
                 vec3 p = r.point_at_parameter(2.0);
                 col += color(r, world,0);
             }
-            col /= float(ns);
+            col /= (float)ns;
             col = vec3( sqrt(col[0]), sqrt(col[1]), sqrt(col[2]) );
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);
