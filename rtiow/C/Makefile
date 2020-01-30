@@ -6,8 +6,10 @@ PPM:=$(patsubst %.c,%.ppm,$(SRC))
 all: $(PPM)
 	md5sum *.ppm
 
+OPT=-O3
+#OPT=-O0 -g
 %.elf: %.c
-	$(CC) -o $@ $^ -O3 -lm
+	$(CC) -o $@ $^ $(OPT) -lm
 
 %.ppm: %.elf
 	./$^ $(ARGS) > $@

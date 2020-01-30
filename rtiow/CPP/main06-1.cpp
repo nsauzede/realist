@@ -38,8 +38,8 @@ int main() {
     vec3 origin(0.0, 0.0, 0.0);
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
-            float u = float(i) / float(nx);
-            float v = float(j) / float(ny);
+            float u = (float)i / (float)nx;
+            float v = (float)j / (float)ny;
             ray r(origin, lower_left_corner + u*horizontal + v*vertical);
 //            r.print();exit(0);
             vec3 col = color(r);

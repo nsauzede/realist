@@ -4,7 +4,6 @@
 #include "float.h"
 #include "random.h"
 
-#if 0
 class camera {
     public:
         camera() {
@@ -17,15 +16,12 @@ class camera {
             return ray(origin,
                        lower_left_corner + u*horizontal + v*vertical - origin);
         }
-            
+
         vec3 origin;
         vec3 lower_left_corner;
         vec3 horizontal;
         vec3 vertical;
 };
-#else
-#include "camera.h"
-#endif
 
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
@@ -47,7 +43,7 @@ vec3 color(const ray& r, hitable *world, int depth) {
 }
 
 vec3 reflect(const vec3& v, const vec3& n) {
-    return v - 2*dot(v,n)*n;
+    return v - 2.*dot(v,n)*n;
 }
 
 class metal : public material {
@@ -71,8 +67,8 @@ class lambertian : public material {
         virtual bool scatter(const ray& r_in, const hit_record& rec,
             vec3& attenuation, ray& scattered) const
         {
-             vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-             scattered = ray(rec.p, target-rec.p);
+             vec3 target = rec.normal + random_in_unit_sphere();
+             scattered = ray(rec.p, target);
              attenuation = albedo;
              return true;
         }
@@ -96,13 +92,13 @@ int main() {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
             for (int s=0; s < ns; s++) {
-                float u = float(i + random_double()) / float(nx);
-                float v = float(j + random_double()) / float(ny);
+                float u = ((float)i + random_f()) / (float)nx;
+                float v = ((float)j + random_f()) / (float)ny;
                 ray r = cam.get_ray(u, v);
                 vec3 p = r.point_at_parameter(2.0);
                 col += color(r, world,0);
             }
-            col /= float(ns);
+            col /= (float)ns;
             col = vec3( sqrtf(col[0]), sqrtf(col[1]), sqrtf(col[2]) );
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);

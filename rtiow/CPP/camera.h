@@ -7,8 +7,8 @@
 vec3 random_in_unit_disk() {
     vec3 p;
     do {
-        float r1 = random_double();
-        float r2 = random_double();
+        float r1 = random_f();
+        float r2 = random_f();
         p = 2.0*vec3(r1,r2,0) - vec3(1,1,0);
     } while (dot(p,p) >= 1.0);
     return p;

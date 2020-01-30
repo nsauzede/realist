@@ -8,15 +8,15 @@
 #include "vec3.h"
 #include "ray.h"
 
-inline double random_double() {
-    return rand() / (RAND_MAX + 1.0);
+static inline float random_f() {
+    return (float)rand() / ((float)RAND_MAX + (float)1.0);
 }
 
 void random_in_unit_sphere(vec3 p) {
 	do {
-		float r1 = random_double();
-		float r2 = random_double();
-		float r3 = random_double();
+		float r1 = random_f();
+		float r2 = random_f();
+		float r3 = random_f();
 		vmul(p, 2.0, VEC3(r1,r2,r3));
 		vsub(p, p, VEC3(1,1,1));
 	} while (vsqlen(p) >= 1.0);
@@ -78,7 +78,7 @@ typedef struct hittable_s {
 bool list_hit(hittable_t *p, const ray *r, float t_min, float t_max, hit_record *rec) {
 	hit_record temp_rec;
 	bool hit_anything = false;
-	double closest_so_far = t_max;
+	float closest_so_far = t_max;
 	while (1) {
 		p++;
 		if (!p->hit) break;
@@ -133,15 +133,15 @@ bool lambertian_scatter(struct material_s *p, const ray *r_in, const hit_record 
 }
 
 void reflect(vec3 l, const vec3 v, const vec3 n) {
-	vmul(l, -2. * vdot(v, n), n);
-	vadd(l, v, l);
+	vmul(l, (float)2. * vdot(v, n), n);
+	vsub(l, v, l);
 }
 
 bool metal_scatter(struct material_s *p, const ray *r_in, const hit_record *rec, vec3 attenuation, ray *scattered) {
 	metal_t *m = &p->u.metal;
-	vec3 reflected;
-	unit_vector(reflected, r_in->direction);
-	reflect(reflected, reflected, rec->normal);
+	vec3 uvector, reflected;
+	unit_vector(uvector, r_in->direction);
+	reflect(reflected, uvector, rec->normal);
 	rmake(scattered, rec->p, reflected);
 	vcopy(attenuation, m->albedo);
 	return vdot(scattered->direction, rec->normal) > 0;
@@ -214,8 +214,8 @@ int main() {
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
 			for (int s = 0; s < ns; s++) {
-				float u = ((float)i + random_double()) / (float)nx;
-				float v = ((float)j + random_double()) / (float)ny;
+				float u = ((float)i + random_f()) / (float)nx;
+				float v = ((float)j + random_f()) / (float)ny;
 				ray r;
 				get_ray(&cam, &r, u, v);
 				vec3 col0;

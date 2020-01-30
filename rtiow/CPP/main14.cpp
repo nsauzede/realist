@@ -19,7 +19,7 @@ void print_rec(hit_record& rec) {
 
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
-//    printf("%f\n", float(MAXFLOAT));
+//    printf("%f\n", (float)MAXFLOAT);
     if (world->hit(r, 0.001, MAXFLOAT, rec)) {
 //        print_rec(rec);
         ray scattered;
@@ -125,7 +125,7 @@ class dielectric : public material {
                reflect_prob = 1.0;
             }
 
-            if (random_double() < reflect_prob) {
+            if (random_f() < reflect_prob) {
                scattered = ray(rec.p, reflected);
             }
             else {
@@ -147,30 +147,30 @@ hitable *random_scene() {
     const int N = 11; //11
     for (int a = -N; a < N; a++) {
         for (int b = -N; b < N; b++) {
-            float choose_mat = random_double();
+            float choose_mat = random_f();
 //    if (i < 3)fprintf(stderr, "choose_mat=%f\n", choose_mat);
-            double r1 = random_double();
-            double r2 = random_double();
+            float r1 = random_f();
+            float r2 = random_f();
             vec3 center(a+0.9*r2,0.2,b+0.9*r1);
 //            fprintf(stderr, "a=%d b=%d center={%f, %f. %f}\n", a, b, center.x(), center.y(), center.z());
             if ((center-vec3(4,0.2,0)).length() > 0.9) {
                 if (choose_mat < 0.8) {  // diffuse
-            double r1 = random_double();
-            double r2 = random_double();
-            double r3 = random_double();
-            double r4 = random_double();
-            double r5 = random_double();
-            double r6 = random_double();
+            float r1 = random_f();
+            float r2 = random_f();
+            float r3 = random_f();
+            float r4 = random_f();
+            float r5 = random_f();
+            float r6 = random_f();
                     list[i++] = new sphere(center, 0.2,
                         new lambertian(vec3(r6*r5,r4*r3,r2*r1)
                         )
                     );
                 }
                 else if (choose_mat < 0.95) { // metal
-            double r1 = random_double();
-            double r2 = random_double();
-            double r3 = random_double();
-            double r4 = random_double();
+            float r1 = random_f();
+            float r2 = random_f();
+            float r3 = random_f();
+            float r4 = random_f();
                     list[i++] = new sphere(center, 0.2,
                             new metal(vec3(0.5*(1 + r4),
                                            0.5*(1 + r3),
@@ -232,15 +232,15 @@ int main(int argc, char *argv[]) {
 		lookfrom,
 		lookat,
 		vec3(0, 1, 0),
-		30, float(nx)/float(ny),
+		30, (float)nx/(float)ny,
 		aperture,
 		dist_to_focus);
 	for (int j = ny-1; j >= 0; j--) {
 		for (int i = 0; i < nx; i++) {
 			vec3 col(0, 0, 0);
 			for (int s=0; s < ns; s++) {
-				float u = float(i + random_double()) / float(nx);
-				float v = float(j + random_double()) / float(ny);
+				float u = ((float)i + random_f()) / (float)nx;
+				float v = ((float)j + random_f()) / (float)ny;
 //				printf("u=%f v=%f ", u, v);
 				ray r = cam.get_ray(u, v);
 //				printf("r=");r.print();printf(" ");
@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
 				col += c0;
 			}
 //			col.print();
-			col /= float(ns);
+			col /= (float)ns;
 			col = vec3( sqrt(col[0]), sqrt(col[1]), sqrt(col[2]) );
 			int ir = int(255.99*col[0]);
 			int ig = int(255.99*col[1]);
