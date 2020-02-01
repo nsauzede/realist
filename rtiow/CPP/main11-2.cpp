@@ -19,35 +19,14 @@ class camera {
             lower_left_corner = origin - half_width*u - half_height*v - w;
             horizontal = 2*half_width*u;
             vertical = 2*half_height*v;
-#if 0
-            origin.print();printf("\n");
-            lower_left_corner.print();printf("\n");
-            horizontal.print();printf("\n");
-            vertical.print();printf("\n");
-#endif
         }
 
 	ray get_ray(float s, float t) {
-#if 0
-	// this one differs slightly from C -- why ?
-	// undefined evaluation order ?
-		return ray(origin,
-			lower_left_corner + s*horizontal + t*vertical - origin);
-#else
-	// this one matches C
-	// forced serialized order
-//		printf("s=%f t=%f\n", s, t);
 		vec3 direction, direction0, direction1;
 		direction0 = t*vertical;
-//		direction0.print();printf("\n");
 		direction1 = s*horizontal;
-//		direction1.print();printf("\n");
 		direction = direction0 + direction1;
-//		direction.print();printf("\n");
-		ray r = ray(origin,
-			lower_left_corner + direction - origin);
-//		r.print();printf("\n");
-#endif
+		ray r = ray(origin, lower_left_corner + direction - origin);
 		return r;
 	}
 
@@ -59,9 +38,7 @@ class camera {
 
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
-//    r.print();
     if (world->hit(r, 0.001, FLT_MAX, rec)) {
-//	printf("HIT\n");
         ray scattered;
         vec3 attenuation;
         if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
@@ -72,7 +49,6 @@ vec3 color(const ray& r, hitable *world, int depth) {
         }
     }
     else {
-//	printf("NOT HIT\n");
         vec3 unit_direction = unit_vector(r.direction());
         float t = 0.5*(unit_direction.y() + 1.0);
         return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
@@ -204,8 +180,6 @@ list[n++] = new sphere(vec3(-1,0,-1), -0.45, new dielectric(1.5));
             for (int s=0; s < ns; s++) {
                 float u = ((float)i + random_f()) / (float)nx;
                 float v = ((float)j + random_f()) / (float)ny;
-//                printf("u=%g v=%g rfcnt=%lu riuscnt=%lu\n", u, v, rfcnt, riuscnt);
-//                printf("j=%d i=%d s=%d riuscnt=%lu\n", j, i, s, riuscnt);
                 ray r = cam.get_ray(u, v);
                 vec3 p = r.point_at_parameter(2.0);
                 col += color(r, world,0);
