@@ -1,9 +1,40 @@
 #include <iostream>
-#include "camera.h"
 #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
 #include "random.h"
+
+class camera {
+    public:
+        camera(vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect) {
+            // vfov is top to bottom in degrees
+            vec3 u, v, w;
+            float theta = vfov*M_PI/180;
+            float half_height = tanf(theta/2);
+            float half_width = aspect * half_height;
+            origin = lookfrom;
+            w = unit_vector(lookfrom - lookat);
+            u = unit_vector(cross(vup, w));
+            v = cross(w, u);
+            lower_left_corner = origin - half_width*u - half_height*v - w;
+            horizontal = 2*half_width*u;
+            vertical = 2*half_height*v;
+        }
+
+	ray get_ray(float s, float t) {
+		vec3 direction, direction0, direction1;
+		direction0 = t*vertical;
+		direction1 = s*horizontal;
+		direction = direction0 + direction1;
+		ray r = ray(origin, lower_left_corner + direction - origin);
+		return r;
+	}
+
+	vec3 origin;
+	vec3 lower_left_corner;
+	vec3 horizontal;
+	vec3 vertical;
+};
 
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
@@ -51,14 +82,15 @@ class lambertian : public material {
         virtual bool scatter(const ray& r_in, const hit_record& rec,
             vec3& attenuation, ray& scattered) const
         {
-             vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-             scattered = ray(rec.p, target-rec.p);
+             vec3 target = rec.normal + random_in_unit_sphere();
+             scattered = ray(rec.p, target);
              attenuation = albedo;
              return true;
         }
 
         vec3 albedo;
 };
+
 bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
     vec3 uv = unit_vector(v);
     float dt = dot(uv, n);
@@ -70,6 +102,7 @@ bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
     else
         return false;
 }
+
 float schlick(float cosine, float ref_idx) {
     float r0 = (1-ref_idx) / (1+ref_idx);
     r0 = r0*r0;
@@ -85,35 +118,34 @@ class dielectric : public material {
             float ni_over_nt;
             attenuation = vec3(1.0, 1.0, 1.0);
             vec3 refracted;
-
             float reflect_prob;
             float cosine;
 
             if (dot(r_in.direction(), rec.normal) > 0) {
-                 outward_normal = -rec.normal;
-                 ni_over_nt = ref_idx;
-                 cosine = ref_idx * dot(r_in.direction(), rec.normal)
-                        / r_in.direction().length();
+                outward_normal = -rec.normal;
+                ni_over_nt = ref_idx;
+                cosine = ref_idx * dot(r_in.direction(), rec.normal)
+                       / r_in.direction().length();
             }
             else {
-                 outward_normal = rec.normal;
-                 ni_over_nt = 1.0 / ref_idx;
-                 cosine = -dot(r_in.direction(), rec.normal)
-                        / r_in.direction().length();
+                outward_normal = rec.normal;
+                ni_over_nt = 1.0 / ref_idx;
+                cosine = -dot(r_in.direction(), rec.normal)
+                       / r_in.direction().length();
             }
 
             if (refract(r_in.direction(), outward_normal, ni_over_nt, refracted)) {
-               reflect_prob = schlick(cosine, ref_idx);
+                reflect_prob = schlick(cosine, ref_idx);
             }
             else {
-               reflect_prob = 1.0;
+                reflect_prob = 1.0;
             }
 
             if (random_f() < reflect_prob) {
-               scattered = ray(rec.p, reflected);
+                scattered = ray(rec.p, reflected);
             }
             else {
-               scattered = ray(rec.p, refracted);
+                scattered = ray(rec.p, refracted);
             }
 
             return true;
@@ -127,22 +159,15 @@ int main() {
     int ny = 100;
     int ns = 100;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+    int n = 0;
     hitable *list[5];
-#if 1
-list[0] = new sphere(vec3(0,0,-1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5)));
-list[1] = new sphere(vec3(0,-100.5,-1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
-list[2] = new sphere(vec3(1,0,-1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3));
-list[3] = new sphere(vec3(-1,0,-1), 0.5, new dielectric(1.5));
-list[4] = new sphere(vec3(-1,0,-1), -0.45, new dielectric(1.5));
-    hitable *world = new hitable_list(list,5);
-camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 30, (float)nx/(float)ny);
-#else
-float R = cos(M_PI/4);
-list[0] = new sphere(vec3(-R,0,-1), R, new lambertian(vec3(0, 0, 1)));
-list[1] = new sphere(vec3( R,0,-1), R, new lambertian(vec3(1, 0, 0)));
-hitable *world = new hitable_list(list,2);
-camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 90, (float)nx/(float)ny);
-#endif
+list[n++] = new sphere(vec3(0,0,-1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5)));
+list[n++] = new sphere(vec3(0,-100.5,-1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
+list[n++] = new sphere(vec3(1,0,-1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3));
+list[n++] = new sphere(vec3(-1,0,-1), 0.5, new dielectric(1.5));
+list[n++] = new sphere(vec3(-1,0,-1), -0.45, new dielectric(1.5));
+    hitable *world = new hitable_list(list,n);
+    camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 20, (float)nx/(float)ny);
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
