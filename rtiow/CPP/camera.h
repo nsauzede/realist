@@ -27,7 +27,7 @@ public:
 		float focus_dist = (lookfrom-lookat).length();
             lens_radius = aperture / 2;
             float theta = vfov*M_PI/180;
-            float half_height = tan(theta/2);
+            float half_height = tanf(theta/2);
             float half_width = aspect * half_height;
             origin = lookfrom;
             w = unit_vector(lookfrom - lookat);
@@ -45,7 +45,7 @@ public:
                float aperture, float focus_dist) {
             lens_radius = aperture / 2;
             float theta = vfov*M_PI/180;
-            float half_height = tan(theta/2);
+            float half_height = tanf(theta/2);
             float half_width = aspect * half_height;
             origin = lookfrom;
             w = unit_vector(lookfrom - lookat);
