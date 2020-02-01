@@ -80,7 +80,7 @@ bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
     float dt = dot(uv, n);
     float discriminant = 1.0 - ni_over_nt*ni_over_nt*(1-dt*dt);
     if (discriminant > 0) {
-        refracted = ni_over_nt*(uv - n*dt) - n*sqrt(discriminant);
+        refracted = ni_over_nt*(uv - n*dt) - n*sqrtf(discriminant);
         return true;
     }
     else
@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
 			}
 //			col.print();
 			col /= (float)ns;
-			col = vec3( sqrt(col[0]), sqrt(col[1]), sqrt(col[2]) );
+			col = vec3( sqrtf(col[0]), sqrtf(col[1]), sqrtf(col[2]) );
 			int ir = int(255.99*col[0]);
 			int ig = int(255.99*col[1]);
 			int ib = int(255.99*col[2]);
