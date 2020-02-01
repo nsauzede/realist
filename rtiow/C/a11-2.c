@@ -8,11 +8,27 @@
 #include "vec3.h"
 #include "ray.h"
 
-static inline float random_f() {
-    return (float)rand() / ((float)RAND_MAX + (float)1.0);
+#ifdef DEBUG
+extern unsigned long rfcnt;
+#define INLINE
+#else
+#define INLINE static inline
+#endif
+
+INLINE float random_f() {
+#ifdef DEBUG
+	rfcnt++;
+#endif
+	return (float)rand() / ((float)RAND_MAX + (float)1.0);
 }
 
+#ifdef DEBUG
+extern unsigned long riuscnt;
+#endif
 void random_in_unit_sphere(vec3 p) {
+#ifdef DEBUG
+	riuscnt++;
+#endif
 	do {
 		float r1 = random_f();
 		float r2 = random_f();
@@ -224,7 +240,9 @@ void color(vec3 col, const ray *r, hittable_t *world, int depth) {
 	if (!world->hit) return;
 	hit_record rec;
 	// remove acne by starting at 0.001
+//	rprint(r);
 	if (world->hit(world, r, 0.001, FLT_MAX, &rec)) {
+//		printf("HIT\n");
 		ray scattered;
 		vec3 attenuation;
 		if (depth < 50 && rec.mat_ptr->scatter(rec.mat_ptr, r, &rec, attenuation, &scattered)) {
@@ -235,6 +253,7 @@ void color(vec3 col, const ray *r, hittable_t *world, int depth) {
 			vcopy(col, VEC3(0, 0, 0));
 		}
 	} else {
+//		printf("NOT HIT\n");
 		vec3 unit_direction;
 		unit_vector(unit_direction, r->direction);
 		float t = 0.5*(unit_direction[1] + 1.0);
@@ -275,17 +294,33 @@ void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
 	vsub(cam->lower_left_corner, cam->lower_left_corner, w);
 	vmul(cam->horizontal, 2 * half_width, u);
 	vmul(cam->vertical, 2 * half_height, v);
+#if 0
+	vprint(cam->origin);printf("\n");
+	vprint(cam->lower_left_corner);printf("\n");
+	vprint(cam->horizontal);printf("\n");
+	vprint(cam->vertical);printf("\n");
+#endif
 }
 
 void get_ray(camera *cam, ray *r, float s, float t) {
+//	printf("s=%f t=%f\n", s, t);
 	vec3 direction, direction0, direction1;
 	vmul(direction0, t, cam->vertical);
+//	vprint(direction0);printf("\n");
 	vmul(direction1, s, cam->horizontal);
+//	vprint(direction1);printf("\n");
 	vadd(direction, direction0, direction1);
+//	vprint(direction);printf("\n");
 	vadd(direction, direction, cam->lower_left_corner);
 	vsub(direction, direction, cam->origin);
 	rmake(r, cam->origin, direction);
+//	rprint(r);printf("\n");
 }
+
+#ifdef DEBUG
+unsigned long rfcnt = 0;
+unsigned long riuscnt = 0;
+#endif
 
 int main() {
 	srand(0);
@@ -311,6 +346,8 @@ int main() {
 			for (int s = 0; s < ns; s++) {
 				float u = ((float)i + random_f()) / (float)nx;
 				float v = ((float)j + random_f()) / (float)ny;
+//				printf("u=%g v=%g rfcnt=%lu riuscnt=%lu\n", u, v, rfcnt, riuscnt);
+//				printf("j=%d i=%d s=%d riuscnt=%lu\n", j, i, s, riuscnt);
 				ray r;
 				get_ray(&cam, &r, u, v);
 				vec3 col0;

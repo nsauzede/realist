@@ -12,8 +12,9 @@ typedef float vec3[3];
 //#define API
 
 API void vprint(const vec3 r) {
-#if 0
-	printf("{%f, %f, %f}", r[0], r[1], r[2]);
+#if 1
+//	printf("{%f, %f, %f}", r[0], r[1], r[2]);
+	printf("{%g, %g, %g}", r[0], r[1], r[2]);
 #else
 #if 1
 	union {

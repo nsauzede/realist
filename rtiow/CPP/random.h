@@ -5,11 +5,25 @@
 
 #include "vec3.h"
 
-inline float random_f() {
+#ifdef DEBUG
+extern unsigned long rfcnt;
+#define INLINE
+#else
+#define INLINE inline
+#endif
+
+INLINE float random_f() {
+#ifdef DEBUG
+	rfcnt++;
+#endif
         return (float)rand() / ((float)RAND_MAX + (float)1.0);
 }
+//extern unsigned long riuscnt;
 vec3 random_in_unit_sphere() {
     vec3 p;
+#ifdef DEBUG
+    riuscnt++;
+#endif
     do {
         float r1 = random_f();
         float r2 = random_f();

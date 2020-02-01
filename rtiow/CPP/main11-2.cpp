@@ -19,22 +19,49 @@ class camera {
             lower_left_corner = origin - half_width*u - half_height*v - w;
             horizontal = 2*half_width*u;
             vertical = 2*half_height*v;
+#if 0
+            origin.print();printf("\n");
+            lower_left_corner.print();printf("\n");
+            horizontal.print();printf("\n");
+            vertical.print();printf("\n");
+#endif
         }
 
-        ray get_ray(float s, float t) {
-            return ray(origin,
-                       lower_left_corner + s*horizontal + t*vertical - origin);
-        }
+	ray get_ray(float s, float t) {
+#if 0
+	// this one differs slightly from C -- why ?
+	// undefined evaluation order ?
+		return ray(origin,
+			lower_left_corner + s*horizontal + t*vertical - origin);
+#else
+	// this one matches C
+	// forced serialized order
+//		printf("s=%f t=%f\n", s, t);
+		vec3 direction, direction0, direction1;
+		direction0 = t*vertical;
+//		direction0.print();printf("\n");
+		direction1 = s*horizontal;
+//		direction1.print();printf("\n");
+		direction = direction0 + direction1;
+//		direction.print();printf("\n");
+		ray r = ray(origin,
+			lower_left_corner + direction - origin);
+//		r.print();printf("\n");
+#endif
+		return r;
+	}
 
-        vec3 origin;
-        vec3 lower_left_corner;
-        vec3 horizontal;
-        vec3 vertical;
+	vec3 origin;
+	vec3 lower_left_corner;
+	vec3 horizontal;
+	vec3 vertical;
 };
 
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
-    if (world->hit(r, 0.001, MAXFLOAT, rec)) {
+//    r.print();
+    if (world->hit(r, 0.001, FLT_MAX, rec)) {
+//	printf("HIT\n");
         ray scattered;
         vec3 attenuation;
         if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
@@ -45,6 +72,7 @@ vec3 color(const ray& r, hitable *world, int depth) {
         }
     }
     else {
+//	printf("NOT HIT\n");
         vec3 unit_direction = unit_vector(r.direction());
         float t = 0.5*(unit_direction.y() + 1.0);
         return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
@@ -150,19 +178,25 @@ class dielectric : public material {
         float ref_idx;
 };
 
+#ifdef DEBUG
+unsigned long rfcnt = 0;
+unsigned long riuscnt = 0;
+#endif
+
 int main() {
     srand(0);
     int nx = 200;
     int ny = 100;
     int ns = 100;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+    int n = 0;
     hitable *list[5];
-list[0] = new sphere(vec3(0,0,-1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5)));
-list[1] = new sphere(vec3(0,-100.5,-1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
-list[2] = new sphere(vec3(1,0,-1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3));
-list[3] = new sphere(vec3(-1,0,-1), 0.5, new dielectric(1.5));
-list[4] = new sphere(vec3(-1,0,-1), -0.45, new dielectric(1.5));
-    hitable *world = new hitable_list(list,5);
+list[n++] = new sphere(vec3(0,0,-1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5)));
+list[n++] = new sphere(vec3(0,-100.5,-1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
+list[n++] = new sphere(vec3(1,0,-1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3));
+list[n++] = new sphere(vec3(-1,0,-1), 0.5, new dielectric(1.5));
+list[n++] = new sphere(vec3(-1,0,-1), -0.45, new dielectric(1.5));
+    hitable *world = new hitable_list(list,n);
     camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 90, (float)nx/(float)ny);
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
@@ -170,6 +204,8 @@ list[4] = new sphere(vec3(-1,0,-1), -0.45, new dielectric(1.5));
             for (int s=0; s < ns; s++) {
                 float u = ((float)i + random_f()) / (float)nx;
                 float v = ((float)j + random_f()) / (float)ny;
+//                printf("u=%g v=%g rfcnt=%lu riuscnt=%lu\n", u, v, rfcnt, riuscnt);
+//                printf("j=%d i=%d s=%d riuscnt=%lu\n", j, i, s, riuscnt);
                 ray r = cam.get_ray(u, v);
                 vec3 p = r.point_at_parameter(2.0);
                 col += color(r, world,0);

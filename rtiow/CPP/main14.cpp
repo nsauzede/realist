@@ -19,9 +19,7 @@ void print_rec(hit_record& rec) {
 
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
-//    printf("%f\n", (float)MAXFLOAT);
-    if (world->hit(r, 0.001, MAXFLOAT, rec)) {
-//        print_rec(rec);
+    if (world->hit(r, 0.001, FLT_MAX, rec)) {
         ray scattered;
         vec3 attenuation;
         if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
