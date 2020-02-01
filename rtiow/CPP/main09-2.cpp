@@ -1,9 +1,27 @@
 #include <iostream>
-#include "camera.h"
 #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
 #include "random.h"
+
+class camera {
+    public:
+        camera() {
+            lower_left_corner = vec3(-2.0, -1.0, -1.0);
+            horizontal = vec3(4.0, 0.0, 0.0);
+            vertical = vec3(0.0, 2.0, 0.0);
+            origin = vec3(0.0, 0.0, 0.0);
+        }
+        ray get_ray(float u, float v) {
+            return ray(origin,
+                       lower_left_corner + u*horizontal + v*vertical - origin);
+        }
+
+        vec3 origin;
+        vec3 lower_left_corner;
+        vec3 horizontal;
+        vec3 vertical;
+};
 
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
@@ -51,8 +69,8 @@ class lambertian : public material {
         virtual bool scatter(const ray& r_in, const hit_record& rec,
             vec3& attenuation, ray& scattered) const
         {
-             vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-             scattered = ray(rec.p, target-rec.p);
+             vec3 target = rec.normal + random_in_unit_sphere();
+             scattered = ray(rec.p, target);
              attenuation = albedo;
              return true;
         }
