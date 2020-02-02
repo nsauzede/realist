@@ -4,16 +4,6 @@
 #include "random.h"
 #include "ray.h"
 
-vec3 random_in_unit_disk() {
-    vec3 p;
-    do {
-        float r1 = random_f();
-        float r2 = random_f();
-        p = 2.0*vec3(r1,r2,0) - vec3(1,1,0);
-    } while (dot(p,p) >= 1.0);
-    return p;
-}
-
 class camera {
 public:
 	camera() {
@@ -33,7 +23,6 @@ public:
             w = unit_vector(lookfrom - lookat);
             u = unit_vector(cross(vup, w));
             v = cross(w, u);
-//            printf("HERE\n");
             lower_left_corner = origin
                               - half_width * focus_dist * u
                               - half_height * focus_dist * v
@@ -51,7 +40,6 @@ public:
             w = unit_vector(lookfrom - lookat);
             u = unit_vector(cross(vup, w));
             v = cross(w, u);
-//            printf("HERE\n");
             lower_left_corner = origin
                               - half_width * focus_dist * u
                               - half_height * focus_dist * v
@@ -59,14 +47,41 @@ public:
             horizontal = 2*half_width*focus_dist*u;
             vertical = 2*half_height*focus_dist*v;
         }
+	void print() {
+		printf("Origin: ");origin.print();
+		printf("\nLower_left: ");lower_left_corner.print();
+		printf("\nhorizontal: ");horizontal.print();
+		printf("\nvertical: ");vertical.print();
+		printf("\nu: ");u.print();
+		printf("\nv: ");v.print();
+		printf("\nw: ");w.print();
+		printf("\nlens_radius=%f\n", lens_radius);
+	}
 
-        ray get_ray(float s, float t) {
-            vec3 rd = lens_radius*random_in_unit_disk();
-            vec3 offset = u * rd.x() + v * rd.y();
-            return ray(origin + offset,
-                       lower_left_corner + s*horizontal + t*vertical
-                           - origin - offset);
-        }
+	ray get_ray(float s, float t) {
+#ifdef DEBUG
+		printf("s=%g t=%g\n", s, t);
+#endif
+#if 0
+		vec3 rd = lens_radius*random_in_unit_disk();
+		vec3 offset = u * rd.x() + v * rd.y();
+		return ray(origin + offset,
+			lower_left_corner + s*horizontal + t*vertical
+			- origin - offset);
+#else
+		vec3 rd = lens_radius*random_in_unit_disk();
+		vec3 offset = u * rd.x() + v * rd.y();
+		vec3 direction, direction0, direction1;
+		direction0 = s*horizontal;
+		direction1 = t*vertical;
+		direction = direction0 + direction1;
+		vec3 orig = origin + offset;
+		ray r = ray(orig,
+			lower_left_corner + direction +
+			- orig);
+		return r;
+#endif
+	}
 
         vec3 origin;
         vec3 lower_left_corner;

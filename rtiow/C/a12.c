@@ -9,7 +9,9 @@
 #include "ray.h"
 
 #ifdef DEBUG
-extern unsigned long rfcnt;
+unsigned long rfcnt;
+unsigned long riuscnt;
+unsigned long riudcnt;
 #define INLINE
 #else
 #define INLINE static inline
@@ -22,10 +24,6 @@ INLINE float random_f() {
 	return (float)rand() / ((float)RAND_MAX + (float)1.0);
 }
 
-#ifdef DEBUG
-extern unsigned long riuscnt;
-#endif
-
 void random_in_unit_sphere(vec3 p) {
 #ifdef DEBUG
 	riuscnt++;
@@ -36,6 +34,18 @@ void random_in_unit_sphere(vec3 p) {
 		float r3 = random_f();
 		vmul(p, 2.0, VEC3(r1,r2,r3));
 		vsub(p, p, VEC3(1,1,1));
+	} while (vsqlen(p) >= 1.0);
+}
+
+void random_in_unit_disk(vec3 p) {
+#ifdef DEBUG
+	riudcnt++;
+#endif
+	do {
+		float r1 = random_f();
+		float r2 = random_f();
+		vmul(p, 2.0, VEC3(r1,r2,0));
+		vsub(p, p, VEC3(1,1,0));
 	} while (vsqlen(p) >= 1.0);
 }
 
@@ -241,9 +251,13 @@ void color(vec3 col, const ray *r, hittable_t *world, int depth) {
 	if (!world->hit) return;
 	hit_record rec;
 	// remove acne by starting at 0.001
-//	rprint(r);
+#ifdef DEBUG
+	rprint(r);
+#endif
 	if (world->hit(world, r, 0.001, FLT_MAX, &rec)) {
-//		printf("HIT\n");
+#ifdef DEBUG
+		printf("HIT\n");
+#endif
 		ray scattered;
 		vec3 attenuation;
 		if (depth < 50 && rec.mat_ptr->scatter(rec.mat_ptr, r, &rec, attenuation, &scattered)) {
@@ -254,7 +268,9 @@ void color(vec3 col, const ray *r, hittable_t *world, int depth) {
 			vcopy(col, VEC3(0, 0, 0));
 		}
 	} else {
-//		printf("NOT HIT\n");
+#ifdef DEBUG
+		printf("NOT HIT\n");
+#endif
 		vec3 unit_direction;
 		unit_vector(unit_direction, r->direction);
 		float t = 0.5*(unit_direction[1] + 1.0);
@@ -271,40 +287,65 @@ typedef struct {
 	vec3 lower_left_corner;
 	vec3 horizontal;
 	vec3 vertical;
+	vec3 u, v, w;
+	float lens_radius;
 } camera;
+
+void cam_print(const camera *cam) {
+	printf("Origin: ");vprint(cam->origin);
+	printf("\nLower_left: ");vprint(cam->lower_left_corner);
+	printf("\nhorizontal: ");vprint(cam->horizontal);
+	printf("\nvertical: ");vprint(cam->vertical);
+	printf("\nu: ");vprint(cam->u);
+	printf("\nv: ");vprint(cam->v);
+	printf("\nw: ");vprint(cam->w);
+	printf("\nlens_radius=%f\n", cam->lens_radius);
+}
 
 // vfov is top to bottom in degrees
 void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
-		const vec3 vup, float vfov, float aspect) {
-	vec3 u, v, w;
+		const vec3 vup, float vfov, float aspect, float aperture, float focus_dist) {
+	cam->lens_radius = aperture / 2;
 	float theta = vfov*M_PI/180;
 	float half_height = tanf(theta/2);
 	float half_width = aspect * half_height;
 
 	vcopy(cam->origin, lookfrom);
-	vsub(w, lookfrom, lookat);
-	unit_vector(w, w);
-	vcross(u, vup, w);
-	unit_vector(u, u);
-	vcross(v, w, u);
+	vsub(cam->w, lookfrom, lookat);
+	unit_vector(cam->w, cam->w);
+	vcross(cam->u, vup, cam->w);
+	unit_vector(cam->u, cam->u);
+	vcross(cam->v, cam->w, cam->u);
+
 	vec3 tmp;
-	vmul(tmp, half_width, u);
+	vmul(tmp, half_width * focus_dist, cam->u);
 	vsub(cam->lower_left_corner, cam->origin, tmp);
-	vmul(tmp, half_height, v);
+	vmul(tmp, half_height * focus_dist, cam->v);
 	vsub(cam->lower_left_corner, cam->lower_left_corner, tmp);
-	vsub(cam->lower_left_corner, cam->lower_left_corner, w);
-	vmul(cam->horizontal, 2 * half_width, u);
-	vmul(cam->vertical, 2 * half_height, v);
+	vmul(tmp, focus_dist, cam->w);
+	vsub(cam->lower_left_corner, cam->lower_left_corner, tmp);
+	vmul(cam->horizontal, 2 * half_width * focus_dist, cam->u);
+	vmul(cam->vertical, 2 * half_height * focus_dist, cam->v);
 }
 
 void get_ray(camera *cam, ray *r, float s, float t) {
-	vec3 direction, direction0, direction1;
-	vmul(direction0, t, cam->vertical);
-	vmul(direction1, s, cam->horizontal);
-	vadd(direction, direction0, direction1);
-	vadd(direction, direction, cam->lower_left_corner);
-	vsub(direction, direction, cam->origin);
-	rmake(r, cam->origin, direction);
+#ifdef DEBUG
+	printf("s=%g t=%g\n", s, t);
+#endif
+	vec3 orig, direction, tmp0, tmp1;
+	vec3 rd, offset;
+	random_in_unit_disk(rd);
+	vmul(rd, cam->lens_radius, rd);
+	vmul(tmp0, rd[0], cam->u);
+	vmul(tmp1, rd[1], cam->v);
+	vadd(offset, tmp0, tmp1);
+	vmul(tmp0, s, cam->horizontal);
+	vmul(tmp1, t, cam->vertical);
+	vadd(direction, tmp0, tmp1);
+	vadd(direction, cam->lower_left_corner, direction);
+	vadd(orig, cam->origin, offset);
+	vsub(direction, direction, orig);
+	rmake(r, orig, direction);
 }
 
 int main() {
@@ -323,14 +364,31 @@ int main() {
 		HSPHERE(-1, 0, -1, -0.45, MDIELECTRIC(1.5)),
 		HEND
 	};
+	vec3 lookfrom = {3,3,2};
+	vec3 lookat = {0,0,-1};
+	float dist_to_focus;
+	float aperture = 2.0;
 	camera cam;
-	make_camera(&cam, VEC3(-2,2,1), VEC3(0,0,-1), VEC3(0,1,0), 20, (float)nx/(float)ny);
+	vec3 vtmp;
+	vsub(vtmp, lookfrom, lookat);
+	dist_to_focus = vlen(vtmp);
+	make_camera(&cam, lookfrom, lookat, VEC3(0,1,0), 20,
+		(float)nx/(float)ny, aperture, dist_to_focus);
+#ifdef DEBUG
+	cam_print(&cam);
+#endif
 	for (int j = ny-1; j >= 0; j--) {
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
 			for (int s = 0; s < ns; s++) {
+#ifdef DEBUG
+printf("rfcnt=%lu riuscnt=%lu riudcnt=%lu\n", rfcnt, riuscnt, riudcnt);
+#endif
 				float u = ((float)i + random_f()) / (float)nx;
 				float v = ((float)j + random_f()) / (float)ny;
+#ifdef DEBUG
+				printf("u=%g v=%g\n", u, v);
+#endif
 				ray r;
 				get_ray(&cam, &r, u, v);
 				vec3 col0;

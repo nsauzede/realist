@@ -8,6 +8,7 @@ all: $(PPM)
 
 OPT=-O3
 #OPT=-O0 -g
+#OPT+=-DDEBUG
 %.elf: %.c
 	$(CC) -o $@ $^ $(OPT) -lm
 

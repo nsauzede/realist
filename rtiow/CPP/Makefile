@@ -6,6 +6,7 @@ all: $(PPM)
 
 OPT=-O3
 #OPT=-O0 -g
+#OPT+=-DDEBUG
 %.elf: %.cpp
 	$(CXX) -o $@ $^ $(OPT) -lm
 

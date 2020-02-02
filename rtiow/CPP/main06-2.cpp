@@ -33,7 +33,6 @@ int main() {
             float v = (float)j / (float)ny;
             ray r(origin, lower_left_corner + u*horizontal + v*vertical);
 
-            vec3 p = r.point_at_parameter(2.0);
             vec3 col = color(r, world);
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);

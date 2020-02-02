@@ -164,7 +164,6 @@ hitable *world = new hitable_list(list,2);
                 float u = ((float)i + random_f()) / (float)nx;
                 float v = ((float)j + random_f()) / (float)ny;
                 ray r = cam.get_ray(u, v);
-                vec3 p = r.point_at_parameter(2.0);
                 col += color(r, world,0);
             }
             col /= (float)ns;

@@ -1,4 +1,5 @@
 #include <iostream>
+#define RANDOM_IMPL
 #include "camera.h"
 #include "sphere.h"
 #include "hitable_list.h"
