@@ -132,12 +132,9 @@ hitable *random_scene() {
     for (int a = -N; a < N; a++) {
         for (int b = -N; b < N; b++) {
             float choose_mat = random_f();
-//    if (i < 3)fprintf(stderr, "choose_mat=%f\n", choose_mat);
-//            vec3 center(a+0.9*random_f(),0.2,b+0.9*random_f());
             float r1 = random_f();
             float r2 = random_f();
-            vec3 center(a+0.9*r2,0.2,b+0.9*r1);
-//            fprintf(stderr, "a=%d b=%d center={%f, %f. %f}\n", a, b, center.x(), center.y(), center.z());
+            vec3 center(a+0.9*r1,0.2,b+0.9*r2);
             if ((center-vec3(4,0.2,0)).length() > 0.9) {
                 if (choose_mat < 0.8) {  // diffuse
             float r1 = random_f();
@@ -147,20 +144,17 @@ hitable *random_scene() {
             float r5 = random_f();
             float r6 = random_f();
                     list[i++] = new sphere(center, 0.2,
-                        new lambertian(vec3(r6*r5,r4*r3,r2*r1)
+                        new lambertian(vec3(r1*r2,r3*r4,r5*r6)
                         )
                     );
                 }
                 else if (choose_mat < 0.95) { // metal
-            float r1 = random_f();
-            float r2 = random_f();
-            float r3 = random_f();
-            float r4 = random_f();
+            float r1 = 0.5 * (1 + random_f());
+            float r2 = 0.5 * (1 + random_f());
+            float r3 = 0.5 * (1 + random_f());
+            float r4 = 0.5 * random_f();
                     list[i++] = new sphere(center, 0.2,
-                            new metal(vec3(0.5*(1 + r4),
-                                           0.5*(1 + r3),
-                                           0.5*(1 + r2)),
-                                      0.5*r1));
+                            new metal(vec3(r1, r2, r3), r4));
                 }
                 else {  // glass
                     list[i++] = new sphere(center, 0.2, new dielectric(1.5));
@@ -197,12 +191,12 @@ int main() {
 #if 0
     int nx = 800;
     int ny = 600;
-//    int ns = 4;
-    int ns = 100;
+    int ns = 4;
+//    int ns = 100;
 #else
     int nx = 200;//200
     int ny = 100;//100
-    int ns = 1;//100
+    int ns = 100;//100
 #endif
 #endif
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
