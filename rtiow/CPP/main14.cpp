@@ -6,18 +6,6 @@
 #include "float.h"
 #include "random.h"
 
-void print_rec(hit_record& rec) {
-	printf("{\n");
-	printf("\tt: %f\n", rec.t);
-	printf("\tp: "); rec.p.print(); printf("\n");
-	printf("\tnormal: "); rec.normal.print(); printf("\n");
-	printf("\tmat: *material type=%d*\n", rec.mat_ptr->type());
-	printf("}\n");
-//    vec3 p;
-//    vec3 normal;
-//    material *mat_ptr;
-}
-
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
     if (world->hit(r, 0.001, FLT_MAX, rec)) {
@@ -55,7 +43,6 @@ class metal : public material {
             attenuation = albedo;
             return (dot(scattered.direction(), rec.normal) > 0);
         }
-        virtual int type() const {return 1;}
         vec3 albedo;
         float fuzz;
 };
@@ -70,10 +57,10 @@ class lambertian : public material {
              attenuation = albedo;
              return true;
         }
-        virtual int type() const {return 0;}
 
         vec3 albedo;
 };
+
 bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
     vec3 uv = unit_vector(v);
     float dt = dot(uv, n);
@@ -85,6 +72,7 @@ bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
     else
         return false;
 }
+
 float schlick(float cosine, float ref_idx) {
     float r0 = (1-ref_idx) / (1+ref_idx);
     r0 = r0*r0;
@@ -100,7 +88,6 @@ class dielectric : public material {
             float ni_over_nt;
             attenuation = vec3(1.0, 1.0, 1.0);
             vec3 refracted;
-
             float reflect_prob;
             float cosine;
 
@@ -133,7 +120,6 @@ class dielectric : public material {
 
             return true;
         }
-        virtual int type() const {return 2;}
 
         float ref_idx;
 };
@@ -147,11 +133,9 @@ hitable *random_scene() {
     for (int a = -N; a < N; a++) {
         for (int b = -N; b < N; b++) {
             float choose_mat = random_f();
-//    if (i < 3)fprintf(stderr, "choose_mat=%f\n", choose_mat);
             float r1 = random_f();
             float r2 = random_f();
-            vec3 center(a+0.9*r2,0.2,b+0.9*r1);
-//            fprintf(stderr, "a=%d b=%d center={%f, %f. %f}\n", a, b, center.x(), center.y(), center.z());
+            vec3 center(a+0.9*r1,0.2,b+0.9*r2);
             if ((center-vec3(4,0.2,0)).length() > 0.9) {
                 if (choose_mat < 0.8) {  // diffuse
             float r1 = random_f();
@@ -161,20 +145,17 @@ hitable *random_scene() {
             float r5 = random_f();
             float r6 = random_f();
                     list[i++] = new sphere(center, 0.2,
-                        new lambertian(vec3(r6*r5,r4*r3,r2*r1)
+                        new lambertian(vec3(r1*r2,r3*r4,r5*r6)
                         )
                     );
                 }
                 else if (choose_mat < 0.95) { // metal
-            float r1 = random_f();
-            float r2 = random_f();
-            float r3 = random_f();
-            float r4 = random_f();
+            float r1 = 0.5 * (1 + random_f());
+            float r2 = 0.5 * (1 + random_f());
+            float r3 = 0.5 * (1 + random_f());
+            float r4 = 0.5 * random_f();
                     list[i++] = new sphere(center, 0.2,
-                            new metal(vec3(0.5*(1 + r4),
-                                           0.5*(1 + r3),
-                                           0.5*(1 + r2)),
-                                      0.5*r1));
+                            new metal(vec3(r1, r2, r3), r4));
                 }
                 else {  // glass
                     list[i++] = new sphere(center, 0.2, new dielectric(1.5));
@@ -189,14 +170,14 @@ hitable *random_scene() {
 
     return new hitable_list(list,i);
 }
-//#define DEBUG
+
 int main(int argc, char *argv[]) {
 	srand(0);
 	char *fnameout = 0;
 	FILE *fout = stdout;
 	int nx = 200;
 	int ny = 100;
-	int ns = 4;
+	int ns = 1;
 	int arg = 1;
 	if (arg < argc) {
 		sscanf(argv[arg++], "%d", &nx);
@@ -213,7 +194,7 @@ int main(int argc, char *argv[]) {
 	unsigned char *bytes = 0;
 	size_t nbytes = 0;
 	if (fnameout) {
-	fout = fopen(fnameout, "wb");
+		fout = fopen(fnameout, "wb");
 		fprintf(fout, "P6\n");
 		nbytes = 3 * ny * nx;
 		bytes = (unsigned char *)malloc(nbytes);
@@ -240,15 +221,9 @@ int main(int argc, char *argv[]) {
 			for (int s=0; s < ns; s++) {
 				float u = ((float)i + random_f()) / (float)nx;
 				float v = ((float)j + random_f()) / (float)ny;
-//				printf("u=%f v=%f ", u, v);
 				ray r = cam.get_ray(u, v);
-//				printf("r=");r.print();printf(" ");
-//				col += color(r, world, 0);
-				vec3 c0 = color(r, world, 0);
-//				c0.print();
-				col += c0;
+				col += color(r, world, 0);
 			}
-//			col.print();
 			col /= (float)ns;
 			col = vec3( sqrtf(col[0]), sqrtf(col[1]), sqrtf(col[2]) );
 			int ir = int(255.99*col[0]);

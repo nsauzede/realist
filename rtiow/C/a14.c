@@ -396,12 +396,38 @@ MDIELECTRIC(1.5));
 	return list;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 	srand(0);
+	char *fnameout = 0;
+	FILE *fout = stdout;
 	int nx = 200;
 	int ny = 100;
 	int ns = 1;
-	printf("P3\n"); printf("%d %d\n", nx, ny); printf("255\n");
+	int arg = 1;
+	if (arg < argc) {
+		sscanf(argv[arg++], "%d", &nx);
+		if (arg < argc) {
+			sscanf(argv[arg++], "%d", &ny);
+			if (arg < argc) {
+				sscanf(argv[arg++], "%d", &ns);
+				if (arg < argc) {
+					fnameout = argv[arg++];
+				}
+			}
+		}
+	}
+	unsigned char *bytes = 0;
+	size_t nbytes = 0;
+	if (fnameout) {
+		fout = fopen(fnameout, "wb");
+		fprintf(fout, "P6\n");
+		nbytes = 3 * ny * nx;
+		bytes = (unsigned char *)malloc(nbytes);
+	} else {
+		fprintf(fout, "P3\n");
+	}
+	fprintf(fout, "%d %d\n", nx, ny);
+	fprintf(fout, "255\n");
 	hittable_t *world = random_scene();
 	vec3 lookfrom = {9, 2, 2.6};
 	vec3 lookat = {3, .8, 1};
@@ -434,7 +460,21 @@ int main() {
 			int ir = (int)(255.99*col[0]);
 			int ig = (int)(255.99*col[1]);
 			int ib = (int)(255.99*col[2]);
-			printf("%d %d %d\n", ir, ig, ib);
+			if (fnameout) {
+				bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir;
+				bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig;
+				bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib;
+			} else {
+				fprintf(fout, "%d %d %d  ", ir, ig, ib);
+			}
 		}
+		if (!fnameout) {
+			fprintf(fout, "\n");
+		}
+	}
+	if (fnameout) {
+		fwrite(bytes, nbytes, 1, fout);
+		fclose(fout);
+		free(bytes);
 	}
 }
