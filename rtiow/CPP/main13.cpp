@@ -170,38 +170,40 @@ hitable *random_scene() {
 
     return new hitable_list(list,i);
 }
-int main() {
-    srand(0);
-    int nx = 200;//1200;
-    int ny = 100;//800;
-    int ns = 1;//64;
-    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
-    hitable *world = random_scene();
-//vec3 lookfrom(4,2,2);
-vec3 lookfrom(9,2,2.6);
-//vec3 lookat(0,0,-1);
-vec3 lookat(3,0.8,1);
-float dist_to_focus = (lookfrom-lookat).length();
-float aperture = 0.0;
 
-camera cam(lookfrom, lookat, vec3(0,1,0), 30,
-           (float)nx/(float)ny, aperture, dist_to_focus);
-    for (int j = ny-1; j >= 0; j--) {
-        for (int i = 0; i < nx; i++) {
-            vec3 col(0, 0, 0);
-            for (int s=0; s < ns; s++) {
-                float u = ((float)i + random_f()) / (float)nx;
-                float v = ((float)j + random_f()) / (float)ny;
-                ray r = cam.get_ray(u, v);
-                vec3 p = r.point_at_parameter(2.0);
-                col += color(r, world,0);
-            }
-            col /= (float)ns;
-            col = vec3( sqrtf(col[0]), sqrtf(col[1]), sqrtf(col[2]) );
-            int ir = int(255.99*col[0]);
-            int ig = int(255.99*col[1]);
-            int ib = int(255.99*col[2]);
-            std::cout << ir << " " << ig << " " << ib << "\n";
-        }
-    }
+int main() {
+	srand(0);
+	int nx = 200;
+	int ny = 100;
+	int ns = 1;
+	std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+	hitable *world = random_scene();
+	vec3 lookfrom(9, 2, 2.6);
+	vec3 lookat(3, 0.8, 1);
+	float dist_to_focus = (lookfrom - lookat).length();
+	float aperture = 0.0;
+	camera cam(
+		lookfrom,
+		lookat,
+		vec3(0, 1, 0),
+		30, (float)nx/(float)ny,
+		aperture,
+		dist_to_focus);
+	for (int j = ny-1; j >= 0; j--) {
+		for (int i = 0; i < nx; i++) {
+			vec3 col(0, 0, 0);
+			for (int s=0; s < ns; s++) {
+				float u = ((float)i + random_f()) / (float)nx;
+				float v = ((float)j + random_f()) / (float)ny;
+				ray r = cam.get_ray(u, v);
+				col += color(r, world, 0);
+			}
+			col /= (float)ns;
+			col = vec3( sqrtf(col[0]), sqrtf(col[1]), sqrtf(col[2]) );
+			int ir = int(255.99*col[0]);
+			int ig = int(255.99*col[1]);
+			int ib = int(255.99*col[2]);
+			std::cout << ir << " " << ig << " " << ib << "\n";
+		}
+	}
 }
