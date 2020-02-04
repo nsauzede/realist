@@ -398,9 +398,9 @@ MDIELECTRIC(1.5));
 
 int main() {
 	srand(0);
-	int nx = 200;
-	int ny = 100;
-	int ns = 4;
+	int nx = 200;//1200;
+	int ny = 100;//800;
+	int ns = 1;//64;
 	printf("P3\n"); printf("%d %d\n", nx, ny); printf("255\n");
 	float R = cos(M_PI/4);
 	hittable_t *world = random_scene();

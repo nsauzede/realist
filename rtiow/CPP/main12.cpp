@@ -7,30 +7,22 @@
 #include "random.h"
 
 vec3 color(const ray& r, hitable *world, int depth) {
-	hit_record rec;
-#ifdef DEBUG
-	r.print();
-#endif
-	if (world->hit(r, 0.001, FLT_MAX, rec)) {
-#ifdef DEBUG
-		printf("HIT\n");
-#endif
-		ray scattered;
-		vec3 attenuation;
-		if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-			return attenuation*color(scattered, world, depth+1);
-		}
-		else {
-			return vec3(0,0,0);
-		}
-	} else {
-#ifdef DEBUG
-		printf("NOT HIT\n");
-#endif
-		vec3 unit_direction = unit_vector(r.direction());
-		float t = 0.5*(unit_direction.y() + 1.0);
-		return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
-	}
+    hit_record rec;
+    if (world->hit(r, 0.001, FLT_MAX, rec)) {
+        ray scattered;
+        vec3 attenuation;
+        if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+            return attenuation*color(scattered, world, depth+1);
+        }
+        else {
+            return vec3(0,0,0);
+        }
+    }
+    else {
+        vec3 unit_direction = unit_vector(r.direction());
+        float t = 0.5*(unit_direction.y() + 1.0);
+        return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
+    }
 }
 
 vec3 reflect(const vec3& v, const vec3& n) {
