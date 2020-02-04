@@ -26,8 +26,8 @@ class camera {
 vec3 color(const ray& r, hitable *world) {
     hit_record rec;
     if (world->hit(r, 0.001, FLT_MAX, rec)) {
-        vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-        return 0.5 * color(ray(rec.p, target - rec.p), world);
+        vec3 target = rec.normal + random_in_unit_sphere();
+        return 0.5 * color(ray(rec.p, target), world);
     }
     else {
         vec3 unit_direction = unit_vector(r.direction());
@@ -35,6 +35,7 @@ vec3 color(const ray& r, hitable *world) {
         return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
     }
 }
+
 int main() {
     srand(0);
     int nx = 200;
@@ -50,8 +51,8 @@ int main() {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
             for (int s=0; s < ns; s++) {
-                float u = ((float)i + (float)random_f()) / (float)nx;
-                float v = ((float)j + (float)random_f()) / (float)ny;
+                float u = ((float)i + random_f()) / (float)nx;
+                float v = ((float)j + random_f()) / (float)ny;
                 ray r = cam.get_ray(u, v);
                 col += color(r, world);
             }

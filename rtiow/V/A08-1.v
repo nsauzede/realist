@@ -101,9 +101,9 @@ fn random_in_unit_sphere() vec.Vec3 {
 
 fn (world []Hittable) color(r ray.Ray) vec.Vec3 {
 	mut rec := HitRec{}
-	if world.hit(r, 0, math.max_f32, mut rec) {
-		target := rec.p + rec.normal + random_in_unit_sphere()
-		return vec.mult(0.5, world.color(ray.Ray{rec.p, target - rec.p}))
+	if world.hit(r, 0.001, C.FLT_MAX, mut rec) {
+		target := rec.normal + random_in_unit_sphere()
+		return vec.mult(0.5, world.color(ray.Ray{rec.p, target}))
 	} else {
 		unit_direction := r.direction().unit_vector()
 		t := .5 * (unit_direction.y + 1.)
