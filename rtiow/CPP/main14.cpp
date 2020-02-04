@@ -65,8 +65,8 @@ class lambertian : public material {
         virtual bool scatter(const ray& r_in, const hit_record& rec,
             vec3& attenuation, ray& scattered) const
         {
-             vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-             scattered = ray(rec.p, target-rec.p);
+             vec3 target = rec.normal + random_in_unit_sphere();
+             scattered = ray(rec.p, target);
              attenuation = albedo;
              return true;
         }

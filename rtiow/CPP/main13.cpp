@@ -52,14 +52,15 @@ class lambertian : public material {
         virtual bool scatter(const ray& r_in, const hit_record& rec,
             vec3& attenuation, ray& scattered) const
         {
-             vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-             scattered = ray(rec.p, target-rec.p);
+             vec3 target = rec.normal + random_in_unit_sphere();
+             scattered = ray(rec.p, target);
              attenuation = albedo;
              return true;
         }
 
         vec3 albedo;
 };
+
 bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
     vec3 uv = unit_vector(v);
     float dt = dot(uv, n);
@@ -71,6 +72,7 @@ bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
     else
         return false;
 }
+
 float schlick(float cosine, float ref_idx) {
     float r0 = (1-ref_idx) / (1+ref_idx);
     r0 = r0*r0;
@@ -86,7 +88,6 @@ class dielectric : public material {
             float ni_over_nt;
             attenuation = vec3(1.0, 1.0, 1.0);
             vec3 refracted;
-
             float reflect_prob;
             float cosine;
 
@@ -169,47 +170,13 @@ hitable *random_scene() {
 
     return new hitable_list(list,i);
 }
-//#define DEBUG
 int main() {
     srand(0);
-//    int rnd = rand();
-//    rnd = rand();
-//    fprintf(stderr, "rnd=%d\n", rnd);
-//    float rndd = random_f();
-//    fprintf(stderr, "rndd=%f\n", rndd);
-#ifdef DEBUG
-#if 0
-    int nx = 2;//200
-    int ny = 1;//100
-    int ns = 1;//100
-#else
-    int nx = 200;//200
-    int ny = 100;//100
-    int ns = 100;//100
-#endif
-#else
-#if 0
-    int nx = 800;
-    int ny = 600;
-    int ns = 4;
-//    int ns = 100;
-#else
-    int nx = 200;//200
-    int ny = 100;//100
-    int ns = 100;//100
-#endif
-#endif
+    int nx = 200;//1200;
+    int ny = 100;//800;
+    int ns = 1;//64;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
-#ifdef DEBUG
-    hitable *list[4];
-    list[0] =  new sphere(vec3(0,-1000,0), 1000, new lambertian(vec3(0.5, 0.5, 0.5)));
-    list[1] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
-    list[2] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(vec3(0.4, 0.2, 0.1)));
-    list[3] = new sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
-    hitable *world = new hitable_list(list,4);
-#else
     hitable *world = random_scene();
-#endif
 //vec3 lookfrom(4,2,2);
 vec3 lookfrom(9,2,2.6);
 //vec3 lookat(0,0,-1);
