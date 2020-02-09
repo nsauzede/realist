@@ -14,8 +14,8 @@ public:
     vec3(float e0, float e1, float e2) { e[0] = e0; e[1] = e1; e[2] = e2; }
 	void print() const {
 #if 1
-//		printf("{%f, %f, %f}",
-		printf("{%g, %g, %g}",
+		printf("{%f, %f, %f}",
+//		printf("{%g, %g, %g}",
 			e[0], e[1], e[2]
 		);
 #else

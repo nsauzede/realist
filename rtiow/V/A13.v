@@ -76,7 +76,7 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	c := oc.dot(oc) - s.radius * s.radius
 	discriminant := b * b - a * c
 	if discriminant > 0 {
-		mut temp := (-b - math.sqrt(discriminant)) / a
+		mut temp := (-b - math.sqrtf(discriminant)) / a
 		if temp < t_max && temp > t_min {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
@@ -85,7 +85,7 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 			rec.mat = s.material
 			return true
 		}
-		temp = (-b + math.sqrt(discriminant)) / a
+		temp = (-b + math.sqrtf(discriminant)) / a
 		if temp < t_max && temp > t_min {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
@@ -123,7 +123,7 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 fn random_in_unit_sphere() vec.Vec3 {
 	mut p := vec.Vec3{}
 	for {
-		p = vec.mult(2, vec.Vec3{random_double(), random_double(), random_double()}) - vec.Vec3{1,1,1}
+		p = vec.mult(2, vec.Vec3{random_f(), random_f(), random_f()}) - vec.Vec3{1,1,1}
 		if p.squared_length() < 1.0 {
 			break
 		}
@@ -132,8 +132,8 @@ fn random_in_unit_sphere() vec.Vec3 {
 }
 
 fn (l MLambertian) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
-	target := rec.p + rec.normal + random_in_unit_sphere()
-	*scattered = ray.Ray{rec.p, target - rec.p}
+	target := rec.normal + random_in_unit_sphere()
+	*scattered = ray.Ray{rec.p, target}
 	*attenuation = l.albedo
 	return true
 }
@@ -173,7 +173,7 @@ fn (d MDielectric) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, s
 	if r_in.direction().refract(outward_normal, ni_over_nt, mut refracted) {
 		reflect_prob = schlick(cosine, d.ref_idx)
 	}
-	if random_double() < reflect_prob {
+	if random_f() < reflect_prob {
 		*scattered = ray.Ray{rec.p, reflected}
 	} else {
 		*scattered = ray.Ray{rec.p, refracted}
@@ -212,14 +212,14 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 	}
 }
 
-fn random_double() f32 {
+fn random_f() f32 {
 	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.)
 }
 
 fn random_in_unit_disk() vec.Vec3 {
 	mut p := vec.Vec3{}
 	for {
-		p = vec.mult(2, vec.Vec3{random_double(), random_double(), 0}) - vec.Vec3{1, 1, 0}
+		p = vec.mult(2, vec.Vec3{random_f(), random_f(), 0}) - vec.Vec3{1, 1, 0}
 		if p.dot(p) < 1.0 {
 			break
 		}
@@ -288,13 +288,13 @@ fn new_world() []Hittable {
 //	mut i := 1
 	for a := -n; a < n; a++ {
 		for b := -n; b < n; b++ {
-			choose_mat := random_double()
+			choose_mat := random_f()
 /*			if i < 3 {
 				eprintln('choose_mat=$choose_mat')
 			}
 			i++
-*/			r01 := random_double()
-			r02 := random_double()
+*/			r01 := random_f()
+			r02 := random_f()
 			center := vec.Vec3{
 				f32(a)+0.9*r02,
 				0.2,
@@ -302,22 +302,22 @@ fn new_world() []Hittable {
 //			eprintln('a=$a b=$b center=$center')
 			if (center - vec.Vec3{4,0.2,0}).length() > 0.9 {
 				if choose_mat < 0.8 {  // diffuse
-					r1 := random_double()
-					r2 := random_double()
-					r3 := random_double()
-					r4 := random_double()
-					r5 := random_double()
-					r6 := random_double()
+					r1 := random_f()
+					r2 := random_f()
+					r3 := random_f()
+					r4 := random_f()
+					r5 := random_f()
+					r6 := random_f()
 world << Hittable(HSphere{
 	center: center, radius: 0.2,
 	material: Material(MLambertian{albedo: vec.Vec3{
 		r6*r5,r4*r3,r2*r1}})
 })
 				} else if choose_mat < 0.95 { // metal
-					r1 := random_double()
-					r2 := random_double()
-					r3 := random_double()
-					r4 := random_double()
+					r1 := random_f()
+					r2 := random_f()
+					r3 := random_f()
+					r4 := random_f()
 world << Hittable(HSphere{
 	center: center, radius: 0.2
 	material: Material(MMetal{albedo: vec.Vec3{
@@ -358,7 +358,7 @@ fn main() {
 //	mut rnd := rand.next(C.RAND_MAX)
 //	rnd = rand.next(C.RAND_MAX)
 //	eprintln('rnd=$rnd')
-//	rndd := random_double()
+//	rndd := random_f()
 //	eprintln('rndd=$rndd')
 //	nx := 200 ny := 100 ns := 100
 	nx := 200 ny := 100 ns := 1
@@ -382,14 +382,14 @@ fn main() {
 		for i := 0; i < nx; i++ {
 			mut col := vec.Vec3{0,0,0}
 			for s := 0; s < ns; s++ {
-				u := (f32(i) + random_double()) / f32(nx)
-				v := (f32(j) + random_double()) / f32(ny)
+				u := (f32(i) + random_f()) / f32(nx)
+				v := (f32(j) + random_f()) / f32(ny)
 				r := cam.get_ray(u, v)
 				col = col + world.color(r, 0)
 			}
 			col = vec.div(col, ns)
 			// Gamma 2 correction (square root)
-			col = vec.Vec3{math.sqrt(col.x),math.sqrt(col.y),math.sqrt(col.z)}
+			col = vec.Vec3{math.sqrtf(col.x),math.sqrtf(col.y),math.sqrtf(col.z)}
 			ir := int(255.99 * col.x)
 			ig := int(255.99 * col.y)
 			ib := int(255.99 * col.z)

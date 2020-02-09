@@ -69,7 +69,7 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	c := oc.dot(oc) - s.radius * s.radius
 	discriminant := b * b - a * c
 	if discriminant > 0 {
-		mut temp := (-b - math.sqrt(discriminant)) / a
+		mut temp := (-b - math.sqrtf(discriminant)) / a
 		if temp < t_max && temp > t_min {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
@@ -78,7 +78,7 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 			rec.mat = s.material
 			return true
 		}
-		temp = (-b + math.sqrt(discriminant)) / a
+		temp = (-b + math.sqrtf(discriminant)) / a
 		if temp < t_max && temp > t_min {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
@@ -116,7 +116,7 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 fn random_in_unit_sphere() vec.Vec3 {
 	mut p := vec.Vec3{}
 	for {
-		p = vec.mult(2, vec.Vec3{random_double(), random_double(), random_double()}) - vec.Vec3{1,1,1}
+		p = vec.mult(2, vec.Vec3{random_f(), random_f(), random_f()}) - vec.Vec3{1,1,1}
 		if p.squared_length() < 1.0 {
 			break
 		}
@@ -126,8 +126,8 @@ fn random_in_unit_sphere() vec.Vec3 {
 
 fn (m Material) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
 	if m.generic.mtype == .lambertian {
-		target := rec.p + rec.normal + random_in_unit_sphere()
-		*scattered = ray.Ray{rec.p, target - rec.p}
+		target := rec.normal + random_in_unit_sphere()
+		*scattered = ray.Ray{rec.p, target}
 		*attenuation = m.lambertian.albedo
 //		eprintln('Hello !!!!!!! lambertian ${m.lambertian.mtype}')
 		return true
@@ -159,7 +159,7 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 	}
 }
 
-fn random_double() f32 {
+fn random_f() f32 {
 	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.)
 }
 
@@ -212,14 +212,14 @@ fn main() {
 		for i := 0; i < nx; i++ {
 			mut col := vec.Vec3{0,0,0}
 			for s := 0; s < ns; s++ {
-				u := (f32(i) + random_double()) / f32(nx)
-				v := (f32(j) + random_double()) / f32(ny)
+				u := (f32(i) + random_f()) / f32(nx)
+				v := (f32(j) + random_f()) / f32(ny)
 				r := cam.get_ray(u, v)
 				col = col + world.color(r, 0)
 			}
 			col = vec.div(col, ns)
 			// Gamma 2 correction (square root)
-			col = vec.Vec3{math.sqrt(col.x),math.sqrt(col.y),math.sqrt(col.z)}
+			col = vec.Vec3{math.sqrtf(col.x),math.sqrtf(col.y),math.sqrtf(col.z)}
 			ir := int(255.99 * col.x)
 			ig := int(255.99 * col.y)
 			ib := int(255.99 * col.z)

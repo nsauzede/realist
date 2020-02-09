@@ -24,7 +24,10 @@ INLINE float random_f() {
 #ifdef DEBUG
 	rfcnt++;
 #endif
-        return (float)rand() / ((float)RAND_MAX + (float)1.0);
+//        return (float)rand() / ((float)RAND_MAX + (float)1.0);
+        float r = (float)rand() / ((float)RAND_MAX + (float)1.0);
+//        printf("r=%f\n", r);
+        return r;
 }
 vec3 random_in_unit_sphere() {
 #ifdef DEBUG
