@@ -15,7 +15,7 @@ fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) f32 {
 	if discriminant < 0 {
 		return -1.0
 	} else {
-		return (-b - math.sqrt(discriminant) ) / (2.0*a)
+		return (-b - math.sqrtf(discriminant) ) / (2.0*a)
 	}
 }
 

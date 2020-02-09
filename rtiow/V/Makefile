@@ -6,8 +6,9 @@ V:=v
 all: $(PPM)
 	md5sum *.ppm
 
+#VFLAGS:=--enable-globals
 %_v.c: %.v
-	$(V) -o $@ $^
+	$(V) $(VFLAGS) -o $@ $^
 
 %.elf: %_v.c
 	$(CC) -o $@ $^ -O3 -lm

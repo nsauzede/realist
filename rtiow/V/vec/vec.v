@@ -20,7 +20,6 @@ struct S0 {
 
 pub fn (a Vec3) str() string {
 //	return '{$a.x, $a.y, $a.z}'
-//	mut s0 := S0{}
 	mut u0 := U0{}
 	u0.v[0] = a.x
 	u0.v[1] = a.y
@@ -28,7 +27,7 @@ pub fn (a Vec3) str() string {
 	p1 := u0.i[0].hex()
 	p2 := u0.i[1].hex()
 	p3 := u0.i[2].hex()
-	return '{$p1, $p2, $p3}'
+	return '{$a.x, $a.y, $a.z;$p1, $p2, $p3}'
 }
 
 pub fn (a Vec3) +(b Vec3) Vec3 {
@@ -88,7 +87,7 @@ pub fn (v Vec3) refract(n Vec3, ni_over_nt f32, refracted mut Vec3) bool {
 	dt := uv.dot(n)
 	discriminant := 1. - ni_over_nt * ni_over_nt * (1. - dt * dt)
 	if discriminant > 0 {
-		*refracted = mult(ni_over_nt, uv - mult(dt, n)) - mult(math.sqrt(discriminant), n)
+		*refracted = mult(ni_over_nt, uv - mult(dt, n)) - mult(math.sqrtf(discriminant), n)
 		return true
 	} else {
 		return false
@@ -96,7 +95,7 @@ pub fn (v Vec3) refract(n Vec3, ni_over_nt f32, refracted mut Vec3) bool {
 }
 
 pub fn (v Vec3) length() f32 {
-	return math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+	return math.sqrtf(v.x * v.x + v.y * v.y + v.z * v.z)
 }
 
 pub fn (v Vec3) squared_length() f32 {

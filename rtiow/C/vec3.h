@@ -12,9 +12,9 @@ typedef float vec3[3];
 //#define API
 
 API void vprint(const vec3 r) {
-#if 1
-//	printf("{%f, %f, %f}", r[0], r[1], r[2]);
-	printf("{%g, %g, %g}", r[0], r[1], r[2]);
+#if 0
+	printf("{%f, %f, %f}", r[0], r[1], r[2]);
+//	printf("{%g, %g, %g}", r[0], r[1], r[2]);
 #else
 #if 1
 	union {
@@ -24,7 +24,8 @@ API void vprint(const vec3 r) {
 	u.v[0] = r[0];
 	u.v[1] = r[1];
 	u.v[2] = r[2];
-	printf("{0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", u.i[0], u.i[1], u.i[2]);
+//	printf("{0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", u.i[0], u.i[1], u.i[2]);
+	printf("{%f, %f, %f;0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", r[0], r[1], r[2], u.i[0], u.i[1], u.i[2]);
 #else
 	printf("pointer : %d\n", (int)sizeof(void *));
 	printf("float : %d\n", (int)sizeof(float));

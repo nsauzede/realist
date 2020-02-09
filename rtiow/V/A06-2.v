@@ -36,14 +36,14 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	c := oc.dot(oc) - s.radius * s.radius
 	discriminant := b * b - a * c
 	if discriminant > 0 {
-		mut temp := (-b - math.sqrt(discriminant)) / a
+		mut temp := (-b - math.sqrtf(discriminant)) / a
 		if temp < t_max && temp > t_min {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
 			rec.normal = vec.div(rec.p - s.center, s.radius)
 			return true
 		}
-		temp = (-b + math.sqrt(discriminant)) / a
+		temp = (-b + math.sqrtf(discriminant)) / a
 		if temp < t_max && temp > t_min {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
