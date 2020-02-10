@@ -4,7 +4,6 @@ module main
 
 import vec
 import ray
-import math
 
 fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) bool {
 	oc := r.origin() - center
