@@ -214,6 +214,14 @@ int main() {
 		.vertical = {0.0, 2.0, 0.0},
 		.origin = {0.0, 0.0, 0.0}
 	};
+#ifdef DEBUG
+	printf("{\n");
+	printf("\tlower_left_corner: ");vprint(cam.lower_left_corner);printf(" \n");
+	printf("\thorizontal: ");vprint(cam.horizontal);printf(" \n");
+	printf("\tvertical: ");vprint(cam.vertical);printf(" \n");
+	printf("\torigin: ");vprint(cam.origin);printf(" \n");
+	printf("}\n");
+#endif
 	for (int j = ny-1; j >= 0; j--) {
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
