@@ -45,14 +45,17 @@ union Material {
 	dielectric MDielectric
 }
 
+type StringCallback fn(obj voidptr) string
 type HitCallback fn(obj voidptr, r ray.Ray, t_min f32, closest f32, rec mut HitRec) bool
 
 struct HGeneric {
+	strcb StringCallback
 	hitcb HitCallback
 	material Material
 }
 
 struct HSphere {
+	strcb StringCallback = StringCallback(cb_sphere_str)
 	hitcb HitCallback = HitCallback(cb_sphere_hit)
 	material Material
 	center vec.Vec3
@@ -62,6 +65,10 @@ struct HSphere {
 union Hittable {
 	generic HGeneric
 	sphere HSphere
+}
+
+fn cb_sphere_str(obj voidptr) string {
+	s := &HSphere(obj) return '{S:$s.center,$s.radius}'
 }
 
 fn cb_sphere_hit(obj voidptr, r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
@@ -325,11 +332,15 @@ world << Hittable(HSphere{
 	return world
 }
 
+pub fn (h Hittable) str() string {
+	return h.generic.strcb(h)
+}
+
 fn main() {
 	mut fnameout := ''
-	mut nx := 5
-	mut ny := 5
-	mut ns := 1
+	mut nx := 1024
+	mut ny := 768
+	mut ns := 16
 	mut arg := 1
 	if arg < os.args.len {
 		nx = os.args[arg++].int()
@@ -372,6 +383,7 @@ fn main() {
 		aperture,
 		dist_to_focus)
 	world := new_world()
+//	println(world)
 	for j := ny - 1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
 			mut col := vec.Vec3{0,0,0}

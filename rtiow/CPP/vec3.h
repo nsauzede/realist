@@ -13,7 +13,7 @@ public:
     vec3() {}
     vec3(float e0, float e1, float e2) { e[0] = e0; e[1] = e1; e[2] = e2; }
 	void print() const {
-#if 1
+#if 0
 		printf("{%f, %f, %f}",
 //		printf("{%g, %g, %g}",
 			e[0], e[1], e[2]
@@ -26,7 +26,7 @@ public:
 		u.v[0] = e[0];
 		u.v[1] = e[1];
 		u.v[2] = e[2];
-		printf("{0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", u.i[0], u.i[1], u.i[2]);
+		printf("{%f, %f, %f;0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", e[0], e[1], e[2], u.i[0], u.i[1], u.i[2]);
 #endif
 	}
 

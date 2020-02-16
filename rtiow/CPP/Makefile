@@ -6,7 +6,9 @@ all: $(PPM)
 
 OPT=-O3
 #OPT=-O0 -g
-#OPT+=-DDEBUG
+ifdef DEBUG
+OPT+=-DDEBUG
+endif
 %.elf: %.cpp
 	$(CXX) -o $@ $^ $(OPT) -lm
 
