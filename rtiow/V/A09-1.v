@@ -115,7 +115,8 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 fn random_in_unit_sphere() vec.Vec3 {
 	mut p := vec.Vec3{}
 	for {
-		p = vec.mult(2, vec.Vec3{random_f(), random_f(), random_f()}) - vec.Vec3{1,1,1}
+		r1 := random_f() r2:= random_f() r3 := random_f()
+		p = vec.mult(2, vec.Vec3{r1, r2, r3}) - vec.Vec3{1,1,1}
 		if p.squared_length() < 1.0 {
 			break
 		}
