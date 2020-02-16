@@ -9,9 +9,21 @@ class hitable_list: public hitable  {
         hitable_list(hitable **l, int n) {list = l; list_size = n; }
         virtual bool hit(
             const ray& r, float tmin, float tmax, hit_record& rec) const;
+        virtual void print() const;
         hitable **list;
         int list_size;
 };
+
+void hitable_list::print() const {
+	printf("[");
+	for (int i = 0; i < list_size; i++) {
+		if (i > 0) {
+			printf(", ");
+		}
+		list[i]->print();
+	}
+	printf("]\n");
+}
 
 bool hitable_list::hit(
     const ray& r, float t_min, float t_max, hit_record& rec) const {

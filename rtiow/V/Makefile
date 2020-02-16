@@ -6,7 +6,9 @@ V:=v
 all: $(PPM)
 	md5sum *.ppm
 
-#VFLAGS:=--enable-globals
+ifdef DEBUG
+VFLAGS:=--enable-globals
+endif
 %_v.c: %.v
 	$(V) $(VFLAGS) -o $@ $^
 

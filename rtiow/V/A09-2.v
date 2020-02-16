@@ -7,6 +7,27 @@ import ray
 import math
 import rand
 
+//__global rfcnt int
+//__global riuscnt int
+//__global riudcnt int
+
+fn random_f() f32 {
+//	rfcnt++
+	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.)
+}
+
+fn random_in_unit_sphere() vec.Vec3 {
+//	riuscnt++
+	mut p := vec.Vec3{}
+	for {
+		p = vec.mult(2, vec.Vec3{random_f(), random_f(), random_f()}) - vec.Vec3{1,1,1}
+		if p.squared_length() < 1.0 {
+			break
+		}
+	}
+	return p
+}
+
 enum HType {
 	sphere
 }
@@ -26,7 +47,7 @@ struct MLambertian {
 }
 
 struct MMetal {
-	mtype MType = MType.metal
+	mtype MType = .metal
 	albedo vec.Vec3
 	fuzz f32 = 0.
 }
@@ -35,22 +56,6 @@ union Material {
 	generic MGeneric
 	lambertian MLambertian
 	metal MMetal
-}
-
-struct HGeneric {
-	htype HType
-}
-
-struct HSphere {
-	htype HType = HType.sphere
-	center vec.Vec3
-	radius f32
-	material Material
-}
-
-union Hittable {
-	generic HGeneric
-	sphere HSphere
 }
 
 struct HitRec {
@@ -62,7 +67,32 @@ mut:
 	mat Material		// material at hit point
 }
 
-fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
+type StringCallback fn(obj voidptr) string
+type HitCallback fn(obj voidptr, r ray.Ray, t_min f32, closest f32, rec mut HitRec) bool
+
+struct HGeneric {
+	strcb StringCallback
+	hitcb HitCallback
+}
+
+struct HSphere {
+	strcb StringCallback = StringCallback(cb_sphere_str)
+	hitcb HitCallback = HitCallback(cb_sphere_hit)
+	center vec.Vec3 radius f32
+	material Material
+}
+
+union Hittable {
+	generic HGeneric
+	sphere HSphere
+}
+
+fn cb_sphere_str(obj voidptr) string {
+	s := &HSphere(obj) return '{S:$s.center,$s.radius}'
+}
+
+fn cb_sphere_hit(obj voidptr, r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
+	s := &HSphere(obj)
 	oc := r.origin() - s.center
 	a := r.direction().dot(r.direction())
 	b := oc.dot(r.direction())
@@ -74,7 +104,6 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
 			rec.normal = vec.div(rec.p - s.center, s.radius)
-//			eprintln('mat type ${s.material.mtype}')
 			rec.mat = s.material
 			return true
 		}
@@ -83,17 +112,9 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
 			rec.normal = vec.div(rec.p - s.center, s.radius)
-//			eprintln('mat type ${s.material.mtype}')
 			rec.mat = s.material
 			return true
 		}
-	}
-	return false
-}
-
-fn (h Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
-	if h.generic.htype == .sphere {
-		return h.sphere.hit(r, t_min, t_max, mut rec)
 	}
 	return false
 }
@@ -104,24 +125,13 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	mut hit_anything := false
 	mut closest_so_far := t_max
 	for h in hh {
-		if h.hit(r, t_min, closest_so_far, mut temp_rec) {
+		if h.generic.hitcb(h, r, t_min, closest_so_far, mut temp_rec) {
 			hit_anything = true
 			closest_so_far = temp_rec.t
 			*rec = temp_rec
 		}
 	}
 	return hit_anything
-}
-
-fn random_in_unit_sphere() vec.Vec3 {
-	mut p := vec.Vec3{}
-	for {
-		p = vec.mult(2, vec.Vec3{random_f(), random_f(), random_f()}) - vec.Vec3{1,1,1}
-		if p.squared_length() < 1.0 {
-			break
-		}
-	}
-	return p
 }
 
 fn (m Material) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
@@ -141,26 +151,25 @@ fn (m Material) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scat
 }
 
 fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
-//	mut rec := HitRec{mat:0}
 	mut rec := HitRec{}
 	// remove acne by starting at 0.001
 	if world.hit(r, 0.001, math.max_f32, mut rec) {
+//		println('HIT')
 		mut scattered := ray.Ray{}
 		mut attenuation := vec.Vec3{}
 		if depth < 50 && rec.mat.scatter(r, rec, mut attenuation, mut scattered) {
+//		println('ATT')
 			return attenuation * world.color(scattered, depth + 1)
 		} else {
+//		println('NOT ATT')
 			return vec.Vec3{0,0,0}
 		}
 	} else {
+//		println('NOT HIT')
 		unit_direction := r.direction().unit_vector()
 		t := .5 * (unit_direction.y + 1.)
 		return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1.})
 	}
-}
-
-fn random_f() f32 {
-	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.)
 }
 
 struct Camera {
@@ -170,18 +179,15 @@ struct Camera {
 	origin vec.Vec3
 }
 
-fn (arr []Hittable) println() {
-	for elt in arr {
-//		elt.println()
-//		println(elt)
-	}
-}
-
 fn (c Camera) get_ray(u f32, v f32) ray.Ray {
 	return ray.Ray {
 c.origin,
 c.lower_left_corner + vec.mult(u, c.horizontal) + vec.mult(v, c.vertical) - c.origin
 	}
+}
+
+pub fn (h Hittable) str() string {
+	return h.generic.strcb(h)
 }
 
 fn main() {
@@ -221,9 +227,11 @@ fn main() {
 		for i := 0; i < nx; i++ {
 			mut col := vec.Vec3{0,0,0}
 			for s := 0; s < ns; s++ {
+//				println('rfcnt=$rfcnt riuscnt=$riuscnt riudcnt=$riudcnt')
 				u := (f32(i) + random_f()) / f32(nx)
 				v := (f32(j) + random_f()) / f32(ny)
 				r := cam.get_ray(u, v)
+//				println('j=$j i=$i r=$r')
 				col = col + world.color(r, 0)
 			}
 			col = vec.div(col, ns)
