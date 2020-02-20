@@ -338,9 +338,9 @@ pub fn (h Hittable) str() string {
 
 fn main() {
 	mut fnameout := ''
-	mut nx := 1024
-	mut ny := 768
-	mut ns := 16
+	mut nx := 200
+	mut ny := 100
+	mut ns := 1
 	mut arg := 1
 	if arg < os.args.len {
 		nx = os.args[arg++].int()
