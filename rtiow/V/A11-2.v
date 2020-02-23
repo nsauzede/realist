@@ -221,7 +221,7 @@ mut:
 }
 
 fn (cam mut Camera) make(lookfrom vec.Vec3, lookat vec.Vec3, vup vec.Vec3, vfov f32, aspect f32) {
-	println(lookfrom)
+//	println(lookfrom)
 	theta := vfov * math.pi / 180.
 	half_height := math.tan(theta / 2.)
 	half_width := aspect * half_height
@@ -255,9 +255,9 @@ pub fn (h Hittable) str() string {
 
 fn main() {
 	rand.seed(0)
-	nx := 20
-	ny := 10
-	ns := 10
+	nx := 200
+	ny := 100
+	ns := 100
 	println('P3') println('$nx $ny') println(255)
 	mut cam := Camera{}
 	cam.make(vec.Vec3{-2,2,1}, vec.Vec3{0,0,-1}, vec.Vec3{0,1,0}, 90., f32(nx)/f32(ny))

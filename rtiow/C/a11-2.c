@@ -10,6 +10,8 @@
 
 #ifdef DEBUG
 extern unsigned long rfcnt;
+extern unsigned long riuscnt;
+extern unsigned long ruidcnt;
 #define INLINE
 #else
 #define INLINE static inline
@@ -22,9 +24,6 @@ INLINE float random_f() {
 	return (float)rand() / ((float)RAND_MAX + (float)1.0);
 }
 
-#ifdef DEBUG
-extern unsigned long riuscnt;
-#endif
 void random_in_unit_sphere(vec3 p) {
 #ifdef DEBUG
 	riuscnt++;
@@ -83,15 +82,17 @@ typedef struct {
 #define MMETAL(ax, ay, az, f) ((material_t){metal_scatter, .u.metal=(metal_t){{ax, ay, az}, f}})
 #define MDIELECTRIC(r) ((material_t){dielectric_scatter, .u.dielectric=(dielectric_t){r}})
 
-#define HSPHERE(cx, cy, cz, r, m) ((hittable_t){sphere_hit, .u.sphere=(sphere_t){{cx, cy, cz}, r, m}})
-#define HSTART ((hittable_t){list_hit, 0})
+#define HSPHERE(cx, cy, cz, r, m) ((hittable_t){sphere_hit, sphere_print, .u.sphere=(sphere_t){{cx, cy, cz}, r, m}})
+#define HSTART ((hittable_t){list_hit, list_print})
 #define HEND ((hittable_t){0, 0})
 
 struct hittable_s;
 typedef bool (*hit_t)(struct hittable_s *p, const ray *r, float t_min, float t_max, hit_record *rec);
+typedef void (*print_t)(struct hittable_s *p);
 
 typedef struct hittable_s {
 	hit_t hit;
+	print_t print;
 	union {
 		void *null;
 		sphere_t sphere;
@@ -112,6 +113,33 @@ bool list_hit(hittable_t *p, const ray *r, float t_min, float t_max, hit_record 
 		}
 	}
 	return hit_anything;
+}
+
+void list_print(hittable_t *p) {
+	printf("[");
+	int first = 1;
+	while (1) {
+		p++;
+		if (!p->print) break;
+		if (!first) {
+			printf(", ");
+		} else {
+			first = 0;
+		}
+		p->print(p);
+	}
+	printf("]\n");
+}
+
+void wprint(hittable_t *world) {
+	if (!world->print) return;
+	world->print(world);
+}
+
+
+void sphere_print(hittable_t *p) {
+	sphere_t *s = &p->u.sphere;
+	printf("{S:");vprint(s->center);printf(" ,%f}", s->radius);
 }
 
 bool sphere_hit(hittable_t *p, const ray *r, float t_min, float t_max, hit_record *rec) {
@@ -275,6 +303,7 @@ typedef struct {
 // vfov is top to bottom in degrees
 void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
 		const vec3 vup, float vfov, float aspect) {
+//	vprint(lookfrom);printf("\n");
 	vec3 u, v, w;
 	float theta = vfov*M_PI/180;
 	float half_height = tanf(theta/2);
@@ -302,6 +331,18 @@ void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
 #endif
 }
 
+void cam_print(const camera *cam) {
+	printf("{\n\tlower_left_corner: ");vprint(cam->lower_left_corner);printf(" ");
+	printf("\n\thorizontal: ");vprint(cam->horizontal);printf(" ");
+	printf("\n\tvertical: ");vprint(cam->vertical);printf(" ");
+	printf("\n\torigin: ");vprint(cam->origin);printf(" ");
+	printf("\n}\n");
+//	printf("\nu: ");vprint(cam->u);
+//	printf("\nv: ");vprint(cam->v);
+//	printf("\nw: ");vprint(cam->w);
+//	printf("\nlens_radius=%f\n", cam->lens_radius);
+}
+
 void get_ray(camera *cam, ray *r, float s, float t) {
 //	printf("s=%f t=%f\n", s, t);
 	vec3 direction, direction0, direction1;
@@ -320,6 +361,7 @@ void get_ray(camera *cam, ray *r, float s, float t) {
 #ifdef DEBUG
 unsigned long rfcnt = 0;
 unsigned long riuscnt = 0;
+unsigned long riudcnt = 0;
 #endif
 
 int main() {
@@ -340,16 +382,32 @@ int main() {
 	};
 	camera cam;
 	make_camera(&cam, VEC3(-2,2,1), VEC3(0,0,-1), VEC3(0,1,0), 90, (float)nx/(float)ny);
+#ifdef DEBUG
+	cam_print(&cam);
+	wprint(world);
+#endif
 	for (int j = ny-1; j >= 0; j--) {
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
 			for (int s = 0; s < ns; s++) {
+#ifdef DEBUG
+//				printf("rfcnt=%lu riuscnt=%lu riudcnt=%lu\n", rfcnt, riuscnt, riudcnt);
+#endif
 				float u = ((float)i + random_f()) / (float)nx;
 				float v = ((float)j + random_f()) / (float)ny;
+#ifdef DEBUG
 //				printf("u=%g v=%g rfcnt=%lu riuscnt=%lu\n", u, v, rfcnt, riuscnt);
+				vec3 uv = {u, v, 0};
+				printf("uv=");vprint(uv);printf(" \n");
 //				printf("j=%d i=%d s=%d riuscnt=%lu\n", j, i, s, riuscnt);
+#endif
 				ray r;
 				get_ray(&cam, &r, u, v);
+#ifdef DEBUG
+				printf("j=%d i=%d s=%d r=", j, i, s);
+				rprint(&r);
+				printf(" \n");
+#endif
 				vec3 col0;
 				color(col0, &r, world, 0);
 				vadd(col, col, col0);
