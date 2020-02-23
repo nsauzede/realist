@@ -6,6 +6,7 @@ V:=v
 all: $(PPM)
 	md5sum *.ppm
 
+#DEBUG:=1
 ifdef DEBUG
 VFLAGS:=--enable-globals
 endif

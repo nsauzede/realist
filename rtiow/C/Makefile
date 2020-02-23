@@ -8,6 +8,7 @@ all: $(PPM)
 
 OPT=-O3
 #OPT=-O0 -g
+#DEBUG:=1
 ifdef DEBUG
 OPT+=-DDEBUG
 endif
