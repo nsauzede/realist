@@ -8,6 +8,8 @@ all: $(PPM)
 
 #DEBUG:=1
 ifdef DEBUG
+VFLAGS:=--enable-globals -d dbg
+else
 VFLAGS:=--enable-globals
 endif
 %_v.c: %.v

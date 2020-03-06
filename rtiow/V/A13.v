@@ -149,7 +149,7 @@ fn (m MMetal) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scatte
 fn schlick(cosine f32, ref_idx f32) f32 {
 	mut r0 := (1. - ref_idx) / (1. + ref_idx)
 	r0 = r0 * r0
-	return r0 + (1. - r0) * math.pow(1. - cosine, 5)
+	return r0 + (1. - r0) * math.powf(1. - cosine, 5)
 }
 
 fn (d MDielectric) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
@@ -250,7 +250,7 @@ pub fn (c Camera) str() string {
 fn new_camera(lookfrom vec.Vec3, lookat vec.Vec3, vup vec.Vec3, vfov f32, aspect f32, aperture f32, focus_dist f32) Camera {
 	// vfov is top to bottom in degrees
 	theta := vfov * math.pi / 180.
-	half_height := math.tan(theta / 2.)
+	half_height := math.tanf(theta / 2.)
 	half_width := aspect * half_height
 	w := (lookfrom - lookat).unit_vector()
 	u := vup.cross(w).unit_vector()
