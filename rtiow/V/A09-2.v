@@ -147,7 +147,7 @@ fn cb_scatter_metal(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.V
 }
 
 fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
-	mut rec := HitRec{}
+	mut rec := HitRec{ph:0}
 	// remove acne by starting at 0.001
 	if world.hit(r, 0.001, math.max_f32, mut rec) {
 //		println('HIT')
