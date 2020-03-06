@@ -8,6 +8,11 @@ import math
 import rand
 import os
 
+//#include "A12-1.h"
+__global rfcnt int
+__global riuscnt int
+__global riudcnt int
+
 struct HitRec {
 mut:
 	t f32			// hit time
@@ -16,24 +21,66 @@ mut:
 	ph voidptr		// hittable at hit point (material, etc..)
 }
 
+fn random_f() f32 {
+$if dbg? {
+	rfcnt++
+}
+	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.)
+}
+
+fn random_in_unit_sphere() vec.Vec3 {
+$if dbg? {
+	riuscnt++
+}
+	mut p := vec.Vec3{}
+	for {
+		r1 := random_f() r2:= random_f() r3 := random_f()
+		p = vec.mult(2, vec.Vec3{r1, r2, r3}) - vec.Vec3{1,1,1}
+		if p.squared_length() < 1.0 {
+			break
+		}
+	}
+	return p
+}
+
+fn random_in_unit_disk() vec.Vec3 {
+$if dbg? {
+	riudcnt++
+}
+	mut p := vec.Vec3{}
+	for {
+		r1 := random_f() r2:= random_f()
+		p = vec.mult(2., vec.Vec3{r1, r2, 0}) - vec.Vec3{1., 1., 0}
+		if p.dot(p) < 1.0 {
+			break
+		}
+	}
+	return p
+}
+
+type StringCallback fn(obj voidptr) string
 type ScatterCallback fn(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool
 
 struct MGeneric {
+	strcb StringCallback
 	scattercb ScatterCallback
 }
 
 struct MLambertian {
+	strcb StringCallback = StringCallback(cb_str_lambertian)
 	scattercb ScatterCallback = ScatterCallback(cb_scatter_lambertian)
 	albedo vec.Vec3
 }
 
 struct MMetal {
+	strcb StringCallback = StringCallback(cb_str_metal)
 	scattercb ScatterCallback = ScatterCallback(cb_scatter_metal)
 	albedo vec.Vec3
 	fuzz f32 = 0.
 }
 
 struct MDielectric {
+	strcb StringCallback = StringCallback(cb_str_dielectric)
 	scattercb ScatterCallback = ScatterCallback(cb_scatter_dielectric)
 	ref_idx f32
 }
@@ -45,7 +92,6 @@ union Material {
 	dielectric MDielectric
 }
 
-type StringCallback fn(obj voidptr) string
 type HitCallback fn(obj voidptr, r ray.Ray, t_min f32, closest f32, rec mut HitRec) bool
 
 struct HGeneric {
@@ -55,8 +101,8 @@ struct HGeneric {
 }
 
 struct HSphere {
-	strcb StringCallback = StringCallback(cb_sphere_str)
-	hitcb HitCallback = HitCallback(cb_sphere_hit)
+	strcb StringCallback = StringCallback(cb_str_sphere)
+	hitcb HitCallback = HitCallback(cb_hit_sphere)
 	material Material
 	center vec.Vec3
 	radius f32
@@ -67,11 +113,11 @@ union Hittable {
 	sphere HSphere
 }
 
-fn cb_sphere_str(obj voidptr) string {
-	s := &HSphere(obj) return '{S:$s.center,$s.radius}'
+fn cb_str_sphere(obj voidptr) string {
+	s := &HSphere(obj) return '{HS:$s.center,$s.radius,${s.material.generic.strcb(s.material)}}'
 }
 
-fn cb_sphere_hit(obj voidptr, r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
+fn cb_hit_sphere(obj voidptr, r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	s := &HSphere(obj)
 	oc := r.origin() - s.center
 	a := r.direction().dot(r.direction())
@@ -99,7 +145,7 @@ fn cb_sphere_hit(obj voidptr, r ray.Ray, t_min f32, t_max f32, rec mut HitRec) b
 	return false
 }
 
-fn (hh []Hittable) hit1(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
+fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	mut hit_anything := false
 	mut closest_so_far := t_max
 	for i, h in hh {
@@ -111,16 +157,8 @@ fn (hh []Hittable) hit1(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	return hit_anything
 }
 
-fn random_in_unit_sphere() vec.Vec3 {
-	mut p := vec.Vec3{}
-	for {
-		r1 := random_f() r2:= random_f() r3 := random_f()
-		p = vec.mult(2, vec.Vec3{r1, r2, r3}) - vec.Vec3{1,1,1}
-		if p.squared_length() < 1.0 {
-			break
-		}
-	}
-	return p
+fn cb_str_lambertian(obj voidptr) string {
+	l := &MLambertian(obj) return '{ML:$l.albedo}'
 }
 
 fn cb_scatter_lambertian(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
@@ -129,6 +167,10 @@ fn cb_scatter_lambertian(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut 
 	*scattered = ray.Ray{rec.p, target}
 	*attenuation = l.albedo
 	return true
+}
+
+fn cb_str_metal(obj voidptr) string {
+	m := &MMetal(obj) return '{MM:$m.albedo,$m.fuzz}'
 }
 
 fn cb_scatter_metal(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
@@ -145,6 +187,10 @@ fn schlick(cosine f32, ref_idx f32) f32 {
 	return r0 + (1. - r0) * math.powf(1. - cosine, 5)
 }
 
+fn cb_str_dielectric(obj voidptr) string {
+	d := &MDielectric(obj) return '{MD:$d.ref_idx}'
+}
+
 fn cb_scatter_dielectric(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
 	d := &MDielectric(obj)
 	mut outward_normal := vec.Vec3{}
@@ -152,7 +198,7 @@ fn cb_scatter_dielectric(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut 
 	mut ni_over_nt := f32(0)
 	*attenuation = vec.Vec3{1., 1., 1.}
 	mut refracted := vec.Vec3{}
-	mut reflect_prob := f32(1)
+	mut reflect_prob := f32(0)
 	mut cosine := f32(0)
 	dot := r_in.direction().dot(rec.normal)
 	len := r_in.direction().length()
@@ -165,53 +211,69 @@ fn cb_scatter_dielectric(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut 
 		ni_over_nt = 1. / d.ref_idx
 		cosine = -dot / len
 	}
+//	dln := vec.Vec3{dot, len, ni_over_nt}
+//	println('dln=$dln')
+//	println('outnorm=$outward_normal')
+//	println('rindir=$r_in.direction()')
 	if r_in.direction().refract(outward_normal, ni_over_nt, mut refracted) {
+//		println('SCHLICK')
 		reflect_prob = schlick(cosine, d.ref_idx)
+	} else {
+//		println('NOSCHLICK')
+		reflect_prob = 1.
 	}
 	if random_f() < reflect_prob {
+//		println('REFL')
 		*scattered = ray.Ray{rec.p, reflected}
 	} else {
+//		println('REFR')
 		*scattered = ray.Ray{rec.p, refracted}
 	}
 	return true
 }
 
 fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
+$if dbg? {
+	println(r)
+}
 	mut rec := HitRec{ph:0}
 	// remove acne by starting at 0.001
-	if world.hit1(r, 0.001, math.max_f32, mut rec) {
+	if world.hit(r, 0.001, math.max_f32, mut rec) {
+$if dbg? {
+		println('HIT')
+}
 		mut scattered := ray.Ray{}
 		mut attenuation := vec.Vec3{}
 		h := &Hittable(rec.ph)
 		if depth < 50 && h.generic.material.generic.scattercb(h.generic.material.generic, r, rec, mut attenuation, mut scattered) {
+//			println('ATT')
+//			tv := vec.Vec3{rec.t, 0, 0}
+//			println('tv=$tv')
+//			println('p=${rec.p}')
+//			println('nor=${rec.normal}')
+//			println('h=${h.generic.strcb(h)}')
+//			println('sca=$scattered')
 			return attenuation * world.color(scattered, depth + 1)
 		} else {
+//			println('NOT ATT')
 			return vec.Vec3{0,0,0}
 		}
 	} else {
 		unit_direction := r.direction().unit_vector()
+$if dbg? {
+		println('NOT HIT')
+}
+//		println('NOT HIT dir=$r.direction()ud=$unit_direction')
 		t := .5 * (unit_direction.y + 1.)
-		return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1.})
+//		return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1.})
+		col0 := vec.mult(1. - t, vec.Vec3{1., 1., 1.})
+		col1 := vec.mult(t, vec.Vec3{.5, .7, 1.})
+		return col0 + col1
 	}
-}
-
-fn random_f() f32 {
-	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.)
-}
-
-fn random_in_unit_disk() vec.Vec3 {
-	mut p := vec.Vec3{}
-	for {
-		r1 := random_f() r2 := random_f()
-		p = vec.mult(2, vec.Vec3{r1, r2, 0}) - vec.Vec3{1, 1, 0}
-		if p.dot(p) < 1.0 {
-			break
-		}
-	}
-	return p
 }
 
 struct Camera {
+mut:
 	origin vec.Vec3
 	lower_left_corner vec.Vec3
 	horizontal vec.Vec3
@@ -223,43 +285,54 @@ struct Camera {
 }
 
 pub fn (c Camera) str() string {
-	return '{origin = $c.origin, lower_left_corner = $c.lower_left_corner, 
-	horizontal = $c.horizontal, vertical = $c.vertical, 
-  u = $c.u, v = $c.v, w = $c.w, 
-  lens_radius = $c.lens_radius'
+	return '{origin = $c.origin, lower_left_corner = $c.lower_left_corner,
+	horizontal = $c.horizontal, vertical = $c.vertical,
+	u = $c.u, v = $c.v, w = $c.w,
+	lens_radius = $c.lens_radius'
 }
 
-fn new_camera(lookfrom vec.Vec3, lookat vec.Vec3, vup vec.Vec3, vfov f32, aspect f32, aperture f32, focus_dist f32) Camera {
-	// vfov is top to bottom in degrees
+fn (cam mut Camera) make(lookfrom vec.Vec3, lookat vec.Vec3, vup vec.Vec3,
+	vfov f32, aspect f32, aperture f32, focus_dist f32)
+{
+//	println(lookfrom)
 	theta := vfov * math.pi / 180.
 	half_height := math.tanf(theta / 2.)
 	half_width := aspect * half_height
+
 	w := (lookfrom - lookat).unit_vector()
 	u := vup.cross(w).unit_vector()
 	v := w.cross(u)
-	return Camera {
-		lens_radius: aperture / 2.
-		lower_left_corner: lookfrom
-			- vec.mult(half_width * focus_dist, u)
-			- vec.mult(half_height * focus_dist, v)
-			- vec.mult(focus_dist, w)
-		horizontal: vec.mult(2. * half_width * focus_dist, u)
-		vertical: vec.mult(2. * half_height * focus_dist, v)
-		origin: lookfrom
-		u: u, v: v, w: w
-	}
+
+	cam.lens_radius = aperture / 2.
+	cam.origin = lookfrom
+	cam.lower_left_corner = lookfrom
+		- vec.mult(half_width * focus_dist, u)
+		- vec.mult(half_height * focus_dist, v)
+		- vec.mult(focus_dist, w)
+	cam.horizontal = vec.mult(2. * half_width * focus_dist, u)
+	cam.vertical = vec.mult(2. * half_height * focus_dist, v)
+	cam.u = u
+	cam.v = v
+	cam.w = w
 }
 
 fn (c Camera) get_ray(s f32, t f32) ray.Ray {
+$if dbg? {
+//	println('s=$s t=$t')
+}
 	rd := vec.mult(c.lens_radius, random_in_unit_disk())
 	offset := vec.mult(rd.x, c.u) + vec.mult(rd.y, c.v)
 	return ray.Ray {
 		c.origin + offset,
 		c.lower_left_corner
-			+ vec.mult(s, c.horizontal)
-			+ vec.mult(t, c.vertical)
-			- c.origin - offset
+		+ vec.mult(s, c.horizontal)
+		+ vec.mult(t, c.vertical)
+		- c.origin - offset
 	}
+}
+
+pub fn (h Hittable) str() string {
+	return h.generic.strcb(h)
 }
 
 fn new_world() []Hittable {
@@ -275,10 +348,9 @@ fn new_world() []Hittable {
 			r01 := random_f()
 			r02 := random_f()
 			center := vec.Vec3{
-				f32(a)+0.9*r02,
+				f32(a)+0.9*r01,
 				0.2,
-				f32(b)+0.9*r01}
-//			eprintln('a=$a b=$b center=$center')
+				f32(b)+0.9*r02}
 			if (center - vec.Vec3{4,0.2,0}).length() > 0.9 {
 				if choose_mat < 0.8 {  // diffuse
 					r1 := random_f()
@@ -290,20 +362,20 @@ fn new_world() []Hittable {
 world << Hittable(HSphere{
 	center: center, radius: 0.2,
 	material: Material(MLambertian{albedo: vec.Vec3{
-		r6*r5,r4*r3,r2*r1}})
+		r1*r2,r3*r4,r5*r6}})
 })
 				} else if choose_mat < 0.95 { // metal
-					r1 := random_f()
-					r2 := random_f()
-					r3 := random_f()
-					r4 := random_f()
+					r1 := .5 * (1. + random_f())
+					r2 := .5 * (1. + random_f())
+					r3 := .5 * (1. + random_f())
+					r4 := .5 * random_f()
 world << Hittable(HSphere{
 	center: center, radius: 0.2
 	material: Material(MMetal{albedo: vec.Vec3{
-		0.5 * (1. + r4),
-		0.5 * (1. + r3),
-		0.5 * (1. + r2)},
-		fuzz: 0.5 * r1})
+		r1,
+		r2,
+		r3},
+		fuzz: r4})
 })
 				} else {  // glass
 world << Hittable(HSphere{
@@ -315,14 +387,14 @@ world << Hittable(HSphere{
 		}
 	}
 	world <<
-                Hittable(HSphere{center: vec.Vec3{0, 1, 0}, radius: 1
-                        material: Material(
-                                MDielectric{ref_idx: 1.5})
-                })
-	world <<
 		Hittable(HSphere{center: vec.Vec3{-4, 1, 0}, radius: 1
                         material: Material(
                                 MLambertian{albedo: vec.Vec3{0.4, 0.2, 0.1}})
+                })
+	world <<
+                Hittable(HSphere{center: vec.Vec3{0, 1, 0}, radius: 1
+                        material: Material(
+                                MDielectric{ref_idx: 1.5})
                 })
 	world <<
                 Hittable(HSphere{center: vec.Vec3{4, 1, 0}, radius: 1
@@ -330,10 +402,6 @@ world << Hittable(HSphere{
                                 MMetal{albedo: vec.Vec3{0.7, 0.6, 0.5}, fuzz: 0.0})
                 })
 	return world
-}
-
-pub fn (h Hittable) str() string {
-	return h.generic.strcb(h)
 }
 
 fn main() {
@@ -372,33 +440,40 @@ fn main() {
 		println('255')
 	}
 	lookfrom := vec.Vec3{9, 2, 2.6}
-	lookat := vec.Vec3{3, 0.8, 1}
-	dist_to_focus := (lookfrom - lookat).length()
+	lookat := vec.Vec3{3, .8, 1}
+	dist_to_focus := (lookfrom-lookat).length()
 	aperture := f32(0)
-	cam := new_camera(
-		lookfrom,
-		lookat,
-		vec.Vec3{0, 1., 0},
-		30., f32(nx) / f32(ny),
-		aperture,
-		dist_to_focus)
+	mut cam := Camera{}
+	cam.make(lookfrom, lookat, vec.Vec3{0,1.,0}, 30., f32(nx)/f32(ny),
+		aperture, dist_to_focus)
 	world := new_world()
-//	println(world)
-	for j := ny - 1; j >= 0; j-- {
+$if dbg? {
+	println(cam)
+	println(world)
+}
+	for j := ny-1; j >= 0; j-- {
+//		if j==98 {break}
 		for i := 0; i < nx; i++ {
 			mut col := vec.Vec3{0,0,0}
 			for s := 0; s < ns; s++ {
+$if dbg? {
+					println('rfcnt=$rfcnt riuscnt=$riuscnt riudcnt=$riudcnt')
+}
 				u := (f32(i) + random_f()) / f32(nx)
 				v := (f32(j) + random_f()) / f32(ny)
-//				print('u=$u v=$v ')
+$if dbg? {
+//				println('u=$u v=$v rfcnt=$rfcnt riuscnt=$riuscnt')
+				uv := vec.Vec3{u, v, 0}
+				println('uv=$uv')
+}
 				r := cam.get_ray(u, v)
-//				print('r=$r ')
+//				println('j=$j i=$i s=$s r=$r')
 //				col = col + world.color(r, 0)
-				c0 := world.color(r, 0)
-//				print(c0)
-				col = col + c0
+				col0 := world.color(r, 0)
+//				println('col0=$col0')
+				col = col + col0
+//				println('col=$col')
 			}
-//			print(col)
 			col = vec.div(col, ns)
 			// Gamma 2 correction (square root)
 			col = vec.Vec3{math.sqrtf(col.x),math.sqrtf(col.y),math.sqrtf(col.z)}
