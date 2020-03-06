@@ -64,7 +64,7 @@ class lambertian : public material {
 bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
     vec3 uv = unit_vector(v);
     float dt = dot(uv, n);
-    float discriminant = 1.0 - ni_over_nt*ni_over_nt*(1-dt*dt);
+    float discriminant = 1.0 - ni_over_nt*ni_over_nt*(1.-dt*dt);
     if (discriminant > 0) {
         refracted = ni_over_nt*(uv - n*dt) - n*sqrtf(discriminant);
         return true;
@@ -90,18 +90,19 @@ class dielectric : public material {
             vec3 refracted;
             float reflect_prob;
             float cosine;
+            float dot_ = dot(r_in.direction(), rec.normal);
+            float len = r_in.direction().length();
 
-            if (dot(r_in.direction(), rec.normal) > 0) {
+
+            if (dot_ > 0) {
                 outward_normal = -rec.normal;
                 ni_over_nt = ref_idx;
-                cosine = ref_idx * dot(r_in.direction(), rec.normal)
-                       / r_in.direction().length();
+                cosine = ref_idx * dot_ / len;
             }
             else {
                 outward_normal = rec.normal;
                 ni_over_nt = 1.0 / ref_idx;
-                cosine = -dot(r_in.direction(), rec.normal)
-                       / r_in.direction().length();
+                cosine = -dot_ / len;
             }
 
             if (refract(r_in.direction(), outward_normal, ni_over_nt, refracted)) {

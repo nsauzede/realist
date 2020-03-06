@@ -152,7 +152,7 @@ int main() {
     int ns = 100;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
     hitable *list[5];
-float R = cos(M_PI/4);
+float R = cosf(M_PI/4);
 list[0] = new sphere(vec3(-R,0,-1), R, new lambertian(vec3(0, 0, 1)));
 list[1] = new sphere(vec3( R,0,-1), R, new lambertian(vec3(1, 0, 0)));
 hitable *world = new hitable_list(list,2);

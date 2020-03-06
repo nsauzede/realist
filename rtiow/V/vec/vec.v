@@ -84,22 +84,28 @@ pub fn (v Vec3) reflect(n Vec3) Vec3 {
 
 pub fn (v Vec3) refract(n Vec3, ni_over_nt f32, refracted mut Vec3) bool {
 	uv := v.unit_vector()
+//	println('refuv=$uv')
+//	println('refn=$n')
 	dt := uv.dot(n)
 	discriminant := 1. - ni_over_nt * ni_over_nt * (1. - dt * dt)
+//	ddn := vec.Vec3{dt, discriminant, ni_over_nt}
+//	println('ddn=$ddn')
 	if discriminant > 0 {
 		*refracted = mult(ni_over_nt, uv - mult(dt, n)) - mult(math.sqrtf(discriminant), n)
+//		println('refrac=${*refracted}')
 		return true
 	} else {
 		return false
 	}
 }
 
-pub fn (v Vec3) length() f32 {
-	return math.sqrtf(v.x * v.x + v.y * v.y + v.z * v.z)
-}
-
 pub fn (v Vec3) squared_length() f32 {
 	return v.x * v.x + v.y * v.y + v.z * v.z
+}
+
+pub fn (v Vec3) length() f32 {
+//	return math.sqrtf(v.x * v.x + v.y * v.y + v.z * v.z)
+	return math.sqrtf(v.squared_length())
 }
 
 pub fn (v Vec3) unit_vector() Vec3 {

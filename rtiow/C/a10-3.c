@@ -162,7 +162,7 @@ bool refract(const vec3 v, const vec3 n, float ni_over_nt, vec3 refracted) {
 	vec3 uv;
 	unit_vector(uv, v);
 	float dt = vdot(uv, n);
-	float discriminant = 1.0 - ni_over_nt*ni_over_nt*(1-dt*dt);
+	float discriminant = 1.0 - ni_over_nt*ni_over_nt*(1.-dt*dt);
 	if (discriminant > 0) {
 		vec3 v1, v2;
 		vmul(v1, dt, n);

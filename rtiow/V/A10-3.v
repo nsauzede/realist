@@ -155,7 +155,7 @@ fn cb_scatter_metal(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.V
 fn schlick(cosine f32, ref_idx f32) f32 {
 	mut r0 := (1. - ref_idx) / (1. + ref_idx)
 	r0 = r0 * r0
-	return r0 + (1. - r0) * math.pow(1. - cosine, 5)
+	return r0 + (1. - r0) * math.powf(1. - cosine, 5)
 }
 
 fn cb_scatter_dielectric(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {

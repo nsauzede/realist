@@ -23,7 +23,7 @@ class camera {
             time1 = t1;
             lens_radius = aperture / 2;
             float theta = vfov*M_PI/180;
-            float half_height = tan(theta/2);
+            float half_height = tanf(theta/2);
             float half_width = aspect * half_height;
             origin = lookfrom;
             w = unit_vector(lookfrom - lookat);

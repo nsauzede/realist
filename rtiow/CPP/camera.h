@@ -71,14 +71,9 @@ public:
 #else
 		vec3 rd = lens_radius*random_in_unit_disk();
 		vec3 offset = u * rd.x() + v * rd.y();
-		vec3 direction, direction0, direction1;
-		direction0 = s*horizontal;
-		direction1 = t*vertical;
-		direction = direction0 + direction1;
-		vec3 orig = origin + offset;
-		ray r = ray(orig,
-			lower_left_corner + direction +
-			- orig);
+		ray r = ray(origin + offset,
+			lower_left_corner + s*horizontal + t*vertical
+			- origin - offset);
 		return r;
 #endif
 	}

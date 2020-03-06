@@ -155,7 +155,7 @@ fn cb_scatter_metal(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.V
 fn schlick(cosine f32, ref_idx f32) f32 {
 	mut r0 := (1. - ref_idx) / (1. + ref_idx)
 	r0 = r0 * r0
-	return r0 + (1. - r0) * math.pow(1. - cosine, 5)
+	return r0 + (1. - r0) * math.powf(1. - cosine, 5)
 }
 
 fn cb_scatter_dielectric(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
@@ -222,7 +222,7 @@ mut:
 
 fn (cam mut Camera) make(vfov f32, aspect f32) {
 	theta := vfov * math.pi / 180.
-	half_height := math.tan(theta / 2.)
+	half_height := math.tanf(theta / 2.)
 	half_width := aspect * half_height
 	cam.lower_left_corner = vec.Vec3{-half_width, -half_height, -1.0}
 	cam.horizontal = vec.Vec3{2. * half_width, 0.0, 0.0}
@@ -250,7 +250,7 @@ fn main() {
 	mut cam := Camera{}
 	cam.make(90., f32(nx)/f32(ny))
 //	println(cam)
-	R := math.cos(math.pi / 4.)
+	R := math.cosf(math.pi / 4.)
 	world := [
 		Hittable(HSphere{center: vec.Vec3{-R, 0, -1}, radius: R,
 			material: Material(

@@ -53,7 +53,7 @@ class checker_texture : public texture {
         checker_texture() {}
         checker_texture(texture *t0, texture *t1): even(t0), odd(t1) {}
         virtual vec3 value(float u, float v, const vec3& p) const {
-            float sines = sin(10*p.x())*sin(10*p.y())*sin(10*p.z());
+            float sines = sinf(10*p.x())*sinf(10*p.y())*sinf(10*p.z());
             if (sines < 0)
                 return odd->value(u, v, p);
             else
@@ -418,7 +418,7 @@ class noise_texture : public texture {
             return vec3(1,1,1) * noise.turb(scale * p);
 #else
             // indirect sine undulate turbulence => marble
-            return vec3(1,1,1) * 0.5 * (1 + sin(scale*p.z() + 10*noise.turb(p)));
+            return vec3(1,1,1) * 0.5 * (1 + sinf(scale*p.z() + 10*noise.turb(p)));
 #endif
         }
         perlin noise;
