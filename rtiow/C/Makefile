@@ -12,6 +12,12 @@ OPT=-O3
 ifdef DEBUG
 OPT+=-DDEBUG
 endif
+
+#PROF:=1
+ifdef PROF
+OPT+=-pg
+endif
+
 %.elf: %.c
 	$(CC) -o $@ $^ $(OPT) -lm
 
