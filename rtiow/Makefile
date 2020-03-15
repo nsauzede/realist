@@ -28,3 +28,4 @@ mrproper: clobber
 	$(MAKE) -C C clean
 	$(MAKE) -C V clean
 	$(MAKE) -C CPP clean
+	$(MAKE) -C rust clean

@@ -6,8 +6,11 @@ import vec
 import ray
 
 fn color(r ray.Ray) vec.Vec3 {
+//	println('r=$r')
 	unit_direction := r.direction().unit_vector()
+//	println('ud=$unit_direction')
 	t := .5 * (unit_direction.y + 1.)
+//	println('t=$t')
 	return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 }
 
@@ -25,6 +28,7 @@ fn main() {
 		for i := 0; i < nx; i++ {
 			u := f32(i) / f32(nx)
 			v := f32(j) / f32(ny)
+//			println('u=$u v=$v')
 			r := ray.Ray {
 				origin,
 				lower_left_corner
@@ -32,6 +36,7 @@ fn main() {
 					+ vec.mult(v, vertical)
 			}
 			col := color(r)
+//			println('col=$col')
 			ir := int(255.99 * col.x)
 			ig := int(255.99 * col.y)
 			ib := int(255.99 * col.z)
