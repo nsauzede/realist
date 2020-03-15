@@ -11,7 +11,7 @@ OPT:=-O3
 ifdef DEBUG
 VFLAGS:=--enable-globals -d dbg
 else
-VFLAGS:=--enable-globals
+#VFLAGS:=--enable-globals
 endif
 
 #PROF:=1
