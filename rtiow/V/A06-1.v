@@ -12,6 +12,7 @@ fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) f32 {
 	b := 2. * oc.dot(r.direction())
 	c := oc.dot(oc) - radius * radius
 	discriminant := b * b - 4. * a * c
+//	println('a=$a b=$b c=$c d=$discriminant')
 	if discriminant < 0 {
 		return -1.0
 	} else {
@@ -22,7 +23,7 @@ fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) f32 {
 fn color(r ray.Ray) vec.Vec3 {
 	mut t := hit_sphere(vec.Vec3{0, 0, -1}, .5, r)
 	if t > 0. {
-		tmp := r.point_at_parameter(t) - vec.Vec3{0, 0, -1}
+//		println('t=$t')
 		N := (r.point_at_parameter(t) - vec.Vec3{0, 0, -1}).unit_vector()
 		return vec.mult(.5, N + vec.Vec3{1, 1, 1})
 	}
