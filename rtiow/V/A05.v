@@ -7,10 +7,12 @@ import ray
 
 fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) bool {
 	oc := r.origin() - center
+//	println('oc=$oc')
 	a := r.direction().dot(r.direction())
 	b := 2. * oc.dot(r.direction())
 	c := oc.dot(oc) - radius * radius
 	discriminant := b * b - 4. * a * c
+//	println('a=$a b=$b c=$c d=$discriminant')
 	return discriminant > 0
 }
 
