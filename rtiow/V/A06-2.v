@@ -70,6 +70,7 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 			hit_anything = true
 			closest_so_far = temp_rec.t
 			*rec = temp_rec
+//			println('t=$temp_rec.t')
 		}
 	}
 	return hit_anything
@@ -78,16 +79,14 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 fn color(r ray.Ray) vec.Vec3 {
 	mut rec := HitRec{}
 	hittables := [
-		Hittable{
-htype:.sphere
-data:HData{sphere: HSphere{center: vec.Vec3{0, 0, -1}, radius: .5}}
-		},
+		Hittable{htype:.sphere, data:HData{sphere: HSphere{center: vec.Vec3{0, 0, -1}, radius: .5}}},
 		Hittable{
 htype:.sphere
 data: HData{sphere: HSphere{center: vec.Vec3{0, -100.5, -1}, radius: 100}}
 		}
 	]
 	if hittables.hit(r, 0, 99999, mut rec) {
+//		println('t=$rec.t')
 		return vec.mult(0.5, rec.normal + vec.Vec3{1., 1., 1.})
 	} else {
 		unit_direction := r.direction().unit_vector()
