@@ -76,7 +76,7 @@ struct MMetal {
 	strcb StringCallback = StringCallback(cb_str_metal)
 	scattercb ScatterCallback = ScatterCallback(cb_scatter_metal)
 	albedo vec.Vec3
-	fuzz f32 = 0.
+	fuzz f32 = f32(0.)
 }
 
 struct MDielectric {
