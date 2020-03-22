@@ -233,7 +233,9 @@ fn cb_scatter_dielectric(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut 
 
 fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 $if dbg? {
-	println(r)
+//	println(r)
+//	v := vec.Vec3{math.max_f32, 0, 0}
+//	println('$v')
 }
 	mut rec := HitRec{ph:0}
 	// remove acne by starting at 0.001
@@ -245,24 +247,24 @@ $if dbg? {
 		mut attenuation := vec.Vec3{}
 		h := &Hittable(rec.ph)
 		if depth < 50 && h.generic.material.generic.scattercb(h.generic.material.generic, r, rec, mut attenuation, mut scattered) {
-//			println('ATT')
-//			tv := vec.Vec3{rec.t, 0, 0}
-//			println('tv=$tv')
-//			println('p=${rec.p}')
-//			println('nor=${rec.normal}')
-//			println('h=${h.generic.strcb(h)}')
-//			println('sca=$scattered')
+			println('ATT')
+			tv := vec.Vec3{rec.t, 0, 0}
+			println('tv=$tv')
+			println('p=${rec.p}')
+			println('nor=${rec.normal}')
+			println('h=${h.generic.strcb(h)}')
+			println('sca=$scattered')
 			return attenuation * world.color(scattered, depth + 1)
 		} else {
-//			println('NOT ATT')
+			println('NOT ATT')
 			return vec.Vec3{0,0,0}
 		}
 	} else {
 		unit_direction := r.direction().unit_vector()
 $if dbg? {
-		println('NOT HIT')
+//		println('NOT HIT')
+		println('NOT HIT dir=$r.direction()ud=$unit_direction')
 }
-//		println('NOT HIT dir=$r.direction()ud=$unit_direction')
 		t := .5 * (unit_direction.y + 1.)
 //		return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1.})
 		col0 := vec.mult(1. - t, vec.Vec3{1., 1., 1.})
@@ -371,8 +373,8 @@ fn main() {
 		})
 	]
 $if dbg? {
-	println(cam)
-	println(world)
+//	println(cam)
+//	println(world)
 }
 	for j := ny-1; j >= 0; j-- {
 //		if j==98 {break}
@@ -386,14 +388,20 @@ $if dbg? {
 				v := (f32(j) + random_f()) / f32(ny)
 $if dbg? {
 //				println('u=$u v=$v rfcnt=$rfcnt riuscnt=$riuscnt')
-				uv := vec.Vec3{u, v, 0}
-				println('uv=$uv')
+//				println('u=$u v=$v')
+//				uv := vec.Vec3{u, v, 0}
+//				println('uv=$uv')
 }
 				r := cam.get_ray(u, v)
+$if dbg? {
 //				println('j=$j i=$i s=$s r=$r')
+//				println('r=$r')
+}
 //				col = col + world.color(r, 0)
 				col0 := world.color(r, 0)
+$if dbg? {
 //				println('col0=$col0')
+}
 				col = col + col0
 //				println('col=$col')
 			}

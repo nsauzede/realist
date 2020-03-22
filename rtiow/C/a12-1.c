@@ -323,7 +323,9 @@ void color(vec3 col, const ray *r, hittable_t *world, int depth) {
 	hit_record rec;
 	// remove acne by starting at 0.001
 #ifdef DEBUG
-	rprint(r);printf("\n");
+//	rprint(r);printf("\n");
+//	vec3 v = {FLT_MAX, 0, 0};
+//	vprint(v);printf(" \n");
 #endif
 	if (world->hit(world, r, 0.001, FLT_MAX, &rec)) {
 #ifdef DEBUG
@@ -334,29 +336,29 @@ void color(vec3 col, const ray *r, hittable_t *world, int depth) {
 		hittable_t *h = rec.h_ptr;
 		if (depth < 50 && h->mat.scatter(&h->mat, r, &rec, attenuation, &scattered)) {
 #ifdef DEBUG
-/*
 			printf("ATT\n");
-//			vec3 tv = {rec.t, 0, 0};
-//			printf("tv=");
-//			vprint(tv);
-//			printf(" \np=");
-//			vprint(rec.p);
+			vec3 tv = {rec.t, 0, 0};
+			printf("tv=");
+			vprint(tv);
 //			printf(" \n");
-//			printf("nor=");
-//			vprint(rec.normal);
-//			printf(" \n");
+			printf(" \np=");
+			vprint(rec.p);
+			printf(" \n");
+			printf("nor=");
+			vprint(rec.normal);
+			printf(" \n");
 			printf("h=");
 			h->print(h);
 			printf("\nsca=");
 			rprint(&scattered);
 			printf(" \n");
-*/#endif
+#endif
 			vec3 scat_col;
 			color(scat_col, &scattered, world, depth + 1);
 			vmulv(col, attenuation, scat_col);
 		} else {
 #ifdef DEBUG
-//			printf("NOT ATT\n");
+			printf("NOT ATT\n");
 #endif
 			vcopy(col, VEC3(0, 0, 0));
 		}
@@ -364,12 +366,13 @@ void color(vec3 col, const ray *r, hittable_t *world, int depth) {
 		vec3 unit_direction;
 		unit_vector(unit_direction, r->direction);
 #ifdef DEBUG
-		printf("NOT HIT\n");
-//		printf(" dir=");
-//		vprint(r->direction);
-//		printf(" ud=");
-//		vprint(unit_direction);
-//		printf(" \n");
+//		printf("NOT HIT\n");
+		printf("NOT HIT");
+		printf(" dir=");
+		vprint(r->direction);
+		printf(" ud=");
+		vprint(unit_direction);
+		printf(" \n");
 #endif
 		float t = 0.5*(unit_direction[1] + 1.0);
 		vec3 col0 = {1.0, 1.0, 1.0};
@@ -495,8 +498,8 @@ int main() {
 	make_camera(&cam, lookfrom, lookat, VEC3(0,1,0), 20, (float)nx/(float)ny,
 		aperture, dist_to_focus);
 #ifdef DEBUG
-	cam_print(&cam);
-	wprint(world);
+//	cam_print(&cam);
+//	wprint(world);
 #endif
 	for (int j = ny-1; j >= 0; j--) {
 //		if (j==98) break;
@@ -510,14 +513,16 @@ int main() {
 				float v = ((float)j + random_f()) / (float)ny;
 #ifdef DEBUG
 //				printf("u=%g v=%g rfcnt=%lu riuscnt=%lu\n", u, v, rfcnt, riuscnt);
-				vec3 uv = {u, v, 0};
-				printf("uv=");vprint(uv);printf(" \n");
+//				printf("u=%g v=%g\n", u, v);
+//				vec3 uv = {u, v, 0};
+//				printf("uv=");vprint(uv);printf(" \n");
 //				printf("j=%d i=%d s=%d riuscnt=%lu\n", j, i, s, riuscnt);
 #endif
 				ray r;
 				get_ray(&cam, &r, u, v);
 #ifdef DEBUG
 //				printf("j=%d i=%d s=%d r=", j, i, s);
+//				printf("r=");
 //				rprint(&r);
 //				printf(" \n");
 #endif
