@@ -24,9 +24,18 @@ pub fn (a Vec3) str() string {
 	u0.v[0] = a.x
 	u0.v[1] = a.y
 	u0.v[2] = a.z
-	p1 := u0.i[0].hex()
-	p2 := u0.i[1].hex()
-	p3 := u0.i[2].hex()
+	mut p1 := u0.i[0].hex()
+	mut p2 := u0.i[1].hex()
+	mut p3 := u0.i[2].hex()
+	if u0.i[0] == 0 {
+		p1 = '0'
+	}
+	if u0.i[1] == 0 {
+		p2 = '0'
+	}
+	if u0.i[2] == 0 {
+		p3 = '0'
+	}
 	return '{$a.x, $a.y, $a.z;$p1, $p2, $p3}'
 }
 
