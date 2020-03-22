@@ -9,7 +9,8 @@ all: $(PPM)
 OPT:=-O3
 #DEBUG:=1
 ifdef DEBUG
-VFLAGS:=--enable-globals -d dbg
+#VFLAGS:=--enable-globals -d dbg
+VFLAGS:=-d dbg
 else
 #VFLAGS:=--enable-globals
 endif

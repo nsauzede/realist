@@ -25,7 +25,7 @@ API void vprint(const vec3 r) {
 	u.v[1] = r[1];
 	u.v[2] = r[2];
 //	printf("{0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", u.i[0], u.i[1], u.i[2]);
-	printf("{%f, %f, %f;0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", r[0], r[1], r[2], u.i[0], u.i[1], u.i[2]);
+	printf("{%f, %f, %f;%" PRIx32 ", %" PRIx32 ", %" PRIx32 "}", r[0], r[1], r[2], u.i[0], u.i[1], u.i[2]);
 #else
 	printf("pointer : %d\n", (int)sizeof(void *));
 	printf("float : %d\n", (int)sizeof(float));
