@@ -127,6 +127,7 @@ fn main() {
 		vertical : vec.Vec3 {0., 2., 0.}
 		origin : vec.Vec3 {0., 0., 0.}
 	}
+//	println('cam=$cam')
 	world := [
 		HSphere{center: vec.Vec3{0, 0, -1}, radius: .5}.make(),
 		HSphere{center: vec.Vec3{0, -100.5, -1}, radius: 100}.make()
@@ -138,6 +139,7 @@ fn main() {
 				u := f32(f64(i) + random_f()) / f32(nx)
 				v := f32(f64(j) + random_f()) / f32(ny)
 				r := cam.get_ray(u, v)
+//				println('r=$r')
 				col = col + color(r, world)
 			}
 			col = vec.div(col, ns)

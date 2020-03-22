@@ -1,5 +1,6 @@
 use std::ops::Div;
 use std::ops::Mul;
+use std::fmt;
 
 #[derive(Debug)]
 #[derive(Copy, Clone)]
@@ -29,6 +30,8 @@ unsafe {
 }
 }
 
+#[derive(Debug)]
+#[derive(Copy, Clone)]
 struct Camera {
 	origin: Vec3,
 	lower_left_corner: Vec3,
@@ -37,8 +40,44 @@ struct Camera {
 }
 
 impl Camera {
-	fn get_ray(self) -> Ray {
-		Ray{origin:Vec3([0., 0., 0.]), direction: Vec3([0., 0., 0.])}
+	fn get_ray(self, u: f32, v: f32) -> Ray {
+		Ray{
+			origin: self.origin,
+			direction: self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin
+		}
+	}
+}
+
+impl fmt::Display for Camera {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{{\n\tlower_left_corner: {}\n\thorizontal: {}\n\tvertical: {}\n\torigin: {}\n}}",
+			self.lower_left_corner,
+			self.horizontal,
+			self.vertical,
+			self.origin)
+	}
+}
+
+impl fmt::Display for Ray {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{{{}, {}}} ",
+			self.origin,
+			self.direction)
+	}
+}
+
+impl fmt::Display for Vec3 {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+unsafe {
+		union MyUnion {
+			f: [f32; 3],
+			i: [u32; 3]
+		};
+		let u = MyUnion{f:self.0};
+		write!(f, "{{{:.6}, {:.6}, {:.6};{:x}, {:x}, {:x}}}",
+			self.0[0], self.0[1], self.0[2],
+			u.i[0], u.i[1], u.i[2])
+}
 	}
 }
 
@@ -192,24 +231,30 @@ unsafe {
 }
 	let nx = 200;
 	let ny = 100;
+	let ns = 100;
 	println!("P3"); println!("{} {}", nx, ny); println!("255");
-	let lower_left_corner = Vec3([-2.0, -1.0, -1.0]);
-	let horizontal = Vec3([4., 0., 0.]);
-	let vertical = Vec3([0., 2., 0.]);
-	let origin = Vec3([0., 0., 0.]);
+	let cam = Camera{
+		lower_left_corner: Vec3([-2.0, -1.0, -1.0]),
+		horizontal: Vec3([4., 0., 0.]),
+		vertical: Vec3([0., 2., 0.]),
+		origin: Vec3([0., 0., 0.]),
+	};
+//	println!("cam={}", cam);
 	let world = [
 		HSphere{center: Vec3([0., 0., -1.]), radius: 0.5},
 		HSphere{center: Vec3([0., -100.5, -1.]), radius: 100.},
 	];
 	for j in (0..ny).rev() {
 		for i in 0..nx {
-			let u = i as f32 / nx as f32;
-			let v = j as f32 / ny as f32;
-			let r = Ray {
-				origin: origin,
-				direction: lower_left_corner + u * horizontal + v * vertical
-			};
-			let col = color(r, &world);
+			let mut col = Vec3([0., 0., 0.]);
+			for _s in 0..ns {
+				let u = (i as f32 + random_double()) / nx as f32;
+				let v = (j as f32 + random_double()) / ny as f32;
+				let r = cam.get_ray(u, v);
+//				println!("r={}", r);
+				col = col + color(r, &world);
+			}
+			col = col / ns as f32;
 			let _ir = (255.99*col.0[0]) as i32;
 			let _ig = (255.99*col.0[1]) as i32;
 			let _ib = (255.99*col.0[2]) as i32;
