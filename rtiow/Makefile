@@ -30,3 +30,4 @@ mrproper: clobber
 	$(MAKE) -C CPP clean
 	$(MAKE) -C rust clean
 	$(MAKE) -C go clean
+	$(MAKE) -C odin clean
