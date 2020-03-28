@@ -424,4 +424,5 @@ int main() {
 			printf("%d %d %d\n", ir, ig, ib);
 		}
 	}
+	return 0;
 }

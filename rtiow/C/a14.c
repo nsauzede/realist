@@ -620,5 +620,5 @@ int main(int argc, char *argv[]) {
 		fclose(fout);
 		free(bytes);
 	}
+	return 0;
 }
-

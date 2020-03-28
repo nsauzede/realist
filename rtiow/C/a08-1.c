@@ -256,4 +256,5 @@ printf("rfcnt=%lu riuscnt=%lu riudcnt=%lu\n", rfcnt, riuscnt, riudcnt);
 			printf("%d %d %d\n", ir, ig, ib);
 		}
 	}
+	return 0;
 }
