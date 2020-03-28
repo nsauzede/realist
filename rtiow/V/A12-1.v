@@ -247,6 +247,7 @@ $if dbg? {
 		mut attenuation := vec.Vec3{}
 		h := &Hittable(rec.ph)
 		if depth < 50 && h.generic.material.generic.scattercb(h.generic.material.generic, r, rec, mut attenuation, mut scattered) {
+$if dbg? {
 			println('ATT')
 			tv := vec.Vec3{rec.t, 0, 0}
 			println('tv=$tv')
@@ -254,9 +255,12 @@ $if dbg? {
 			println('nor=${rec.normal}')
 			println('h=${h.generic.strcb(h)}')
 			println('sca=$scattered')
+}
 			return attenuation * world.color(scattered, depth + 1)
 		} else {
+$if dbg? {
 			println('NOT ATT')
+}
 			return vec.Vec3{0,0,0}
 		}
 	} else {
