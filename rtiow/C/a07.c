@@ -152,8 +152,10 @@ int main(int argc, char *argv[]) {
 			for (int s = 0; s < ns; s++) {
 				float u = (float)(i + random_f()) / (float)nx;
 				float v = (float)(j + random_f()) / (float)ny;
+//				printf("u=%f v=%f\n", u, v);
 				ray r;
 				get_ray(&cam, &r, u, v);
+//				rprint(&r);printf("\n");
 				vec3 col0;
 				color(col0, &r, world);
 				vadd(col, col, col0);

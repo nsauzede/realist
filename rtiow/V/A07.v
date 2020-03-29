@@ -18,6 +18,14 @@ union HData {
 	sphere HSphere
 }
 
+pub fn (hs HSphere) str() string {
+	return '{$hs.center, $hs.radius}'
+}
+
+pub fn (hd HData) str() string {
+	return hd.sphere.str()
+}
+
 struct Hittable {
 	htype HType
 	data HData
@@ -127,11 +135,12 @@ fn main() {
 		vertical : vec.Vec3 {0., 2., 0.}
 		origin : vec.Vec3 {0., 0., 0.}
 	}
-//	println('cam=$cam')
 	world := [
 		HSphere{center: vec.Vec3{0, 0, -1}, radius: .5}.make(),
 		HSphere{center: vec.Vec3{0, -100.5, -1}, radius: 100}.make()
 	]
+//	println('world=$world')
+//	println('cam=$cam')
 	for j := ny-1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
 			mut col := vec.Vec3{0,0,0}
@@ -140,9 +149,13 @@ fn main() {
 				v := f32(f64(j) + random_f()) / f32(ny)
 				r := cam.get_ray(u, v)
 //				println('r=$r')
-				col = col + color(r, world)
+				col0 := color(r, world)
+//				println('col0=$col0')
+				col = col + col0
 			}
+//			println('col=$col')
 			col = vec.div(col, ns)
+//			println('col=$col')
 			ir := int(255.99 * col.x)
 			ig := int(255.99 * col.y)
 			ib := int(255.99 * col.z)
