@@ -124,9 +124,9 @@ int main() {
 			rmake(&r, origin, direction);
 			vec3 col;
 			color(col, &r, world);
-			int ir = (int)(255.99*col[0]);
-			int ig = (int)(255.99*col[1]);
-			int ib = (int)(255.99*col[2]);
+			int ir = (int)(255.99f*col[0]);
+			int ig = (int)(255.99f*col[1]);
+			int ib = (int)(255.99f*col[2]);
 			printf("%d %d %d\n", ir, ig, ib);
 		}
 	}

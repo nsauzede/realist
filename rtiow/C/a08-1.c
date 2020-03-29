@@ -250,9 +250,9 @@ printf("rfcnt=%lu riuscnt=%lu riudcnt=%lu\n", rfcnt, riuscnt, riudcnt);
 #endif
 			}
 			vdiv(col, col, (float)ns);
-			int ir = (int)(255.99*col[0]);
-			int ig = (int)(255.99*col[1]);
-			int ib = (int)(255.99*col[2]);
+			int ir = (int)(255.99f*col[0]);
+			int ig = (int)(255.99f*col[1]);
+			int ib = (int)(255.99f*col[2]);
 			printf("%d %d %d\n", ir, ig, ib);
 		}
 	}

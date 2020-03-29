@@ -13,9 +13,9 @@ fn main() {
 			r := f32(i) / f32(nx)
 			g := f32(j) / f32(ny)
 			b := 0.2
-			ir := int(255.99 * r)
-			ig := int(255.99 * g)
-			ib := int(255.99 * b)
+			ir := int(f32(255.99) * r)
+			ig := int(f32(255.99) * g)
+			ib := int(f32(255.99) * b)
 			println('$ir $ig $ib')
 		}
 	}

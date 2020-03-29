@@ -99,8 +99,18 @@ fn color(r ray.Ray, world []Hittable) vec.Vec3 {
 		return vec.mult(0.5, rec.normal + vec.Vec3{1., 1., 1.})
 	} else {
 		unit_direction := r.direction().unit_vector()
+//		println('ud=$unit_direction')
 		t := .5 * (unit_direction.y + 1.)
-		return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1})
+//		tv := vec.Vec3{t, 0, 0}
+//		tv := vec.Vec3{t, 1.0 - t, 0}
+//		println('tv=$tv')
+//		col := vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1.})
+		col0 := vec.mult(1. - t, vec.Vec3{1., 1., 1.})
+//		println('col0=$col0')
+		col1 := vec.mult(t, vec.Vec3{.5, .7, 1.})
+		col := col0 + col1
+//		println('col=$col')
+		return col
 	}
 }
 
@@ -147,6 +157,9 @@ fn main() {
 			for s := 0; s < ns; s++ {
 				u := f32(f64(i) + random_f()) / f32(nx)
 				v := f32(f64(j) + random_f()) / f32(ny)
+//				println('u=$u v=$v')
+				uv := vec.Vec3{u, v, 0}
+//				println('uv=$uv')
 				r := cam.get_ray(u, v)
 //				println('r=$r')
 				col0 := color(r, world)
@@ -156,9 +169,9 @@ fn main() {
 //			println('col=$col')
 			col = vec.div(col, ns)
 //			println('col=$col')
-			ir := int(255.99 * col.x)
-			ig := int(255.99 * col.y)
-			ib := int(255.99 * col.z)
+			ir := int(f32(255.99) * col.x)
+			ig := int(f32(255.99) * col.y)
+			ib := int(f32(255.99) * col.z)
 			println('$ir $ig $ib')
 		}
 	}

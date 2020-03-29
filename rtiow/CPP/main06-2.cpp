@@ -34,9 +34,9 @@ int main() {
             ray r(origin, lower_left_corner + u*horizontal + v*vertical);
 
             vec3 col = color(r, world);
-            int ir = int(255.99*col[0]);
-            int ig = int(255.99*col[1]);
-            int ib = int(255.99*col[2]);
+            int ir = (int)(255.99f*col[0]);
+            int ig = (int)(255.99f*col[1]);
+            int ib = (int)(255.99f*col[2]);
 
             std::cout << ir << " " << ig << " " << ib << "\n";
         }

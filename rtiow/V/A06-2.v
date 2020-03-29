@@ -116,9 +116,9 @@ fn main() {
 					+ vec.mult(v, vertical)
 			}
 			col := color(r)
-			ir := int(255.99 * col.x)
-			ig := int(255.99 * col.y)
-			ib := int(255.99 * col.z)
+			ir := int(f32(255.99) * col.x)
+			ig := int(f32(255.99) * col.y)
+			ib := int(f32(255.99) * col.z)
 			println('$ir $ig $ib')
 		}
 	}

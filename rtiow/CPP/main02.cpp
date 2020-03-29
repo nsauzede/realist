@@ -9,9 +9,9 @@ int main() {
             float r = (float)i / (float)nx;
             float g = (float)j / (float)ny;
             float b = 0.2;
-            int ir = int(255.99*r);
-            int ig = int(255.99*g);
-            int ib = int(255.99*b);
+            int ir = (int)(255.99f*r);
+            int ig = (int)(255.99f*g);
+            int ib = (int)(255.99f*b);
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }
