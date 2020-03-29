@@ -239,7 +239,7 @@ unsafe {
 		vertical: Vec3([0., 2., 0.]),
 		origin: Vec3([0., 0., 0.]),
 	};
-	println!("cam={}", cam);
+//	println!("cam={}", cam);
 	let world = [
 		HSphere{center: Vec3([0., 0., -1.]), radius: 0.5},
 		HSphere{center: Vec3([0., -100.5, -1.]), radius: 100.},
