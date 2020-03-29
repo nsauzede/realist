@@ -234,9 +234,9 @@ int main() {
 				float v = ((float)j + (float)random_f()) / (float)ny;
 #ifdef DEBUG
 //                printf("u=%f v=%f\n", u, v);
-				vec3 uv={u, v, 0};
-				printf("uv=");vprint(uv);printf(" \n");
 #endif
+//				vec3 uv={u, v, 0};
+//				printf("uv=");vprint(uv);printf(" \n");
 				ray r;
 				get_ray(&cam, &r, u, v);
 #ifdef DEBUG
