@@ -276,9 +276,9 @@ fn main() {
 			col = vec.div(col, ns)
 			// Gamma 2 correction (square root)
 			col = vec.Vec3{math.sqrtf(col.x),math.sqrtf(col.y),math.sqrtf(col.z)}
-			ir := int(255.99 * col.x)
-			ig := int(255.99 * col.y)
-			ib := int(255.99 * col.z)
+			ir := int(f32(255.99) * col.x)
+			ig := int(f32(255.99) * col.y)
+			ib := int(f32(255.99) * col.z)
 			println('$ir $ig $ib')
 		}
 	}

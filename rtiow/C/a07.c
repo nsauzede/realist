@@ -93,6 +93,8 @@ void color(vec3 col, const ray *r, hittable *world) {
 		vec3 unit_direction;
 		unit_vector(unit_direction, r->direction);
 		float t = 0.5*(unit_direction[1] + 1.0);
+//		vec3 tv = {t, 1. - t, 0};
+//		printf("tv=");vprint(tv);printf(" \n");
 		vec3 col0 = {1.0, 1.0, 1.0};
 		vec3 col1 = {0.5, 0.7, 1.0};
 		vmul(col0, 1.0-t, col0);
@@ -160,10 +162,12 @@ int main(int argc, char *argv[]) {
 				color(col0, &r, world);
 				vadd(col, col, col0);
 			}
+//			printf("col=");vprint(col);printf(" \n");
 			vdiv(col, col, (float)ns);
-			int ir = (int)(255.99*col[0]);
-			int ig = (int)(255.99*col[1]);
-			int ib = (int)(255.99*col[2]);
+//			printf("col=");vprint(col);printf(" \n");
+			int ir = (int)(255.99f*col[0]);
+			int ig = (int)(255.99f*col[1]);
+			int ib = (int)(255.99f*col[2]);
 			printf("%d %d %d\n", ir, ig, ib);
 		}
 	}

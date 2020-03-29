@@ -1,5 +1,7 @@
 package main
+// #cgo LDFLAGS:  -lm
 // #include <stdlib.h>
+// #include <math.h>
 import "C"
 import (
 	"fmt"
@@ -26,7 +28,8 @@ func (c Camera) get_ray(u float32, v float32) Ray {
 }
 
 func random_double() float32 {
-	return float32(C.rand()) / (float32(C.RAND_MAX) + 1.0)
+//	return float32(C.rand()) / (float32(C.RAND_MAX) + float32(1.0))
+	return float32(C.rand()) / (float32(C.RAND_MAX + 1))
 }
 
 func vmul(f float32, v Vec3) Vec3 {
@@ -51,7 +54,8 @@ func vdot(v1 Vec3, v2 Vec3) float32 {
 
 // #include <math.h>
 func Sqrtf(x float32) float32 {
-	return float32(math.Sqrt(float64(x)))
+//	return float32(math.Sqrt(float64(x)))
+	return float32(C.sqrtf(C.float(x)))
 }
 func (v Vec3) len() float32 {
 //	return math.Sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
@@ -70,7 +74,7 @@ func (r Ray) point_at_parameter(t float32) Vec3 {
 func hit_sphere(center Vec3, radius float32, r Ray) float32 {
 	oc := vsub(r.origin, center)
 	a := vdot(r.direction, r.direction)
-	b := 2.0 * vdot(oc, r.direction)
+	b := float32(2.0) * vdot(oc, r.direction)
 	c := vdot(oc, oc) - radius * radius
 	discriminant := b * b - 4 * a * c
 	if discriminant < 0 {
@@ -135,11 +139,34 @@ func (hh HSphereS) hit(r Ray, t_min float32, t_max float32, rec *HitRec) bool {
 func color(r Ray, world HSphereS) Vec3 {
 	rec := HitRec{}
 	if world.hit(r, 0., 99999., &rec) {
-		return vmul(0.5, vadd(rec.normal, Vec3{1, 1, 1}))
+		return vmul(0.5, vadd(rec.normal, Vec3{1., 1., 1.}))
+	} else {
+		unit_direction := r.direction.unit_vector()
+//		fmt.Printf("ud=");unit_direction.print();fmt.Printf(" \n")
+		t := 0.5 * (unit_direction[1] + 1.0)
+//		tv := Vec3{t, 0, 0}
+//		tv := Vec3{t, float32(1.0) - float32(t), 0}
+//		fmt.Printf("tv=");tv.print();fmt.Printf(" \n")
+//		col := vadd(vmul(1.0 - t, Vec3{1.0, 1.0, 1.0}), vmul(t, Vec3{0.5, 0.7, 1.0}))
+		col0 := vmul(1.0 - t, Vec3{1.0, 1.0, 1.0})
+//		fmt.Printf("col0=");col0.print();fmt.Printf(" \n")
+		col1 := vmul(t, Vec3{0.5, 0.7, 1.0})
+		col := vadd(col0, col1)
+//		fmt.Printf("col=");col.print();fmt.Printf(" \n")
+		return col
 	}
-	unit_direction := r.direction.unit_vector()
-	t := 0.5 * (unit_direction[1] + 1.0)
-	return vadd(vmul(1.0 - t, Vec3{1.0, 1.0, 1.0}), vmul(t, Vec3{0.5, 0.7, 1.0}))
+}
+
+func (v Vec3) print() {
+	fmt.Printf("{%f, %f, %f;%x, %x, %x}", v[0], v[1], v[2], math.Float32bits(v[0]), math.Float32bits(v[1]), math.Float32bits(v[2]))
+}
+
+func (r Ray) print() {
+	fmt.Printf("{")
+	r.origin.print()
+	fmt.Printf(", ");
+	r.direction.print()
+	fmt.Printf("} ");
 }
 
 func main() {
@@ -151,8 +178,8 @@ func main() {
 	fmt.Printf("%d %d\n", nx, ny)
 	fmt.Printf("%d\n", 255)
 	world := []HSphere{
-		HSphere{Vec3{0, 0, -1}, 0.5},
-		HSphere{Vec3{0, -100.5, -1}, 100},
+		HSphere{Vec3{0, 0, -1.}, 0.5},
+		HSphere{Vec3{0, -100.5, -1.}, 100.},
 	}
 //	fmt.Print("world=",world,"\n")
 	cam := Camera {
@@ -169,15 +196,18 @@ func main() {
 				u := (float32(i) + random_double()) / float32(nx)
 				v := (float32(j) + random_double()) / float32(ny)
 //				fmt.Printf("u=%f v=%f\n", u, v)
+//				uv := Vec3{u, v, 0}
+//				fmt.Printf("uv=", uv, "\n")
+//				uv.println("uv=")
 				r := cam.get_ray(u, v)
-//				fmt.Print(r)
+//				fmt.Printf("r=");r.print();fmt.Printf("\n")
 				col0 := color(r, world)
-//				fmt.Print("col0=",col0,"\n")
+//				fmt.Printf("col0=");col0.print();fmt.Printf(" \n")
 				col = vadd(col, col0)
 			}
-//			fmt.Print("col=",col,"\n")
+//			fmt.Print("col=");col.print();fmt.Printf(" \n")
 			col = vdiv(col, float32(ns))
-//			fmt.Print("col=",col,"\n")
+//			fmt.Print("col=");col.print();fmt.Printf(" \n")
 			ir := int(255.99 * col[0])
 			ig := int(255.99 * col[1])
 			ib := int(255.99 * col[2])

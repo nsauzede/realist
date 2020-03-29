@@ -6,8 +6,7 @@ GO=go
 all: $(PPM)
 	md5sum *.ppm
 
-#OPT=-O
-#OPT=-O0 -g
+#OPT:=--ldflags '-extldflags "-lm"'
 #DEBUG:=1
 ifdef DEBUG
 OPT+=-DDEBUG
@@ -19,7 +18,7 @@ OPT+=-pg
 endif
 
 %.elf: %.go
-	$(GO) build -o $@ $^ $(OPT)
+	$(GO) build $(OPT) -o $@ $^
 
 %.ppm: %.elf
 	./$^ $(ARGS) > $@

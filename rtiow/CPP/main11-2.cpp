@@ -185,9 +185,9 @@ list[n++] = new sphere(vec3(-1,0,-1), -0.45, new dielectric(1.5));
             }
             col /= (float)ns;
             col = vec3( sqrtf(col[0]), sqrtf(col[1]), sqrtf(col[2]) );
-            int ir = int(255.99*col[0]);
-            int ig = int(255.99*col[1]);
-            int ib = int(255.99*col[2]);
+            int ir = (int)(255.99f*col[0]);
+            int ig = (int)(255.99f*col[1]);
+            int ib = (int)(255.99f*col[2]);
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }
