@@ -59,6 +59,7 @@ func main() {
 		for i := 0; i < nx; i++ {
 			u := float32(i) / float32(nx)
 			v := float32(j) / float32(ny)
+//			fmt.Println(Vec3{u, v, 0})
 			r := Ray{origin, vadd(lower_left_corner, vadd(vmul(u, horizontal), vmul(v, vertical)))}
 			col := color(r)
 			ir := int(255.99 * col[0])
