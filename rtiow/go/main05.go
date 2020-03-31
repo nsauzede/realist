@@ -49,9 +49,11 @@ func (r Ray) point_at_parameter(t float32) Vec3 {
 
 func hit_sphere(center Vec3, radius float32, r Ray) bool {
 	oc := vsub(r.origin, center)
+//	fmt.Println("oc=", oc)
 	a := vdot(r.direction, r.direction)
 	b := 2.0 * vdot(oc, r.direction)
 	c := vdot(oc, oc) - radius * radius
+//	fmt.Println("abc=", Vec3{a, b, c})
 	discriminant := b * b - 4 * a * c
 	return discriminant > 0
 }
