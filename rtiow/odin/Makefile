@@ -6,7 +6,7 @@ ODIN=odin
 all: $(PPM)
 	md5sum *.ppm
 
-#OPT=-O
+#OPT=-opt=3
 #OPT=-O0 -g
 #DEBUG:=1
 ifdef DEBUG
