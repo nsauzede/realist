@@ -88,7 +88,7 @@ pub fn div(v Vec3, k f32) Vec3 {
 }
 
 pub fn (v Vec3) reflect(n Vec3) Vec3 {
-	return v - mult(2. * v.dot(n), n)
+	return v - mult(2.0 * v.dot(n), n)
 }
 
 pub fn (v Vec3) refract(n Vec3, ni_over_nt f32, refracted mut Vec3) bool {
@@ -96,7 +96,7 @@ pub fn (v Vec3) refract(n Vec3, ni_over_nt f32, refracted mut Vec3) bool {
 //	println('refuv=$uv')
 //	println('refn=$n')
 	dt := uv.dot(n)
-	discriminant := 1. - ni_over_nt * ni_over_nt * (1. - dt * dt)
+	discriminant := 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt)
 //	ddn := vec.Vec3{dt, discriminant, ni_over_nt}
 //	println('ddn=$ddn')
 	if discriminant > 0 {

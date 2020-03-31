@@ -107,8 +107,8 @@ fn (world []Hittable) color(r ray.Ray) vec.Vec3 {
 		return vec.mult(0.5, world.color(ray.Ray{rec.p, target}))
 	} else {
 		unit_direction := r.direction().unit_vector()
-		t := .5 * (unit_direction.y + 1.)
-		return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1})
+		t := .5 * (unit_direction.y + 1)
+		return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 	}
 }
 
@@ -140,10 +140,10 @@ fn main() {
 	ns := 100
 	println('P3') println('$nx $ny') println(255)
 	cam := Camera {
-		lower_left_corner : vec.Vec3 {-2., -1., -1.}
-		horizontal : vec.Vec3 {4., 0., 0.}
-		vertical : vec.Vec3 {0., 2., 0.}
-		origin : vec.Vec3 {0., 0., 0.}
+		lower_left_corner : vec.Vec3 {-2, -1, -1}
+		horizontal : vec.Vec3 {4, 0, 0}
+		vertical : vec.Vec3 {0, 2, 0}
+		origin : vec.Vec3 {0, 0, 0}
 	}
 	world := [
 		HSphere{center: vec.Vec3{0, 0, -1}, radius: .5}.make(),

@@ -21,7 +21,7 @@ mut:
 
 fn random_f() f32 {
 //	rfcnt++
-	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.)
+	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.0)
 }
 
 fn random_in_unit_sphere() vec.Vec3 {
@@ -164,8 +164,8 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 	} else {
 //		println('NOT HIT')
 		unit_direction := r.direction().unit_vector()
-		t := .5 * (unit_direction.y + 1.)
-		return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1.})
+		t := .5 * (unit_direction.y + 1.0)
+		return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 	}
 }
 
@@ -194,10 +194,10 @@ fn main() {
 	ns := 100
 	println('P3') println('$nx $ny') println(255)
 	cam := Camera {
-		lower_left_corner : vec.Vec3 {-2., -1., -1.}
-		horizontal : vec.Vec3 {4., 0., 0.}
-		vertical : vec.Vec3 {0., 2., 0.}
-		origin : vec.Vec3 {0., 0., 0.}
+		lower_left_corner : vec.Vec3 {-2, -1, -1}
+		horizontal : vec.Vec3 {4, 0, 0}
+		vertical : vec.Vec3 {0, 2, 0}
+		origin : vec.Vec3 {0, 0, 0}
 	}
 //	println(cam)
 	world := [
@@ -212,7 +212,7 @@ fn main() {
 		}),
 		Hittable(HSphere{center: vec.Vec3{1, 0, -1}, radius: 0.5
 			material: Material(
-				MMetal{albedo: vec.Vec3{0.8, 0.6, 0.2}, fuzz: 1.})
+				MMetal{albedo: vec.Vec3{0.8, 0.6, 0.2}, fuzz: 1})
 		}),
 		Hittable(HSphere{center: vec.Vec3{-1, 0, -1}, radius: 0.5
 			material: Material(

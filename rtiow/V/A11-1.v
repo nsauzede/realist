@@ -21,7 +21,7 @@ mut:
 
 fn random_f() f32 {
 //	rfcnt++
-	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.)
+	return f32(rand.next(C.RAND_MAX)) / (f32(C.RAND_MAX) + 1.0)
 }
 
 fn random_in_unit_sphere() vec.Vec3 {
@@ -153,9 +153,9 @@ fn cb_scatter_metal(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.V
 }
 
 fn schlick(cosine f32, ref_idx f32) f32 {
-	mut r0 := (1. - ref_idx) / (1. + ref_idx)
+	mut r0 := (1.0 - ref_idx) / (1.0 + ref_idx)
 	r0 = r0 * r0
-	return r0 + (1. - r0) * math.powf(1. - cosine, 5)
+	return r0 + (1.0 - r0) * math.powf(1.0 - cosine, 5)
 }
 
 fn cb_scatter_dielectric(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
@@ -163,19 +163,19 @@ fn cb_scatter_dielectric(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut 
 	mut outward_normal := vec.Vec3{}
 	reflected := r_in.direction().reflect(rec.normal)
 	mut ni_over_nt := f32(0)
-	*attenuation = vec.Vec3{1., 1., 1.}
+	*attenuation = vec.Vec3{1, 1, 1}
 	mut refracted := vec.Vec3{}
 	mut reflect_prob := f32(1)
 	mut cosine := f32(0)
 	dot := r_in.direction().dot(rec.normal)
 	len := r_in.direction().length()
 	if dot > 0 {
-		outward_normal = vec.mult(-1., rec.normal)
+		outward_normal = vec.mult(-1, rec.normal)
 		ni_over_nt = d.ref_idx
 		cosine = d.ref_idx * dot / len
 	} else {
 		outward_normal = rec.normal
-		ni_over_nt = 1. / d.ref_idx
+		ni_over_nt = 1.0 / d.ref_idx
 		cosine = -dot / len
 	}
 	if r_in.direction().refract(outward_normal, ni_over_nt, mut refracted) {
@@ -207,8 +207,8 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 	} else {
 //		println('NOT HIT')
 		unit_direction := r.direction().unit_vector()
-		t := .5 * (unit_direction.y + 1.)
-		return vec.mult(1. - t, vec.Vec3{1., 1., 1.}) + vec.mult(t, vec.Vec3{.5, .7, 1.})
+		t := .5 * (unit_direction.y + 1.0)
+		return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 	}
 }
 
@@ -221,13 +221,13 @@ mut:
 }
 
 fn (cam mut Camera) make(vfov f32, aspect f32) {
-	theta := vfov * math.pi / 180.
-	half_height := math.tanf(theta / 2.)
+	theta := vfov * math.pi / 180.0
+	half_height := math.tanf(theta / 2.0)
 	half_width := aspect * half_height
 	cam.lower_left_corner = vec.Vec3{-half_width, -half_height, -1.0}
-	cam.horizontal = vec.Vec3{2. * half_width, 0.0, 0.0}
-	cam.vertical = vec.Vec3{0.0, 2. * half_height, 0.0}
-	cam.origin = vec.Vec3{0.0, 0.0, 0.0}
+	cam.horizontal = vec.Vec3{2.0 * half_width, 0, 0}
+	cam.vertical = vec.Vec3{0, 2.0 * half_height, 0}
+	cam.origin = vec.Vec3{0, 0, 0}
 }
 
 fn (c Camera) get_ray(u f32, v f32) ray.Ray {
@@ -248,17 +248,17 @@ fn main() {
 	ns := 100
 	println('P3') println('$nx $ny') println(255)
 	mut cam := Camera{}
-	cam.make(90., f32(nx)/f32(ny))
+	cam.make(90, f32(nx)/f32(ny))
 //	println(cam)
 	R := math.cosf(math.pi / 4.)
 	world := [
 		Hittable(HSphere{center: vec.Vec3{-R, 0, -1}, radius: R,
 			material: Material(
-				MLambertian{albedo: vec.Vec3{0., 0., 1.}})
+				MLambertian{albedo: vec.Vec3{0, 0, 1}})
 		}),
 		Hittable(HSphere{center: vec.Vec3{R, 0, -1}, radius: R
 			material: Material(
-				MLambertian{albedo: vec.Vec3{1., 0., 0.}})
+				MLambertian{albedo: vec.Vec3{1, 0, 0}})
 		})
 	]
 //	println(world)
