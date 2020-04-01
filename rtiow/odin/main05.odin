@@ -14,27 +14,8 @@ vlen :: proc(v: Vec3) -> f32 {
 	return math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 
-vdiv :: proc(v: Vec3, f: f32) -> Vec3 {
-	return Vec3{v[0] / f, v[1] / f, v[2] / f};
-}
-
 unit_vector :: proc(v: Vec3) -> Vec3 {
-	return vdiv(v, vlen(v));
-}
-
-point_at_parameter :: proc(r: Ray, t: f32) {
-}
-
-vadd :: proc(v1: Vec3, v2: Vec3) -> Vec3 {
-	return Vec3{v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]};
-}
-
-vsub :: proc(v1: Vec3, v2: Vec3) -> Vec3 {
-	return Vec3{v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]};
-}
-
-vmul :: proc(f: f32, v: Vec3) -> Vec3 {
-	return Vec3{f * v[0], f * v[1], f * v[2]};
+	return v / vlen(v);
 }
 
 vdot :: proc(v1: Vec3, v2: Vec3) -> f32 {
@@ -42,12 +23,10 @@ vdot :: proc(v1: Vec3, v2: Vec3) -> f32 {
 }
 
 hit_sphere :: proc(center: Vec3, radius: f32, r: Ray) -> bool {
-	oc := vsub(r.origin, center);
-//	fmt.println("oc=", oc);
+	oc := r.origin - center;
 	a := vdot(r.direction, r.direction);
 	b := 2.0 * vdot(oc, r.direction);
 	c := vdot(oc, oc) - radius * radius;
-//	fmt.println("abc=", Vec3{a, b, c});
 	discriminant := b * b - 4 * a * c;
 	return discriminant > 0;
 }
@@ -58,7 +37,7 @@ color :: proc(r: Ray) -> Vec3 {
 	}
 	unit_direction := unit_vector(r.direction);
 	t := 0.5 * (unit_direction[1] + 1.0);
-	return vadd(vmul(1.0 - t, Vec3{1.0, 1.0, 1.0}), vmul(t, Vec3{0.5, 0.7, 1.0}));
+	return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0};
 }
 
 main :: proc() {
@@ -75,7 +54,7 @@ main :: proc() {
 		for i := 0; i < nx; i += 1 {
 			u := f32(i) / f32(nx);
 			v := f32(j) / f32(ny);
-			r := Ray{origin, vadd(lower_left_corner, vadd(vmul(u, horizontal), vmul(v, vertical)))};
+			r := Ray{origin, lower_left_corner + u * horizontal + v * vertical};
 			col := color(r);
 			ir := int(255.99 * col[0]);
 			ig := int(255.99 * col[1]);
