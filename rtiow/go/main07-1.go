@@ -171,6 +171,8 @@ func (r Ray) print() {
 
 func main() {
 	C.srand(0)
+	f := random_double()
+	fmt.Printf("f=%f\n", f)
 	nx := 200
 	ny := 100
 	ns := 100
