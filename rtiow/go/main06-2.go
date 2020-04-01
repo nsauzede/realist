@@ -27,6 +27,9 @@ func vsub(v1 Vec3, v2 Vec3) Vec3 {
 
 func vdot(v1 Vec3, v2 Vec3) float32 {
 	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]
+//	f := v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]
+//	fmt.Println("f=", f)
+//	return f
 }
 
 // #include <math.h>
@@ -73,9 +76,12 @@ type HitRec struct {
 
 func (s HSphere) hit(r Ray, t_min float32, t_max float32, rec *HitRec) bool {
 	oc := vsub(r.origin, s.center)
+//	fmt.Println("oc=", oc)
+//	fmt.Println("dir=", r.direction)
 	a := vdot(r.direction, r.direction)
 	b := vdot(oc, r.direction)
 	c := vdot(oc, oc) - s.radius * s.radius
+//	fmt.Println("abc=", Vec3{a, b, c})
 	discriminant := b * b - a * c
 	if discriminant > 0. {
 		temp := (-b - Sqrtf(discriminant)) / a
@@ -103,6 +109,7 @@ func (hh HSphereS) hit(r Ray, t_min float32, t_max float32, rec *HitRec) bool {
 	hit_anything := false
 	closest_so_far := t_max
 	for _, h := range hh {
+//		fmt.Println("h=", h)
 		if h.hit(r, t_min, closest_so_far, &temp_rec) {
 			hit_anything = true
 			closest_so_far = temp_rec.t
@@ -115,6 +122,7 @@ func (hh HSphereS) hit(r Ray, t_min float32, t_max float32, rec *HitRec) bool {
 func color(r Ray, world HSphereS) Vec3 {
 	rec := HitRec{}
 	if world.hit(r, 0., 99999., &rec) {
+//		fmt.Println("rec=", rec)
 		return vmul(0.5, vadd(rec.normal, Vec3{1, 1, 1}))
 	}
 	unit_direction := r.direction.unit_vector()
@@ -140,7 +148,10 @@ func main() {
 		for i := 0; i < nx; i++ {
 			u := float32(i) / float32(nx)
 			v := float32(j) / float32(ny)
+//			fmt.Println(Vec3{u, v, 0})
+//			fmt.Printf("j=%d i=%d\n", j, i)
 			r := Ray{origin, vadd(lower_left_corner, vadd(vmul(u, horizontal), vmul(v, vertical)))}
+//			fmt.Println(r)
 			col := color(r, world)
 			ir := int(255.99 * col[0])
 			ig := int(255.99 * col[1])
