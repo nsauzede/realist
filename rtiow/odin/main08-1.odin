@@ -18,31 +18,31 @@ Vec3 :: [3]f32;
 Ray :: struct {
 	origin: Vec3,
 	direction: Vec3
-};
+}
 
 HSphere :: struct {
 	center: Vec3,
 	radius: f32
-};
+}
 
 HitRec :: struct {
 	t: f32,
 	p: Vec3,
 	normal: Vec3
-};
+}
 
 Camera :: struct {
 	lower_left_corner: Vec3,
 	horizontal: Vec3,
 	vertical: Vec3,
 	origin: Vec3
-};
+}
 
 get_ray :: proc(c: Camera, u: f32, v: f32) -> Ray {
 	return Ray{c.origin, c.lower_left_corner + u * c.horizontal + v * c.vertical - c.origin};
 }
 
-random_double :: proc() -> f32 {
+random_f :: proc() -> f32 {
 	RAND_MAX : u32 = 2147483647;
 	return f32(rand()) / (f32(RAND_MAX) + 1.0);
 }
@@ -109,9 +109,9 @@ hit :: proc(hh: []HSphere, r: Ray, t_min: f32, t_max: f32, rec: ^HitRec) -> bool
 random_in_unit_sphere :: proc() -> Vec3 {
 	p := Vec3{};
 	for {
-		r1 := random_double();
-		r2 := random_double();
-		r3 := random_double();
+		r1 := random_f();
+		r2 := random_f();
+		r3 := random_f();
 		p = 2.0 * Vec3{r1, r2, r3} - Vec3{1,1,1};
 		if squared_length(p) < 1.0 {
 			break;
@@ -120,11 +120,11 @@ random_in_unit_sphere :: proc() -> Vec3 {
 	return p;
 }
 
-color :: proc(r: Ray, world: []HSphere) -> Vec3 {
+color :: proc(world: []HSphere, r: Ray) -> Vec3 {
 	rec := HitRec{};
 	if hit(world, r, 0.001, 99999., &rec) {
 		target := rec.normal + random_in_unit_sphere();
-		return 0.5 * color(Ray{rec.p, target}, world);
+		return 0.5 * color(world, Ray{rec.p, target});
 	}
 	unit_direction := unit_vector(r.direction);
 	t := 0.5 * (unit_direction[1] + 1.0);
@@ -153,10 +153,10 @@ main :: proc() {
 		for i := 0; i < nx; i += 1 {
 			col := Vec3{0, 0, 0};
 			for s := 0; s < ns; s += 1 {
-				u := (f32(i) + random_double()) / f32(nx);
-				v := (f32(j) + random_double()) / f32(ny);
+				u := (f32(i) + random_f()) / f32(nx);
+				v := (f32(j) + random_f()) / f32(ny);
 				r := get_ray(cam, u, v);
-				col += color(r, world);
+				col += color(world, r);
 			}
 			col /= f32(ns);
 			ir := int(255.99 * col[0]);

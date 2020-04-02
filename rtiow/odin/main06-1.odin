@@ -8,7 +8,7 @@ Vec3 :: [3]f32;
 Ray :: struct {
 	origin: Vec3,
 	direction: Vec3
-};
+}
 
 vlen :: proc(v: Vec3) -> f32 {
 	return math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);

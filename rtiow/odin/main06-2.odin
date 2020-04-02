@@ -8,18 +8,18 @@ Vec3 :: [3]f32;
 Ray :: struct {
 	origin: Vec3,
 	direction: Vec3
-};
+}
 
 HSphere :: struct {
 	center: Vec3,
 	radius: f32
-};
+}
 
 HitRec :: struct {
 	t: f32,
 	p: Vec3,
 	normal: Vec3
-};
+}
 
 vlen :: proc(v: Vec3) -> f32 {
 	return math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
@@ -76,7 +76,7 @@ hit :: proc(hh: []HSphere, r: Ray, t_min: f32, t_max: f32, rec: ^HitRec) -> bool
 	return hit_anything;
 }
 
-color :: proc(r: Ray, world: []HSphere) -> Vec3 {
+color :: proc(world: []HSphere, r: Ray) -> Vec3 {
 	rec := HitRec{};
 	if hit(world, r, 0., 99999., &rec) {
 		return 0.5 * (rec.normal + Vec3{1, 1, 1});
@@ -105,7 +105,7 @@ main :: proc() {
 			u := f32(i) / f32(nx);
 			v := f32(j) / f32(ny);
 			r := Ray{origin, lower_left_corner + u * horizontal + v * vertical};
-			col := color(r, world);
+			col := color(world, r);
 			ir := int(255.99 * col[0]);
 			ig := int(255.99 * col[1]);
 			ib := int(255.99 * col[2]);
