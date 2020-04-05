@@ -133,17 +133,12 @@ bool list_hit(hittable_t *p, const ray *r, float t_min, float t_max, hit_record 
 
 void list_print(void *_p) {
 	hittable_t *p = (hittable_t *)_p;
-	printf("[");
-	int first = 1;
+	printf("[\n");
 	while (1) {
 		p++;
 		if (!p->print) break;
-		if (!first) {
-			printf(", ");
-		} else {
-			first = 0;
-		}
 		p->print(p);
+		printf(",\n");
 	}
 	printf("]\n");
 }
@@ -393,10 +388,10 @@ typedef struct {
 void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
 	const vec3 vup, float vfov, float aspect, float aperture, float focus_dist)
 {
-	cam->lens_radius = aperture / 2;
+	cam->lens_radius = aperture / 2.f;
 	vec3 u, v, w;
 	float theta = vfov*(float)M_PI/180;
-	float half_height = tanf(theta/2);
+	float half_height = tanf(theta/2.f);
 	float half_width = aspect * half_height;
 
 	vcopy(cam->origin, lookfrom);
@@ -419,7 +414,7 @@ void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
 	vmul(cam->vertical, 2 * half_height * focus_dist, v);
 }
 
-void cam_print0(const camera *cam) {
+void cam_print(const camera *cam) {
 	printf("{\n\tlower_left_corner: ");vprint(cam->lower_left_corner);printf(" ");
 	printf("\n\thorizontal: ");vprint(cam->horizontal);printf(" ");
 	printf("\n\tvertical: ");vprint(cam->vertical);printf(" ");
@@ -430,7 +425,7 @@ void cam_print0(const camera *cam) {
 	printf("\nw: ");vprint(cam->w);
 	printf("\nlens_radius=%.6f\n", cam->lens_radius);
 }
-void cam_print(const camera *cam) {
+void cam_print0(const camera *cam) {
         printf("{");
         printf("origin = ");vprint(cam->origin);printf(" ");
         printf(", lower_left_corner = ");vprint(cam->lower_left_corner);printf(" ");
@@ -474,7 +469,15 @@ hittable_t *random_scene() {
                         float choose_mat = random_f();
                         float r1 = random_f();
                         float r2 = random_f();
-                        vec3 center = {a + 0.9 * r1, 0.2, b + 0.9 * r2};
+#ifdef DEBUG
+                        vec3 crr = {choose_mat, r1, r2};
+                        printf("crr=");vprint(crr);printf(" \n");
+                        printf("a=%d b=%d\n", a, b);
+#endif
+                        vec3 center = {a + 0.9f * r1, 0.2f, b + 0.9f * r2};
+#ifdef DEBUG
+                        printf("center=");vprint(center);printf(" \n");
+#endif
                         vec3 tmp;
                         vsub(tmp, center, VEC3(4, 0.2, 0));
                         if (vlen(tmp) > 0.9) {
@@ -534,7 +537,7 @@ int main() {
 		aperture, dist_to_focus);
 #ifdef DEBUG
 	cam_print(&cam);
-	wprint(world);
+//	wprint(world);
 #endif
 	for (int j = ny-1; j >= 0; j--) {
 //		if (j==98) break;

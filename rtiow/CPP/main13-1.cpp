@@ -135,7 +135,7 @@ hitable *random_scene() {
             float choose_mat = random_f();
             float r1 = random_f();
             float r2 = random_f();
-            vec3 center(a+0.9*r1,0.2,b+0.9*r2);
+            vec3 center(a+0.9f*r1,0.2,b+0.9f*r2);
             if ((center-vec3(4,0.2,0)).length() > 0.9) {
                 if (choose_mat < 0.8) {  // diffuse
             float r1 = random_f();
