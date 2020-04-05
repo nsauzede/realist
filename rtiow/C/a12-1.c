@@ -157,18 +157,28 @@ void wprint(hittable_t *world) {
 void sphere_print(void *_p) {
 	hittable_t *p = (hittable_t *)_p;
 	sphere_t *s = &p->u.sphere;
-	printf("{HS:");vprint(s->center);printf(" ,%f,", s->radius);
+	printf("{HS:");vprint(s->center);printf(" ,%.6f,", s->radius);
 	p->mat.print(&p->mat);
 	printf("}");
 }
 
 bool sphere_hit(hittable_t *p, const ray *r, float t_min, float t_max, hit_record *rec) {
 	sphere_t *s = &p->u.sphere;
+#ifdef DEBUG
+	printf("ray=");rprint(r);printf(" \n");
+#endif
 	vec3 oc;
 	vsub(oc, r->origin, s->center);
+#ifdef DEBUG
+	printf("oc=");vprint(oc);printf(" \n");
+#endif
 	float a = vdot(r->direction, r->direction);
 	float b = vdot(oc, r->direction);
 	float c = vdot(oc, oc) - s->radius*s->radius;
+#ifdef DEBUG
+	vec3 abc = {a, b, c};
+	printf("abc=");vprint(abc);printf(" \n");
+#endif
 	float discriminant = b*b - a*c;
 	if (discriminant > 0) {
 		float temp = (-b - sqrtf(discriminant))/a;
@@ -210,14 +220,14 @@ bool lambertian_scatter(struct material_s *p, const ray *r_in, const hit_record 
 }
 
 void reflect(vec3 l, const vec3 v, const vec3 n) {
-	vmul(l, (float)2. * vdot(v, n), n);
+	vmul(l, 2.f * vdot(v, n), n);
 	vsub(l, v, l);
 }
 
 void metal_print(void *_p) {
 	material_t *p = (material_t *)_p;
 	metal_t *m = &p->u.metal;
-	printf("{MM:");vprint(m->albedo);printf(" ,%f}", m->fuzz);
+	printf("{MM:");vprint(m->albedo);printf(" ,%.6f}", m->fuzz);
 }
 
 bool metal_scatter(struct material_s *p, const ray *r_in, const hit_record *rec,
@@ -237,12 +247,16 @@ bool metal_scatter(struct material_s *p, const ray *r_in, const hit_record *rec,
 bool refract(const vec3 v, const vec3 n, float ni_over_nt, vec3 refracted) {
 	vec3 uv;
 	unit_vector(uv, v);
-//	printf("refuv=");vprint(uv);printf(" \n");
-//	printf("refn=");vprint(n);printf(" \n");
+#ifdef DEBUG
+	printf("refuv=");vprint(uv);printf(" \n");
+	printf("refn=");vprint(n);printf(" \n");
+#endif
 	float dt = vdot(uv, n);
-	float discriminant = 1.0 - ni_over_nt * ni_over_nt * (1. - dt * dt);
-//	vec3 ddn = {dt, discriminant, ni_over_nt};
-//	printf("ddn=");vprint(ddn);printf(" \n");
+	float discriminant = 1.0f - ni_over_nt * ni_over_nt * (1.f - dt * dt);
+#ifdef DEBUG
+	vec3 ddn = {dt, discriminant, ni_over_nt};
+	printf("ddn=");vprint(ddn);printf(" \n");
+#endif
 	if (discriminant > 0) {
 		vec3 v1, v2;
 		vmul(v1, dt, n);
@@ -266,7 +280,7 @@ float schlick(float cosine, float ref_idx) {
 void dielectric_print(void *_p) {
 	material_t *p = (material_t *)_p;
 	dielectric_t *d = &p->u.dielectric;
-	printf("{MD:%f}", d->ref_idx);
+	printf("{MD:%.6f}", d->ref_idx);
 }
 
 bool dielectric_scatter(struct material_s *p, const ray *r_in,
@@ -289,11 +303,13 @@ bool dielectric_scatter(struct material_s *p, const ray *r_in,
 		cosine = d->ref_idx * dot / len;
 	} else {
 		vcopy(outward_normal, rec->normal);
-		ni_over_nt = 1.0 / d->ref_idx;
+		ni_over_nt = 1.0f / d->ref_idx;
 		cosine = -dot / len;
 	}
-//	vec3 dln = {dot, len, ni_over_nt};
-//	printf("dln=");vprint(dln);printf(" \n");
+#ifdef DEBUG
+	vec3 dln = {dot, len, ni_over_nt};
+	printf("dln=");vprint(dln);printf(" \n");
+#endif
 //	printf("outnorm=");
 //	vprint(outward_normal);
 //	printf(" \n");
@@ -301,17 +317,25 @@ bool dielectric_scatter(struct material_s *p, const ray *r_in,
 //	vprint(r_in->direction);
 //	printf(" \n");
 	if (refract(r_in->direction, outward_normal, ni_over_nt, refracted)) {
-//		printf("SCHLICK\n");
+#ifdef DEBUG
+		printf("SCHLICK\n");
+#endif
 		reflect_prob = schlick(cosine, d->ref_idx);
 	} else {
-//		printf("NOSCHLICK\n");
+#ifdef DEBUG
+		printf("NOSCHLICK\n");
+#endif
 		reflect_prob = 1.0;
 	}
 	if (random_f() < reflect_prob) {
-//		printf("REFL\n");
+#ifdef DEBUG
+		printf("REFL\n");
+#endif
 		rmake(scattered, rec->p, reflected);
 	} else {
-//		printf("REFR\n");
+#ifdef DEBUG
+		printf("REFR\n");
+#endif
 		rmake(scattered, rec->p, refracted);
 	}
 
@@ -396,12 +420,16 @@ typedef struct {
 void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
 	const vec3 vup, float vfov, float aspect, float aperture, float focus_dist)
 {
-	cam->lens_radius = aperture / 2;
+	cam->lens_radius = aperture / 2.f;
 	vec3 u, v, w;
 	float theta = vfov*(float)M_PI/180;
-	float half_height = tanf(theta/2);
+	float half_height = tanf(theta/2.f);
 	float half_width = aspect * half_height;
 
+#ifdef DEBUG
+	vec3 thw = {theta, half_height, half_width};
+	printf("thw=");vprint(thw);printf(" \n");
+#endif
 	vcopy(cam->origin, lookfrom);
 	vsub(w, lookfrom, lookat);
 	unit_vector(w, w);
@@ -422,7 +450,7 @@ void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
 	vmul(cam->vertical, 2 * half_height * focus_dist, v);
 }
 
-void cam_print0(const camera *cam) {
+void cam_print(const camera *cam) {
 	printf("{\n\tlower_left_corner: ");vprint(cam->lower_left_corner);printf(" ");
 	printf("\n\thorizontal: ");vprint(cam->horizontal);printf(" ");
 	printf("\n\tvertical: ");vprint(cam->vertical);printf(" ");
@@ -431,9 +459,16 @@ void cam_print0(const camera *cam) {
 	printf("\nu: ");vprint(cam->u);
 	printf("\nv: ");vprint(cam->v);
 	printf("\nw: ");vprint(cam->w);
-	printf("\nlens_radius=%f\n", cam->lens_radius);
+	printf("\nlens_radius=%.6f\n", cam->lens_radius);
 }
-void cam_print(const camera *cam) {
+void cam_print0(const camera *cam) {
+#if 1
+        printf("{\n\tlower_left_corner: ");vprint(cam->lower_left_corner);printf(" ");
+        printf("\n\thorizontal: ");vprint(cam->horizontal);printf(" ");
+        printf("\n\tvertical: ");vprint(cam->vertical);printf(" ");
+        printf("\n\torigin: ");vprint(cam->origin);printf(" ");
+        printf("\n}\n");
+#else
         printf("{");
         printf("origin = ");vprint(cam->origin);printf(" ");
         printf(", lower_left_corner = ");vprint(cam->lower_left_corner);printf(" ");
@@ -442,8 +477,9 @@ void cam_print(const camera *cam) {
         printf(",\n\tu = ");vprint(cam->u);printf(" ");
         printf(", v = ");vprint(cam->v);printf(" ");
         printf(", w = ");vprint(cam->w);printf(" ");
-        printf(",\n\tlens_radius = %f\n", cam->lens_radius);
+        printf(",\n\tlens_radius = %.6f\n", cam->lens_radius);
 //      printf("\n}\n");
+#endif
 }
 
 void get_ray(camera *cam, ray *r, float s, float t) {
@@ -498,7 +534,7 @@ int main() {
 	make_camera(&cam, lookfrom, lookat, VEC3(0,1,0), 20, (float)nx/(float)ny,
 		aperture, dist_to_focus);
 #ifdef DEBUG
-//	cam_print(&cam);
+	cam_print(&cam);
 //	wprint(world);
 #endif
 	for (int j = ny-1; j >= 0; j--) {
@@ -507,15 +543,27 @@ int main() {
 			vec3 col = {0, 0, 0};
 			for (int s = 0; s < ns; s++) {
 #ifdef DEBUG
+				printf("j=%d i=%d s=%d\n", j, i, s);
 				printf("rfcnt=%lu riuscnt=%lu riudcnt=%lu\n", rfcnt, riuscnt, riudcnt);
 #endif
-				float u = ((float)i + random_f()) / (float)nx;
-				float v = ((float)j + random_f()) / (float)ny;
+#if 0
+                                float u = ((float)i + random_f()) / (float)nx;
+                                float v = ((float)j + random_f()) / (float)ny;
+#else
+                                float r1 = random_f();
+                                float r2 = random_f();
+#ifdef DEBUG
+                                vec3 rr = {r1, r2, 0};
+                                printf("rr=");vprint(rr);printf(" \n");
+#endif
+                                float u = ((float)i + r1) / (float)nx;
+                                float v = ((float)j + r2) / (float)ny;
+#endif
 #ifdef DEBUG
 //				printf("u=%g v=%g rfcnt=%lu riuscnt=%lu\n", u, v, rfcnt, riuscnt);
 //				printf("u=%g v=%g\n", u, v);
-//				vec3 uv = {u, v, 0};
-//				printf("uv=");vprint(uv);printf(" \n");
+				vec3 uv = {u, v, 0};
+				printf("uv=");vprint(uv);printf(" \n");
 //				printf("j=%d i=%d s=%d riuscnt=%lu\n", j, i, s, riuscnt);
 #endif
 				ray r;

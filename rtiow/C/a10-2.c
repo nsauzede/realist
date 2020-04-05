@@ -140,7 +140,7 @@ bool lambertian_scatter(struct material_s *p, const ray *r_in, const hit_record 
 }
 
 void reflect(vec3 l, const vec3 v, const vec3 n) {
-	vmul(l, (float)2. * vdot(v, n), n);
+	vmul(l, 2.f * vdot(v, n), n);
 	vsub(l, v, l);
 }
 
@@ -162,7 +162,7 @@ bool refract(const vec3 v, const vec3 n, float ni_over_nt, vec3 refracted) {
 	vec3 uv;
 	unit_vector(uv, v);
 	float dt = vdot(uv, n);
-	float discriminant = 1.0 - ni_over_nt*ni_over_nt*(1.-dt*dt);
+	float discriminant = 1.0f - ni_over_nt*ni_over_nt*(1.-dt*dt);
 	if (discriminant > 0) {
 		vec3 v1, v2;
 		vmul(v1, dt, n);
@@ -191,7 +191,7 @@ bool dielectric_scatter(struct material_s *p, const ray *r_in,
 		ni_over_nt = d->ref_idx;
 	} else {
 		vcopy(outward_normal, rec->normal);
-		ni_over_nt = 1.0 / d->ref_idx;
+		ni_over_nt = 1.0f / d->ref_idx;
 	}
 
 	if (refract(r_in->direction, outward_normal, ni_over_nt, refracted)) {

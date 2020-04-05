@@ -157,7 +157,7 @@ void wprint(hittable_t *world) {
 void sphere_print(void *_p) {
 	hittable_t *p = (hittable_t *)_p;
 	sphere_t *s = &p->u.sphere;
-	printf("{HS:");vprint(s->center);printf(" ,%f,", s->radius);
+	printf("{HS:");vprint(s->center);printf(" ,%.6f,", s->radius);
 	p->mat.print(&p->mat);
 	printf("}");
 }
@@ -210,14 +210,14 @@ bool lambertian_scatter(struct material_s *p, const ray *r_in, const hit_record 
 }
 
 void reflect(vec3 l, const vec3 v, const vec3 n) {
-	vmul(l, (float)2. * vdot(v, n), n);
+	vmul(l, 2.f * vdot(v, n), n);
 	vsub(l, v, l);
 }
 
 void metal_print(void *_p) {
 	material_t *p = (material_t *)_p;
 	metal_t *m = &p->u.metal;
-	printf("{MM:");vprint(m->albedo);printf(" ,%f}", m->fuzz);
+	printf("{MM:");vprint(m->albedo);printf(" ,%.6f}", m->fuzz);
 }
 
 bool metal_scatter(struct material_s *p, const ray *r_in, const hit_record *rec,
@@ -240,7 +240,7 @@ bool refract(const vec3 v, const vec3 n, float ni_over_nt, vec3 refracted) {
 //	printf("refuv=");vprint(uv);printf(" \n");
 //	printf("refn=");vprint(n);printf(" \n");
 	float dt = vdot(uv, n);
-	float discriminant = 1.0 - ni_over_nt * ni_over_nt * (1. - dt * dt);
+	float discriminant = 1.0f - ni_over_nt * ni_over_nt * (1.f - dt * dt);
 //	vec3 ddn = {dt, discriminant, ni_over_nt};
 //	printf("ddn=");vprint(ddn);printf(" \n");
 	if (discriminant > 0) {
@@ -266,7 +266,7 @@ float schlick(float cosine, float ref_idx) {
 void dielectric_print(void *_p) {
 	material_t *p = (material_t *)_p;
 	dielectric_t *d = &p->u.dielectric;
-	printf("{MD:%f}", d->ref_idx);
+	printf("{MD:%.6f}", d->ref_idx);
 }
 
 bool dielectric_scatter(struct material_s *p, const ray *r_in,
@@ -289,7 +289,7 @@ bool dielectric_scatter(struct material_s *p, const ray *r_in,
 		cosine = d->ref_idx * dot / len;
 	} else {
 		vcopy(outward_normal, rec->normal);
-		ni_over_nt = 1.0 / d->ref_idx;
+		ni_over_nt = 1.0f / d->ref_idx;
 		cosine = -dot / len;
 	}
 //	vec3 dln = {dot, len, ni_over_nt};
@@ -428,7 +428,7 @@ void cam_print0(const camera *cam) {
 	printf("\nu: ");vprint(cam->u);
 	printf("\nv: ");vprint(cam->v);
 	printf("\nw: ");vprint(cam->w);
-	printf("\nlens_radius=%f\n", cam->lens_radius);
+	printf("\nlens_radius=%.6f\n", cam->lens_radius);
 }
 void cam_print(const camera *cam) {
         printf("{");
@@ -439,7 +439,7 @@ void cam_print(const camera *cam) {
         printf(",\n\tu = ");vprint(cam->u);printf(" ");
         printf(", v = ");vprint(cam->v);printf(" ");
         printf(", w = ");vprint(cam->w);printf(" ");
-        printf(",\n\tlens_radius = %f\n", cam->lens_radius);
+        printf(",\n\tlens_radius = %.6f\n", cam->lens_radius);
 //      printf("\n}\n");
 }
 

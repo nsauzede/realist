@@ -145,7 +145,7 @@ void wprint(hittable_t *world) {
 void sphere_print(void *_p) {
 	hittable_t *p = (hittable_t *)_p;
 	sphere_t *s = &p->u.sphere;
-	printf("{HS:");vprint(s->center);printf(" ,%f,", s->radius);
+	printf("{HS:");vprint(s->center);printf(" ,%.6f,", s->radius);
 	p->mat.print(&p->mat);
 	printf("}");
 }
@@ -198,7 +198,7 @@ bool lambertian_scatter(struct material_s *p, const ray *r_in, const hit_record 
 }
 
 void reflect(vec3 l, const vec3 v, const vec3 n) {
-	vmul(l, (float)2. * vdot(v, n), n);
+	vmul(l, 2.f * vdot(v, n), n);
 	vsub(l, v, l);
 }
 
@@ -281,7 +281,7 @@ bool dielectric_scatter(struct material_s *p, const ray *r_in,
 		cosine = d->ref_idx * dot / len;
 	} else {
 		vcopy(outward_normal, rec->normal);
-		ni_over_nt = 1.0 / d->ref_idx;
+		ni_over_nt = 1.0f / d->ref_idx;
 		cosine = -dot / len;
 	}
 #ifdef DEBUG
@@ -424,7 +424,7 @@ void cam_print(const camera *cam) {
 //	printf("\nu: ");vprint(cam->u);
 //	printf("\nv: ");vprint(cam->v);
 //	printf("\nw: ");vprint(cam->w);
-//	printf("\nlens_radius=%f\n", cam->lens_radius);
+//	printf("\nlens_radius=%.6f\n", cam->lens_radius);
 }
 
 void get_ray(camera *cam, ray *r, float s, float t) {
