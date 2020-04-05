@@ -491,8 +491,10 @@ append(&world, Sphere{Vec3{center[0], center[1], center[2]}, 0.2, Material_Diele
 }
 
 main :: proc() {
-	srand(0);
 	fout := os.stdout;
+	err : os.Errno;
+	fnameout := "";
+	bytes : []byte;
 	nx := 200;
 	ny := 100;
 	ns := 1;
@@ -507,10 +509,26 @@ main :: proc() {
 			if arg < len(os.args) {
 				ns = strconv.atoi(os.args[arg]);
 				arg += 1;
+				if arg < len(os.args) {
+					fnameout = os.args[arg];
+					arg += 1;
+				}
 			}
 		}
 	}
-	fmt.fprintf(fout, "P3\n");
+	srand(0);
+	if fnameout != "" {
+		fout, err = os.open(fnameout, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, os.S_IRUSR | os.S_IWUSR | os.S_IRGRP | os.S_IROTH);
+		if err != 0 {
+			fmt.printf("File open error\n");
+			os.exit(1);
+		}
+		os.write_string(fout, "P6\n");
+		nbytes := 3 * ny * nx;
+		bytes = make([]byte, nbytes);
+	} else {
+		fmt.fprintf(fout, "P3\n");
+	}
 	fmt.fprintf(fout, "%d %d\n", nx, ny);
 	fmt.fprintf(fout, "%d\n", 255);
 	world := random_scene();
@@ -519,54 +537,37 @@ main :: proc() {
 	dist_to_focus := vlen(lookfrom - lookat);
 	aperture := f32(0.0);
 	cam := make_camera(lookfrom, lookat, Vec3{0,1,0}, 30, f32(nx) / f32(ny), aperture, dist_to_focus);
-when #defined(DEBUG) {
-	cam_print(cam);
-}
-//	wprint(world[:]);
 	for j := ny - 1; j >= 0; j -= 1 {
 		for i := 0; i < nx; i += 1 {
 			col := Vec3{0, 0, 0};
 			for s := 0; s < ns; s += 1 {
-when #defined(DEBUG) {
-				fmt.printf("j=%d i=%d s=%d\n", j, i, s);
-				fmt.printf("rfcnt=%d riuscnt=%d riudcnt=%d\n", rfcnt, riuscnt, riudcnt);
-}
-when false {
 				u := (f32(i) + random_f()) / f32(nx);
 				v := (f32(j) + random_f()) / f32(ny);
-} else {
-				r1 := random_f();
-				r2 := random_f();
-				rr := Vec3{r1, r2, 0};
-when #defined(DEBUG) {
-				fmt.printf("rr=");vprint(rr);fmt.printf(" \n");
-}
-				fi := f32(i);
-				fj := f32(j);
-				fnx := f32(nx);
-				fny := f32(ny);
-				u := (fi + r1) / fnx;
-				v := (fj + r2) / fny;
-}
-when #defined(DEBUG) {
-//				fmt.printf("u=%.6f v=%.6f\n", u, v);
-				uv := Vec3{u, v, 0};
-				fmt.printf("uv=");vprint(uv);fmt.printf(" \n");
-}
 				r := get_ray(cam, u, v);
-//				fmt.printf("j=%d i=%d s=%d r=", j, i, s);
-//				rprint(r);
-//				fmt.printf(" \n");
 				col += color(world[:], r, 0);
 			}
 			col /= f32(ns);
+			// Gamma 2 correction (square root)
 			col = Vec3{math.sqrt(col[0]), math.sqrt(col[1]), math.sqrt(col[2])};
 			ir := int(255.99 * col[0]);
 			ig := int(255.99 * col[1]);
 			ib := int(255.99 * col[2]);
-			fmt.fprintf(fout, "%d %d %d  ", ir, ig, ib);
+			if fnameout != "" {
+				bytes[((ny -1 - j) * nx + i) * 3 + 0] = u8(ir);
+				bytes[((ny -1 - j) * nx + i) * 3 + 1] = u8(ig);
+				bytes[((ny -1 - j) * nx + i) * 3 + 2] = u8(ib);
+			} else {
+				fmt.fprintf(fout, "%d %d %d  ", ir, ig, ib);
+			}
 		}
-		fmt.fprintf(fout, "\n");
+		if fnameout == "" {
+			fmt.fprintf(fout, "\n");
+		}
+	}
+	if fnameout != "" {
+		os.write(fout, bytes);
+		os.close(fout);
+		delete(bytes);
 	}
 	delete(world);
 }
