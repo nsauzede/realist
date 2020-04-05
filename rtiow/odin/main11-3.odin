@@ -16,6 +16,34 @@ foreign libc {
 RAND_MAX : u32 = 2147483647;
 FLT_MAX : f32 = 340282346638528859811704183484516925440.000000;
 
+rfcnt := u32(0);
+riuscnt := u32(0);
+riudcnt := u32(0);
+
+random_f :: proc() -> f32 {
+when #defined(DEBUG) {
+	rfcnt += 1;
+}
+	return f32(rand()) / (f32(RAND_MAX) + 1.0);
+}
+
+random_in_unit_sphere :: proc() -> Vec3 {
+when #defined(DEBUG) {
+	riuscnt += 1;
+}
+	p := Vec3{};
+	for {
+		r1 := random_f();
+		r2 := random_f();
+		r3 := random_f();
+		p = 2.0 * Vec3{r1, r2, r3} - Vec3{1,1,1};
+		if vsqlen(p) < 1.0 {
+			break;
+		}
+	}
+	return p;
+}
+
 Vec3 :: [3]f32;
 
 Ray :: struct {
@@ -56,7 +84,8 @@ Hit_Record :: struct {
 	t: f32,
 	p: Vec3,
 	normal: Vec3,
-	mat: Material
+	mat: Material,
+	h_ptr: ^Hittable
 }
 
 Camera :: struct {
@@ -64,24 +93,6 @@ Camera :: struct {
 	horizontal: Vec3,
 	vertical: Vec3,
 	origin: Vec3
-}
-
-random_f :: proc() -> f32 {
-	return f32(rand()) / (f32(RAND_MAX) + 1.0);
-}
-
-random_in_unit_sphere :: proc() -> Vec3 {
-	p := Vec3{};
-	for {
-		r1 := random_f();
-		r2 := random_f();
-		r3 := random_f();
-		p = 2.0 * Vec3{r1, r2, r3} - Vec3{1,1,1};
-		if vsqlen(p) < 1.0 {
-			break;
-		}
-	}
-	return p;
 }
 
 point_at_parameter :: proc(r: Ray, t: f32) -> Vec3 {
@@ -115,15 +126,6 @@ vreflect :: proc(v: Vec3, n: Vec3) -> Vec3 {
 	return v - 2.0 * vdot(v, n) * n;
 }
 
-get_ray :: proc(c: Camera, s: f32, t: f32) -> Ray {
-//	return Ray{c.origin, c.lower_left_corner + u * c.horizontal + v * c.vertical - c.origin};
-	direction0 := t * c.vertical;
-	direction1 := s * c.horizontal;
-	direction := direction0 + direction1;
-	r := Ray{c.origin, c.lower_left_corner + direction - c.origin};
-	return r;
-}
-
 hit_sphere :: proc(s: Sphere, r: Ray, t_min: f32, t_max: f32, rec: ^Hit_Record) -> bool {
 	oc := r.origin - s.center;
 	a := vdot(r.direction, r.direction);
@@ -154,22 +156,65 @@ hit_sphere :: proc(s: Sphere, r: Ray, t_min: f32, t_max: f32, rec: ^Hit_Record) 
 hit :: proc(world: []Hittable, r: Ray, t_min: f32, t_max: f32, rec: ^Hit_Record) -> bool {
 	hit_anything := false;
 	closest_so_far := t_max;
+when false {
 	for hittable in world {
 		switch h in hittable {
 		case Sphere:
 			if hit_sphere(h, r, t_min, closest_so_far, rec) {
 				hit_anything = true;
 				closest_so_far = rec.t;
+				rec.h_ptr = &h;
 			}
 		}
 	}
+} else {
+	for i := 0; i < len(world); i+= 1 {
+		hittable := &world[i];
+		switch h in hittable {
+		case Sphere:
+			if hit_sphere(h, r, t_min, closest_so_far, rec) {
+				hit_anything = true;
+				closest_so_far = rec.t;
+				rec.h_ptr = hittable;
+			}
+		}
+	}
+}
 	return hit_anything;
+}
+
+mprint :: proc(material: Material) {
+	switch m in material {
+	case Material_Metal:
+		fmt.printf("{{MM:");vprint(m.albedo);fmt.printf(" ,%.6f}}", m.fuzz);
+	case Material_Lambertian:
+		fmt.printf("{{ML:");vprint(m.albedo);fmt.printf(" }}");
+	case Material_Dielectric:
+		fmt.printf("{{MD:%.6f}}", m.ref_idx);
+	}
+}
+
+hprint :: proc(hittable: ^Hittable) {
+	switch h in hittable {
+	case Sphere:
+		fmt.printf("{{HS:");vprint(h.center);fmt.printf(" ,%.6f,", h.radius);
+		mprint(h.material);
+		fmt.printf("}}");
+	}
 }
 
 refract :: proc(v: Vec3, n: Vec3, ni_over_nt: f32, refracted: ^Vec3) -> bool {
 	uv := unit_vector(v);
+when #defined(DEBUG) {
+	fmt.printf("refuv=");vprint(uv);fmt.printf(" \n");
+	fmt.printf("refn=");vprint(n);fmt.printf(" \n");
+}
 	dt := vdot(uv, n);
 	discriminant := 1.0 - ni_over_nt * ni_over_nt * (1 - dt * dt);
+when #defined(DEBUG) {
+	ddn := Vec3{dt, discriminant, ni_over_nt};
+	fmt.printf("ddn=");vprint(ddn);fmt.printf(" \n");
+}
 	if discriminant > 0 {
 		refracted^ = ni_over_nt * (uv - n * dt) - n * math.sqrt(discriminant);
 		return true;
@@ -204,23 +249,41 @@ scatter :: proc(material: Material, ray_in: Ray, rec: ^Hit_Record, attenuation: 
 		refracted := Vec3{};
 		reflect_prob : f32;
 		cosine : f32;
-		if vdot(ray_in.direction, rec.normal) > 0 {
+		dot := vdot(ray_in.direction, rec.normal);
+		len := vlen(ray_in.direction);
+		if dot > 0 {
 			outward_normal = -rec.normal;
 			ni_over_nt = m.ref_idx;
-			cosine = m.ref_idx * vdot(ray_in.direction, rec.normal) / vlen(ray_in.direction);
+			cosine = m.ref_idx * dot / len;
 		} else {
 			outward_normal = rec.normal;
 			ni_over_nt = 1.0 / m.ref_idx;
-			cosine = -vdot(ray_in.direction, rec.normal) / vlen(ray_in.direction);
+			cosine = -dot / len;
 		}
+when #defined(DEBUG) {
+		dln := Vec3{dot, len, ni_over_nt};
+		fmt.printf("dln=");vprint(dln);fmt.printf(" \n");
+}
 		if refract(ray_in.direction, outward_normal, ni_over_nt, &refracted) {
+when #defined(DEBUG) {
+			fmt.printf("SCHLICK\n");
+}
 			reflect_prob = schlick(cosine, m.ref_idx);
 		} else {
+when #defined(DEBUG) {
+			fmt.printf("NOSCHLICK\n");
+}
 			reflect_prob = 1.0;
 		}
 		if random_f() < reflect_prob {
+when #defined(DEBUG) {
+			fmt.printf("REFL\n");
+}
 			scattered^ = Ray{rec.p, reflected};
 		} else {
+when #defined(DEBUG) {
+			fmt.printf("REFR\n");
+}
 			scattered^ = Ray{rec.p, refracted};
 		}
 		return true;
@@ -231,24 +294,53 @@ scatter :: proc(material: Material, ray_in: Ray, rec: ^Hit_Record, attenuation: 
 color :: proc(world: []Hittable, r: Ray, depth: int) -> Vec3 {
 	rec := Hit_Record{};
 	if hit(world, r, 0.001, FLT_MAX, &rec) {
+when #defined(DEBUG) {
+		fmt.printf("HIT\n");
+}
 		scattered := Ray{};
 		attenuation := Vec3{};
+		h := rec.h_ptr;
 		if depth < 50 && scatter(rec.mat, r, &rec, &attenuation, &scattered) {
+when #defined(DEBUG) {
+			fmt.printf("ATT\n");
+                        fmt.printf("h=");
+                        hprint(h);
+                        fmt.printf("\nsca=");
+//                        fmt.printf("sca=");
+                        rprint(scattered);
+                        fmt.printf(" \n");
+}
 			return attenuation * color(world, scattered, depth + 1);
 		} else {
+when #defined(DEBUG) {
+			fmt.printf("NOT ATT\n");
+}
 			return Vec3{0, 0, 0};
 		}
 	} else {
 		unit_direction := unit_vector(r.direction);
+when #defined(DEBUG) {
+		fmt.printf("NOT HIT");
+                fmt.printf(" dir=");
+                vprint(r.direction);
+                fmt.printf(" ud=");
+                vprint(unit_direction);
+                fmt.printf(" \n");
+}
 		t := 0.5 * (unit_direction[1] + 1.0);
 		return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0};
 	}
 }
 
 make_camera :: proc(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f32, aspect: f32) -> Camera {
-	theta := vfov * f32(math.PI) / f32(180);
-	half_height := math.tan(theta / 2);
+//	vap := Vec3{vfov, aspect, math.PI};
+//	fmt.printf("vap=");vprint(vap);fmt.printf(" \n");
+	theta := vfov * math.PI / 180;
+//	half_height := math.tan(theta / f32(2));
+	half_height := f32(math.tan(f64(theta) / 2));	// HACK : workaround to get same compute as C libm which has bug with tanf ?
 	half_width := aspect * half_height;
+//	thw := Vec3{theta, half_height, half_width};
+//	fmt.printf("thw=");vprint(thw);fmt.printf(" \n");
 	w := unit_vector(lookfrom - lookat);
 	u := unit_vector(vcross(vup, w));
 	v := vcross(w, u);
@@ -280,6 +372,19 @@ cam_print :: proc(cam: Camera) {
 	fmt.printf("\n}}\n");
 }
 
+get_ray :: proc(c: Camera, s: f32, t: f32) -> Ray {
+//	return Ray{c.origin, c.lower_left_corner + u * c.horizontal + v * c.vertical - c.origin};
+//	st := Vec3{s, t, 0};
+//	fmt.printf("st=");vprint(st);fmt.printf(" \n");
+//	fmt.printf("vert=");vprint(c.vertical);fmt.printf(" \n");
+	direction0 := t * c.vertical;
+//	fmt.printf("dir0=");vprint(direction0);fmt.printf(" \n");
+	direction1 := s * c.horizontal;
+	direction := direction0 + direction1;
+	r := Ray{c.origin, c.lower_left_corner + direction - c.origin};
+	return r;
+}
+
 main :: proc() {
 	srand(0);
 	nx := 200;
@@ -295,15 +400,40 @@ main :: proc() {
 		Sphere{Vec3{-1, 0, -1}, 0.5, Material_Dielectric{1.5}},
 		Sphere{Vec3{-1, 0, -1}, -0.45, Material_Dielectric{1.5}},
 	};
-	cam := make_camera(Vec3{-2, 2, 1}, Vec3{0,0,-1}, Vec3{0,1,0}, 90, f32(nx) / f32(ny));
-//	cam_print(cam);
+	cam := make_camera(Vec3{-2, 2, 1}, Vec3{0,0,-1}, Vec3{0,1,0}, 20, f32(nx) / f32(ny));
+when #defined(DEBUG) {
+	cam_print(cam);
+}
 	for j := ny - 1; j >= 0; j -= 1 {
 		for i := 0; i < nx; i += 1 {
 			col := Vec3{0, 0, 0};
 			for s := 0; s < ns; s += 1 {
+when #defined(DEBUG) {
+				fmt.printf("j=%d i=%d s=%d\n", j, i, s);
+				fmt.printf("rfcnt=%d riuscnt=%d riudcnt=%d\n", rfcnt, riuscnt, riudcnt);
+}
+when true {
 				u := (f32(i) + random_f()) / f32(nx);
 				v := (f32(j) + random_f()) / f32(ny);
+} else {
+				r1 := random_f();
+				r2 := random_f();
+				rr := Vec3{r1, r2, 0};
+when #defined(DEBUG) {
+				fmt.printf("rr=");vprint(rr);fmt.printf(" \n");
+}
+				fi := f32(i);
+				fj := f32(j);
+				fnx := f32(nx);
+				fny := f32(ny);
+				u := (fi + r1) / fnx;
+				v := (fj + r2) / fny;
+}
+when #defined(DEBUG) {
 //				fmt.printf("u=%.6f v=%.6f\n", u, v);
+				uv := Vec3{u, v, 0};
+				fmt.printf("uv=");vprint(uv);fmt.printf(" \n");
+}
 				r := get_ray(cam, u, v);
 //				fmt.printf("j=%d i=%d s=%d r=", j, i, s);
 //				rprint(r);

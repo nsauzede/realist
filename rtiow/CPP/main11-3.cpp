@@ -9,7 +9,7 @@ class camera {
         camera(vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect) {
             // vfov is top to bottom in degrees
             vec3 u, v, w;
-            float theta = vfov*M_PI/180;
+            float theta = vfov*(float)M_PI/180;
             float half_height = tanf(theta/2);
             float half_width = aspect * half_height;
             origin = lookfrom;
@@ -94,7 +94,7 @@ class lambertian : public material {
 bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
     vec3 uv = unit_vector(v);
     float dt = dot(uv, n);
-    float discriminant = 1.0 - ni_over_nt*ni_over_nt*(1.-dt*dt);
+    float discriminant = 1.0f - ni_over_nt*ni_over_nt*(1.f-dt*dt);
     if (discriminant > 0) {
         refracted = ni_over_nt*(uv - n*dt) - n*sqrtf(discriminant);
         return true;

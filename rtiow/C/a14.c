@@ -395,7 +395,7 @@ void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
 {
 	cam->lens_radius = aperture / 2;
 	vec3 u, v, w;
-	float theta = vfov*M_PI/180;
+	float theta = vfov*(float)M_PI/180;
 	float half_height = tanf(theta/2);
 	float half_width = aspect * half_height;
 
