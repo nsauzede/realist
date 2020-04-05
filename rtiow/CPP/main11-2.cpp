@@ -9,7 +9,7 @@ class camera {
         camera(vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect) {
             // vfov is top to bottom in degrees
             vec3 u, v, w;
-            float theta = vfov*M_PI/180;
+            float theta = vfov*(float)M_PI/180;
             float half_height = tanf(theta/2);
             float half_width = aspect * half_height;
             origin = lookfrom;

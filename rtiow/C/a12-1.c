@@ -398,7 +398,7 @@ void make_camera(camera *cam, const vec3 lookfrom, const vec3 lookat,
 {
 	cam->lens_radius = aperture / 2;
 	vec3 u, v, w;
-	float theta = vfov*M_PI/180;
+	float theta = vfov*(float)M_PI/180;
 	float half_height = tanf(theta/2);
 	float half_width = aspect * half_height;
 
@@ -478,7 +478,7 @@ int main() {
 	int ny = 100;
 	int ns = 100;
 	printf("P3\n"); printf("%d %d\n", nx, ny); printf("255\n");
-	float R = cosf(M_PI/4);
+	float R = cosf((float)M_PI/4);
 	hittable_t world[] = {
 		HSTART,
 		HSPHERE(0, 0, -1, 0.5, MLAMBERTIAN(0.1, 0.2, 0.5)),

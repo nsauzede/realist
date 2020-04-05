@@ -7,7 +7,7 @@
 class camera {
     public:
         camera(float vfov, float aspect) { // vfov is top to bottom in degrees
-            float theta = vfov*M_PI/180;
+            float theta = vfov*(float)M_PI/180;
             float half_height = tanf(theta/2);
             float half_width = aspect * half_height;
             lower_left_corner = vec3(-half_width, -half_height, -1.0);
@@ -152,7 +152,7 @@ int main() {
     int ns = 100;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
     hitable *list[5];
-float R = cosf(M_PI/4);
+float R = cosf((float)M_PI/4);
 list[0] = new sphere(vec3(-R,0,-1), R, new lambertian(vec3(0, 0, 1)));
 list[1] = new sphere(vec3( R,0,-1), R, new lambertian(vec3(1, 0, 0)));
 hitable *world = new hitable_list(list,2);

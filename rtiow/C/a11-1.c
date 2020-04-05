@@ -255,7 +255,7 @@ typedef struct {
 
 // vfov is top to bottom in degrees
 void make_camera(camera *cam, float vfov, float aspect) {
-	float theta = vfov*M_PI/180;
+	float theta = vfov * (float)M_PI / 180;
 	float half_height = tanf(theta/2);
 	float half_width = aspect * half_height;
 	vcopy(cam->lower_left_corner, VEC3(-half_width, -half_height, -1.0));
@@ -280,7 +280,7 @@ int main() {
 	int ny = 100;
 	int ns = 100;
 	printf("P3\n"); printf("%d %d\n", nx, ny); printf("255\n");
-	float R = cosf(M_PI/4);
+	float R = cosf((float)M_PI/4);
 	hittable_t world[] = {
 		HSTART,
 		HSPHERE(-R, 0, -1, R, MLAMBERTIAN(0, 0, 1)),
