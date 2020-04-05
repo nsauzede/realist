@@ -495,8 +495,8 @@ $if dbg? {
 	if fnameout != '' {
 		fout.write_bytes(bytes, nbytes)
 		fout.close()
-		unsafe {
-			free(bytes)
-		}
+unsafe {
+		free(bytes)
+}
 	}
 }

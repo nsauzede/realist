@@ -26,9 +26,9 @@ V/A14_v.c: V/A14.v
 	(cd V; v -o A14_v.c A14.v)
 
 bench: $(TARGET)
-	/usr/bin/time Odin/main14.elf 1024 768 10 > main14.ppm
-	/usr/bin/time C/main14.elf 1024 768 10 > main14.ppm
-	/usr/bin/time CPP/main14.elf 1024 768 10 > main14.ppm
+	/usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
+	/usr/bin/time C/main14.elf 1024 768 10 main14.ppm
+	/usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm
 #	/usr/bin/time V/A14_v 200 100 100 A14.ppm
 
 clean:

@@ -504,8 +504,8 @@ main :: proc() {
 	cam := make_camera(lookfrom, lookat, Vec3{0,1,0}, 30, f32(nx) / f32(ny), aperture, dist_to_focus);
 when #defined(DEBUG) {
 	cam_print(cam);
-}
 //	wprint(world[:]);
+}
 	for j := ny - 1; j >= 0; j -= 1 {
 		for i := 0; i < nx; i += 1 {
 			col := Vec3{0, 0, 0};
@@ -514,23 +514,8 @@ when #defined(DEBUG) {
 				fmt.printf("j=%d i=%d s=%d\n", j, i, s);
 				fmt.printf("rfcnt=%d riuscnt=%d riudcnt=%d\n", rfcnt, riuscnt, riudcnt);
 }
-when false {
 				u := (f32(i) + random_f()) / f32(nx);
 				v := (f32(j) + random_f()) / f32(ny);
-} else {
-				r1 := random_f();
-				r2 := random_f();
-				rr := Vec3{r1, r2, 0};
-when #defined(DEBUG) {
-				fmt.printf("rr=");vprint(rr);fmt.printf(" \n");
-}
-				fi := f32(i);
-				fj := f32(j);
-				fnx := f32(nx);
-				fny := f32(ny);
-				u := (fi + r1) / fnx;
-				v := (fj + r2) / fny;
-}
 when #defined(DEBUG) {
 //				fmt.printf("u=%.6f v=%.6f\n", u, v);
 				uv := Vec3{u, v, 0};
