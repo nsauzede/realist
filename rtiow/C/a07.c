@@ -93,7 +93,7 @@ void color(vec3 col, const ray *r, hittable *world) {
 		vec3 unit_direction;
 		unit_vector(unit_direction, r->direction);
 		float t = 0.5*(unit_direction[1] + 1.0);
-//		vec3 tv = {t, 1. - t, 0};
+//		vec3 tv = {t, 1.f - t, 0};
 //		printf("tv=");vprint(tv);printf(" \n");
 		vec3 col0 = {1.0, 1.0, 1.0};
 		vec3 col1 = {0.5, 0.7, 1.0};
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
 			for (int s = 0; s < ns; s++) {
 				float u = (float)(i + random_f()) / (float)nx;
 				float v = (float)(j + random_f()) / (float)ny;
-//				printf("u=%f v=%f\n", u, v);
+//				printf("u=%.6f v=%.6f\n", u, v);
 				ray r;
 				get_ray(&cam, &r, u, v);
 //				rprint(&r);printf("\n");

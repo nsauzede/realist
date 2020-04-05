@@ -133,7 +133,7 @@ bool lambertian_scatter(struct material_s *p, const ray *r_in, const hit_record 
 }
 
 void reflect(vec3 l, const vec3 v, const vec3 n) {
-	vmul(l, (float)2. * vdot(v, n), n);
+	vmul(l, 2.f * vdot(v, n), n);
 	vsub(l, v, l);
 }
 

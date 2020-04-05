@@ -36,7 +36,7 @@ class camera {
 		printf("\nu: ");u.print();
 		printf("\nv: ");v.print();
 		printf("\nw: ");w.print();
-		printf("\nlens_radius=%f\n", lens_radius);
+		printf("\nlens_radius=%.6f\n", lens_radius);
 #endif
 	}
 };
@@ -83,7 +83,7 @@ printf("rfcnt=%lu riuscnt=%lu riudcnt=%lu\n", rfcnt, riuscnt, riudcnt);
                 float u = ((float)i + random_f()) / (float)nx;
                 float v = ((float)j + random_f()) / (float)ny;
 #ifdef DEBUG
-                printf("u=%f v=%f\n", u, v);
+                printf("u=%.6f v=%.6f\n", u, v);
 #endif
                 ray r = cam.get_ray(u, v);
 #ifdef DEBUG

@@ -18,7 +18,7 @@ class sphere: public hitable  {
 };
 
 void sphere::print() const {
-	printf("{S:");center.print();printf(" ,%f}", radius);
+	printf("{S:");center.print();printf(" ,%.6f}", radius);
 }
 
 bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const {

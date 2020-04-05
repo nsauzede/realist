@@ -55,7 +55,7 @@ public:
 		printf("\nu: ");u.print();
 		printf("\nv: ");v.print();
 		printf("\nw: ");w.print();
-		printf("\nlens_radius=%f\n", lens_radius);
+		printf("\nlens_radius=%.6f\n", lens_radius);
 	}
 
 	ray get_ray(float s, float t) {

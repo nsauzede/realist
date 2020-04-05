@@ -20,7 +20,7 @@ static inline float random_f() {
 #endif
     float r = (float)rand() / (RAND_MAX + 1.0);
 #ifdef DEBUG
-	printf("r=%f ", r);
+	printf("r=%.6f ", r);
 #endif
     return r;
 }
@@ -64,7 +64,7 @@ typedef struct hittable_s {
 } hittable;
 
 bool list_hit(hittable *p, const ray *r, float t_min, float t_max, hit_record *rec) {
-//	printf("max=%f\n", t_max);
+//	printf("max=%.6f\n", t_max);
 	hit_record temp_rec;
 	bool hit_anything = false;
 	float closest_so_far = t_max;
@@ -91,15 +91,15 @@ bool sphere_hit(hittable *p, const ray *r, float t_min, float t_max, hit_record 
 	float c = vdot(oc, oc) - ra;
 	float discriminant = b*b - a*c;
 #ifdef DEBUG
-//	printf("ray=");rprint(r);printf(" \noc=");vprint(oc);printf(" \na=%f b=%f ra=%f c=%f d=%f\n", a, b, ra, c, discriminant);
+//	printf("ray=");rprint(r);printf(" \noc=");vprint(oc);printf(" \na=%.6f b=%.6f ra=%.6f c=%.6f d=%.6f\n", a, b, ra, c, discriminant);
 	printf("sc=");vprint(s->center);printf(" \n");
 	printf("ray=");rprint(r);printf(" \n");
 	printf("oc=");vprint(oc);printf(" \n");
-	printf("a=%f\n", a);
-	printf("b=%f\n", b);
-	printf("ra=%f\n", ra);
-	printf("c=%f\n", c);
-	printf("d=%f\n", discriminant);
+	printf("a=%.6f\n", a);
+	printf("b=%.6f\n", b);
+	printf("ra=%.6f\n", ra);
+	printf("c=%.6f\n", c);
+	printf("d=%.6f\n", discriminant);
 #endif
 	if (discriminant > 0) {
 #ifdef DEBUG
@@ -144,7 +144,7 @@ void color(vec3 col, const ray *r, hittable *world) {
 	if (!world->hit) return;
 	hit_record rec;
 	float max = FLT_MAX;
-//	printf("max=%f\n", max);
+//	printf("max=%.6f\n", max);
 //	if (world->hit(world, r, 0, FLT_MAX, &rec)) {
 	if (world->hit(world, r, 0.001, FLT_MAX, &rec)) {
 #ifdef DEBUG
@@ -233,7 +233,7 @@ int main() {
 				float u = ((float)i + (float)random_f()) / (float)nx;
 				float v = ((float)j + (float)random_f()) / (float)ny;
 #ifdef DEBUG
-//                printf("u=%f v=%f\n", u, v);
+//                printf("u=%.6f v=%.6f\n", u, v);
 #endif
 //				vec3 uv={u, v, 0};
 //				printf("uv=");vprint(uv);printf(" \n");

@@ -8,7 +8,7 @@ int hit_sphere(const vec3 center, float radius, const ray *r) {
 	vec3 oc;
 	vsub(oc, r->origin, center);
 	float a = vdot(r->direction, r->direction);
-	float b = 2.0 * vdot(oc, r->direction);
+	float b = 2.0f * vdot(oc, r->direction);
 	float c = vdot(oc, oc) - radius*radius;
 	float discriminant = b*b - 4*a*c;
 	return (discriminant > 0);

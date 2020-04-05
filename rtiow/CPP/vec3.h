@@ -14,7 +14,7 @@ public:
     vec3(float e0, float e1, float e2) { e[0] = e0; e[1] = e1; e[2] = e2; }
 	void print() const {
 #if 0
-		printf("{%f, %f, %f}",
+		printf("{%.6f, %.6f, %.6f}",
 //		printf("{%g, %g, %g}",
 			e[0], e[1], e[2]
 		);
@@ -26,7 +26,7 @@ public:
 		u.v[0] = e[0];
 		u.v[1] = e[1];
 		u.v[2] = e[2];
-		printf("{%f, %f, %f;0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", e[0], e[1], e[2], u.i[0], u.i[1], u.i[2]);
+		printf("{%.6f, %.6f, %.6f;0x%" PRIx32 ", 0x%" PRIx32 ", 0x%" PRIx32 "}", e[0], e[1], e[2], u.i[0], u.i[1], u.i[2]);
 #endif
 	}
 
@@ -114,12 +114,12 @@ inline float dot(const vec3 &v1, const vec3 &v2) {
 #if 1
 	return v1.e[0] *v2.e[0] + v1.e[1] *v2.e[1]  + v1.e[2] *v2.e[2];
 #else
-	printf("DOT %f,%f,%f;%f,%f,%f",
+	printf("DOT %.6f,%.6f,%.6f;%.6f,%.6f,%.6f",
 		v1.x(), v1.y(), v1.z(),
 		v2.x(), v2.y(), v2.z()
 	);
 	float ret = v1.e[0] *v2.e[0] + v1.e[1] *v2.e[1]  + v1.e[2] *v2.e[2];
-	printf(" => %f\n", ret);
+	printf(" => %.6f\n", ret);
 	return ret;
 #endif
 }
