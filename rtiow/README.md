@@ -1,11 +1,9 @@
 # Ray tracing in one weekend
-==========================
 See here : https://raytracing.github.io
 This repo contains my experiments following the excellent book above,
 in C, C++, Odin and V.
 
 # rtiow
-==============
 Benchmark :
 -------------
 `$ make mrproper bench`
@@ -45,8 +43,7 @@ Notes :
 TODO :
 -understand why V version is slower and fix it
 
-rttnw vs. rttroyl
-==============
+# rttnw vs. rttroyl
 Tests revealed that rttnw (brute force) produce more noisy result
 that rttroyl (stochastic)
 
