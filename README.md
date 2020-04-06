@@ -30,6 +30,9 @@ GOPATH=`pwd`/ray_go go build -o raygo ray_go/raygo.go
 0ae8911109ff4a32f471bd704829a44c  raygo.ppm
 ```
 
+# rtiow
+This is my implementation of the excellent RTIOW ray tracing book in C, C++, V and Odin
+
 # Acknowledgements
 Many thanks to spytheman (delian66@gmail.com) for his significant improvements
 done to the V port (both perfs and accuracy).
