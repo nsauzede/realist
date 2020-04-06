@@ -509,7 +509,11 @@ main :: proc() {
 	}
 	pcg.srand(0);
 	if fnameout != "" {
+when ODIN_OS == "windows" {
+		fout, err = os.open(fnameout, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0);
+} else {
 		fout, err = os.open(fnameout, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, os.S_IRUSR | os.S_IWUSR | os.S_IRGRP | os.S_IROTH);
+}
 		if err != 0 {
 			fmt.printf("File open error\n");
 			os.exit(1);

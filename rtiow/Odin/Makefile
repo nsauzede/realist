@@ -1,7 +1,15 @@
 SRC:=$(wildcard main*.odin)
 PPM:=$(patsubst %.odin,%.ppm,$(SRC))
 
+_SYS:=$(shell uname -o)
+ifeq ($(_SYS),Msys)
+WIN32:=1
+EXEXT:=exe
+ODIN=odin.exe
+else
+EXEXT:=elf
 ODIN=odin
+endif
 
 all: $(PPM)
 	md5sum *.ppm
@@ -20,11 +28,11 @@ ifdef PROF
 OPT+=-pg
 endif
 
-%.elf: %.odin
+%.$(EXEXT): %.odin
 	$(ODIN) build $^ -out:$@ $(OPT)
 
-%.ppm: %.elf
+%.ppm: %.$(EXEXT)
 	./$^ $(ARGS) > $@
 
 clean:
-	$(RM) *.elf *.ppm
+	$(RM) *.$(EXEXT) *.ppm
