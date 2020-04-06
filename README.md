@@ -1,8 +1,12 @@
+# rtiow
+This is my implementation of the excellent RTIOW ray tracing book in C, C++, V and Odin
+Check out rtiow/README.md
+
 # realist
 Simple, naive, C++ ray-tracer
 
 # rayXX
-Even simpler ray-tracer benchmark to compare between C, C++, Vlang and golang.
+Simple ray-tracer benchmark to compare between C, C++, Vlang and golang.
 
 To run the benchmark :
 ```
@@ -30,10 +34,8 @@ GOPATH=`pwd`/ray_go go build -o raygo ray_go/raygo.go
 0ae8911109ff4a32f471bd704829a44c  raygo.ppm
 ```
 
-# rtiow
-This is my implementation of the excellent RTIOW ray tracing book in C, C++, V and Odin
-
 # Acknowledgements
+Many thanks to Odin community for help with my initial Odin rampup
 Many thanks to spytheman (delian66@gmail.com) for his significant improvements
 done to the V port (both perfs and accuracy).
-Thanks to Amaury for initial rust port (WIP)
+Thanks to Amaury for initial rust port
