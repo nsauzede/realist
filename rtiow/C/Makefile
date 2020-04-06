@@ -1,4 +1,4 @@
-SRC:=$(wildcard a*.c)
+SRC:=$(wildcard main*.c)
 PPM:=$(patsubst %.c,%.ppm,$(SRC))
 
 #CC=$(CXX)
