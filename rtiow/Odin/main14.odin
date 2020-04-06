@@ -5,17 +5,8 @@ import "core:fmt"
 import "core:math"
 import "core:strconv"
 
-foreign import libc "system:c"
+import "pcg"
 
-import "core:c"
-
-@(default_calling_convention="c")
-foreign libc {
-	rand :: proc() -> c.int ---
-	srand :: proc(seed: c.uint) -> c.int ---
-}
-
-RAND_MAX : u32 = 2147483647;
 FLT_MAX : f32 = 340282346638528859811704183484516925440.000000;
 
 rfcnt := u32(0);
@@ -26,7 +17,7 @@ random_f :: proc() -> f32 {
 when #defined(DEBUG) {
 	rfcnt += 1;
 }
-	return f32(rand()) / (f32(RAND_MAX) + 1.0);
+	return f32(pcg.rand()) / (f32(pcg.RAND_MAX) + 1.0);
 }
 
 random_in_unit_sphere :: proc() -> Vec3 {
@@ -516,7 +507,7 @@ main :: proc() {
 			}
 		}
 	}
-	srand(0);
+	pcg.srand(0);
 	if fnameout != "" {
 		fout, err = os.open(fnameout, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, os.S_IRUSR | os.S_IWUSR | os.S_IRGRP | os.S_IROTH);
 		if err != 0 {

@@ -3,15 +3,7 @@ package main
 import "core:fmt"
 import "core:math"
 
-foreign import libc "system:c"
-
-import "core:c"
-
-@(default_calling_convention="c")
-foreign libc {
-	rand :: proc() -> c.int ---
-	srand :: proc(seed: c.uint) -> c.int ---
-}
+import "pcg"
 
 Vec3 :: [3]f32;
 
@@ -43,8 +35,7 @@ get_ray :: proc(c: Camera, u: f32, v: f32) -> Ray {
 }
 
 random_f :: proc() -> f32 {
-	RAND_MAX : u32 = 2147483647;
-	return f32(rand()) / (f32(RAND_MAX) + 1.0);
+	return f32(pcg.rand()) / (f32(pcg.RAND_MAX) + 1.0);
 }
 
 vlen :: proc(v: Vec3) -> f32 {
@@ -132,7 +123,7 @@ color :: proc(world: []HSphere, r: Ray) -> Vec3 {
 }
 
 main :: proc() {
-	srand(0);
+	pcg.srand(0);
 	nx := 200;
 	ny := 100;
 	ns := 100;
