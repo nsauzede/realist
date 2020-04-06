@@ -3,17 +3,8 @@ package main
 import "core:fmt"
 import "core:math"
 
-foreign import libc "system:c"
+import "pcg"
 
-import "core:c"
-
-@(default_calling_convention="c")
-foreign libc {
-	rand :: proc() -> c.int ---
-	srand :: proc(seed: c.uint) -> c.int ---
-}
-
-RAND_MAX : u32 = 2147483647;
 FLT_MAX : f32 = 340282346638528859811704183484516925440.000000;
 
 rfcnt := u32(0);
@@ -24,7 +15,7 @@ random_f :: proc() -> f32 {
 when #defined(DEBUG) {
 	rfcnt += 1;
 }
-	return f32(rand()) / (f32(RAND_MAX) + 1.0);
+	return f32(pcg.rand()) / (f32(pcg.RAND_MAX) + 1.0);
 }
 
 random_in_unit_sphere :: proc() -> Vec3 {
@@ -430,7 +421,7 @@ get_ray :: proc(c: Camera, s: f32, t: f32) -> Ray {
 }
 
 main :: proc() {
-	srand(0);
+	pcg.srand(0);
 	nx := 200;
 	ny := 100;
 	ns := 100;
