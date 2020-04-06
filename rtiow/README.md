@@ -9,12 +9,12 @@ Benchmark :
 `$ make mrproper bench`
 
 ```
-/usr/bin/time C/main14.elf 1024 768 10 > main14.ppm
-50.80user 0.02system 0:51.35elapsed 98%CPU (0avgtext+0avgdata 2388maxresident)k
-/usr/bin/time CPP/main14.elf 1024 768 10 > main14.ppm
-59.33user 0.02system 0:59.66elapsed 99%CPU (0avgtext+0avgdata 3952maxresident)k
-/usr/bin/time Odin/main14.elf 1024 768 10 > main14.ppm
-74.05user 0.80system 1:15.23elapsed 99%CPU (0avgtext+0avgdata 2080maxresident)k
+/usr/bin/time C/main14.elf 1024 768 10 main14.ppm
+50.76user 0.00system 0:50.82elapsed 99%CPU (0avgtext+0avgdata 4316maxresident)k
+/usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm
+60.78user 0.00system 1:00.86elapsed 99%CPU (0avgtext+0avgdata 5776maxresident)k
+/usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
+71.76user 0.00system 1:12.09elapsed 99%CPU (0avgtext+0avgdata 4208maxresident)k
 ```
 
 Conclusion (old) :
