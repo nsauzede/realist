@@ -1,10 +1,10 @@
 #include <iostream>
 #define RANDOM_IMPL
+#include "random.h"
 #include "camera.h"
 #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
-#include "random.h"
 
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
@@ -172,7 +172,7 @@ hitable *random_scene() {
 }
 
 int main(int argc, char *argv[]) {
-	srand(0);
+	pcg_srand(0);
 	char *fnameout = 0;
 	FILE *fout = stdout;
 	int nx = 200;

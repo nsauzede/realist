@@ -5,12 +5,10 @@
 #include <math.h>
 #include <float.h>
 
+#define RANDOM_IMPL
+#include "random.h"
 #include "vec3.h"
 #include "ray.h"
-
-static inline float random_f() {
-    return (float)rand() / (RAND_MAX + 1.0);
-}
 
 typedef struct hit_record_s {
 	float t;
@@ -121,7 +119,7 @@ void get_ray(camera *cam, ray *r, float u, float v) {
 }
 
 int main(int argc, char *argv[]) {
-	srand(0);
+	pcg_srand(0);
 	int nx = 200;
 	int ny = 100;
 	int ns = 100;

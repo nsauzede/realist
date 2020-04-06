@@ -5,41 +5,10 @@
 #include <math.h>
 #include <float.h>
 
+#define RANDOM_IMPL
+#include "random.h"
 #include "vec3.h"
 #include "ray.h"
-
-#ifdef DEBUG
-unsigned long rfcnt = 0;
-unsigned long riudcnt = 0;
-unsigned long riuscnt = 0;
-#endif
-
-static inline float random_f() {
-#ifdef DEBUG
-	rfcnt++;
-#endif
-    float r = (float)rand() / (RAND_MAX + 1.0);
-#ifdef DEBUG
-	printf("r=%.6f ", r);
-#endif
-    return r;
-}
-
-void random_in_unit_sphere(vec3 p) {
-#ifdef DEBUG
-	riuscnt++;
-#endif
-	do {
-		float r1 = random_f();
-		float r2 = random_f();
-		float r3 = random_f();
-		vmul(p, 2.0, VEC3(r1,r2,r3));
-		vsub(p, p, VEC3(1,1,1));
-#ifdef DEBUG
-		printf("p=");vprint(p);printf(" \n");
-#endif
-	} while (vsqlen(p) >= 1.0);
-}
 
 typedef struct hit_record_s {
 	float t;
@@ -198,7 +167,7 @@ void get_ray(camera *cam, ray *r, float u, float v) {
 }
 
 int main() {
-	srand(0);
+	pcg_srand(0);
 	int nx = 200;
 	int ny = 100;
 	int ns = 100;

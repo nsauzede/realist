@@ -5,22 +5,10 @@
 #include <math.h>
 #include <float.h>
 
+#define RANDOM_IMPL
+#include "random.h"
 #include "vec3.h"
 #include "ray.h"
-
-static inline float random_f() {
-    return (float)rand() / ((float)RAND_MAX + (float)1.0);
-}
-
-void random_in_unit_sphere(vec3 p) {
-	do {
-		float r1 = random_f();
-		float r2 = random_f();
-		float r3 = random_f();
-		vmul(p, 2.0, VEC3(r1,r2,r3));
-		vsub(p, p, VEC3(1,1,1));
-	} while (vsqlen(p) >= 1.0);
-}
 
 struct hit_record_s;
 struct material_s;
@@ -275,7 +263,7 @@ void get_ray(camera *cam, ray *r, float u, float v) {
 }
 
 int main() {
-	srand(0);
+	pcg_srand(0);
 	int nx = 200;
 	int ny = 100;
 	int ns = 100;
