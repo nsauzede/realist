@@ -2,6 +2,7 @@
 #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
+#define RANDOM_IMPL
 #include "random.h"
 
 class camera {
@@ -37,7 +38,7 @@ vec3 color(const ray& r, hitable *world) {
     }
 }
 int main() {
-    srand(0);
+    pcg_srand(0);
     int nx = 200;
     int ny = 100;
     int ns = 100;

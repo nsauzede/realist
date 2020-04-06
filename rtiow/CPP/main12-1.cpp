@@ -1,10 +1,10 @@
 #include <iostream>
 #define RANDOM_IMPL
+#include "random.h"
 #include "camera.h"
 #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
-#include "random.h"
 
 vec3 color(const ray& r, hitable *world, int depth) {
     hit_record rec;
@@ -125,7 +125,7 @@ class dielectric : public material {
         float ref_idx;
 };
 int main() {
-    srand(0);
+    pcg_srand(0);
     int nx = 200;
     int ny = 100;
     int ns = 100;

@@ -2,6 +2,7 @@
 #include "sphere.h"
 #include "hitable_list.h"
 #include "float.h"
+#define RANDOM_IMPL
 #include "random.h"
 
 class camera {
@@ -160,7 +161,7 @@ unsigned long riuscnt = 0;
 #endif
 
 int main() {
-    srand(0);
+    pcg_srand(0);
     int nx = 200;
     int ny = 100;
     int ns = 100;
