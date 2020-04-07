@@ -134,7 +134,9 @@ fn color(r: Ray) -> Vec3 {
 fn main() {
 	let nx = 200;
 	let ny = 100;
-	println!("P3"); println!("{} {}", nx, ny); println!("255");
+	println!("P3");
+	println!("{} {}", nx, ny);
+	println!("255");
 	let lower_left_corner = Vec3([-2.0, -1.0, -1.0]);
 	let horizontal = Vec3([4., 0., 0.]);
 	let vertical = Vec3([0., 2., 0.]);
