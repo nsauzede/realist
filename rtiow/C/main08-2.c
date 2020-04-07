@@ -148,9 +148,15 @@ int main() {
 				float v = ((float)j + random_f()) / (float)ny;
 				ray r;
 				get_ray(&cam, &r, u, v);
+#ifdef DEBUG
+//				printf("r=");rprint(&r);printf(" \n");
+#endif
 				vec3 col0;
 				color(col0, &r, world);
 				vadd(col, col, col0);
+#ifdef DEBUG
+				printf("col=");vprint(col);printf(" \n");
+#endif
 			}
 			vdiv(col, col, (float)ns);
 			// Gamma 2 correction (square root)

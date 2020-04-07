@@ -122,6 +122,37 @@ color :: proc(world: []HSphere, r: Ray) -> Vec3 {
 	return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0};
 }
 
+vprint :: proc(v: Vec3) {
+        fmt.printf("{{%.6f, %.6f, %.6f;%x, %x, %x}}", v[0], v[1], v[2], transmute(u32)v[0], transmute(u32)v[1], transmute(u32)v[2]);
+}
+
+rprint :: proc(ray: Ray) {
+        fmt.printf("{{");
+        vprint(ray.origin);
+        fmt.printf(", ");
+        vprint(ray.direction);
+        fmt.printf("}}");
+}
+
+cam_print :: proc(cam: Camera) {
+        fmt.printf("{{\n\tlower_left_corner: ");vprint(cam.lower_left_corner);fmt.printf(" ");
+        fmt.printf("\n\thorizontal: ");vprint(cam.horizontal);fmt.printf(" ");
+        fmt.printf("\n\tvertical: ");vprint(cam.vertical);fmt.printf(" ");
+        fmt.printf("\n\torigin: ");vprint(cam.origin);fmt.printf(" ");
+        fmt.printf("\n}}\n");
+}
+
+wprint :: proc(world: []HSphere) {
+	fmt.printf("[\n");
+	for h in world {
+		fmt.printf("{{HS:");vprint(h.center);fmt.printf(" ,%.6f", h.radius);
+//		mprint(h.material);
+		fmt.printf("}}");
+		fmt.printf(",\n");
+	}
+	fmt.printf("]\n");
+}
+
 main :: proc() {
 	pcg.srand(0);
 	nx := 200;
@@ -140,6 +171,10 @@ main :: proc() {
 		Vec3{0.,2.,0.},
 		Vec3{0.,0.,0.}
 	};
+when #defined(DEBUG) {
+	cam_print(cam);
+	wprint(world[:]);
+}
 	for j := ny - 1; j >= 0; j -= 1 {
 		for i := 0; i < nx; i += 1 {
 			col := Vec3{0, 0, 0};
@@ -147,6 +182,9 @@ main :: proc() {
 				u := (f32(i) + random_f()) / f32(nx);
 				v := (f32(j) + random_f()) / f32(ny);
 				r := get_ray(cam, u, v);
+when #defined(DEBUG) {
+				fmt.println("r=",r);
+}
 				col += color(world, r);
 			}
 			col /= f32(ns);
