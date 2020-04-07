@@ -20,7 +20,7 @@ struct HSphere {
 	radius: f32
 }
 
-fn random_double() -> f32 {
+fn random_f() -> f32 {
 	pcg::rand() as f32 / (pcg::RAND_MAX as f32 + 1.0)
 }
 
@@ -207,11 +207,28 @@ fn hit(hh: &[HSphere], r: Ray, t_min: f32, t_max: f32, rec: &mut HitRec) -> bool
 	hit_anything
 }
 
+
+
+fn random_in_unit_sphere() -> Vec3 {
+	let mut p: Vec3;
+	loop {
+		let r1 = random_f();
+		let r2 = random_f();
+		let r3 = random_f();
+		p = 2.0 * Vec3([r1, r2, r3]) - Vec3([1., 1., 1.]);
+		if p.squared_length() < 1.0 {
+			break;
+		}
+	}
+	p
+}
+
 fn color(r: Ray, world: &[HSphere]) -> Vec3 {
 	let mut rec = HitRec{t: 0., p: Vec3([0., 0., 0.]), normal: Vec3([0., 0., 0.])};
-	if hit(world, r, 0., 99999., &mut rec) {
+	if hit(world, r, 0.001, 99999., &mut rec) {
 //		println!("t={}", rec.t);
-		0.5 * (rec.normal + Vec3([1., 1., 1.]))
+		let target = rec.normal + random_in_unit_sphere();
+		0.5 * color(Ray{origin: rec.p, direction: target}, world)
 	} else {
 		let unit_direction = unit_vector(r.direction);
 		let t = 0.5 * (unit_direction.0[1] + 1.);
@@ -242,8 +259,8 @@ fn main() {
 		for i in 0..nx {
 			let mut col = Vec3([0., 0., 0.]);
 			for _s in 0..ns {
-				let u = (i as f32 + random_double()) / nx as f32;
-				let v = (j as f32 + random_double()) / ny as f32;
+				let u = (i as f32 + random_f()) / nx as f32;
+				let v = (j as f32 + random_f()) / ny as f32;
 				let r = cam.get_ray(u, v);
 //				println!("r={}", r);
 				col = col + color(r, &world);
