@@ -1,11 +1,11 @@
 package main
 // #cgo LDFLAGS:  -lm
-// #include <stdlib.h>
 // #include <math.h>
 import "C"
 import (
 	"fmt"
 	"math"
+	"./src/pcg"
 )
 
 type Vec3 [3]float32
@@ -28,8 +28,7 @@ func (c Camera) get_ray(u float32, v float32) Ray {
 }
 
 func random_double() float32 {
-//	return float32(C.rand()) / (float32(C.RAND_MAX) + float32(1.0))
-	return float32(C.rand()) / (float32(C.RAND_MAX + 1))
+	return float32(pcg.Rand()) / (float32(pcg.RAND_MAX) + float32(1))
 }
 
 func vmul(f float32, v Vec3) Vec3 {
@@ -170,9 +169,7 @@ func (r Ray) print() {
 }
 
 func main() {
-	C.srand(0)
-	f := random_double()
-	fmt.Printf("f=%f\n", f)
+	pcg.Srand(0)
 	nx := 200
 	ny := 100
 	ns := 100

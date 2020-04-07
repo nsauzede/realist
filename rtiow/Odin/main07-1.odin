@@ -121,6 +121,7 @@ main :: proc() {
 		Vec3{0.,2.,0.},
 		Vec3{0.,0.,0.}
 	};
+//	fmt.println("cam=",cam);
 	for j := ny - 1; j >= 0; j -= 1 {
 		for i := 0; i < nx; i += 1 {
 			col := Vec3{0, 0, 0};
