@@ -1,3 +1,5 @@
+mod pcg;
+
 use std::ops::Div;
 use std::ops::Mul;
 use std::fmt;
@@ -18,16 +20,8 @@ struct HSphere {
 	radius: f32
 }
 
-extern "C" {
-	fn srand(s:u32);
-	fn rand() -> u32;
-}
-
 fn random_double() -> f32 {
-unsafe {
-	const RAND_MAX : u32 = 2147483647;
-	rand() as f32 / (RAND_MAX as f32 + 1.0)
-}
+	pcg::rand() as f32 / (pcg::RAND_MAX as f32 + 1.0)
 }
 
 #[derive(Debug)]
@@ -226,9 +220,7 @@ fn color(r: Ray, world: &[HSphere]) -> Vec3 {
 }
 
 fn main() {
-unsafe {
-	srand(0);
-}
+	pcg::srand(0);
 	let nx = 200;
 	let ny = 100;
 	let ns = 100;

@@ -18,8 +18,8 @@ ifdef PROF
 OPT+=-pg
 endif
 
-%.elf: %.rs
-	$(RSC) -o $@ $^ $(OPT) -lm
+%.elf: %.rs pcg.rs
+	$(RSC) -o $@ $< $(OPT) -lm
 
 %.ppm: %.elf
 	./$^ $(ARGS) > $@

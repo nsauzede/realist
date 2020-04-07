@@ -53,6 +53,60 @@ when #defined(DEBUG) {
 	return p;
 }
 
+/**********************************************
+ Fast sphere random implementation - credits to MV
+ */
+/*
+random_point_in_unit_sphere :: proc() -> [3]f32 {
+    u := rand.float32();
+    v := rand.float32();
+    w := rand.float32();
+    
+    r := math.cbrt(w); // Don't think this exists?
+    
+    theta := math.TAU * u;
+    sin_theta, cos_theta := math.sincos(theta); // Assume there's a fast thing for this
+    
+    cos_phi := 2.0 * v - 1.0;
+    sin_phi := math.sqrt(1.0 - cos_phi * cos_phi);
+
+    return {r * sin_phi * cos_theta, r * sin_phi * sin_theta, r * cos_phi};    
+}
+
+random_point_on_unit_sphere :: proc() -> [3]f32 {
+    u := rand.float32();
+    v := rand.float32();
+    
+    theta := math.TAU * u;
+    sin_theta, cos_theta := math.sincos(theta); // Assume there's a fast thing for this
+    
+    cos_phi := 2.0 * v - 1.0;
+    sin_phi := math.sqrt(1.0 - cos_phi * cos_phi);
+
+    return {sin_phi * cos_theta, sin_phi * sin_theta, cos_phi};
+}
+
+random_four_points_on_unit_sphere :: proc() -> [4][3]f32 {
+    u := rand.float32_x4(); // these return [4]f32 using a SIMD version of the PRNG
+    v := rand.float32_x4(); // these return [4]f32 using a SIMD version of the PRNG
+    
+    theta := math.TAU * u;
+    sin_theta, cos_theta := math.sincos(theta); // Assume this works on [4]f32 and returns two [4]f32
+    
+    cos_phi := 2.0 * v - 1.0;
+    sin_phi := math.sqrt(1.0 - cos_phi * cos_phi); // Assume this works on [4]f32
+
+    return { // This thing could probably be simd-fied too 
+        {sin_phi[0] * cos_theta[0], sin_phi[0] * sin_theta[0], cos_phi[0]},
+        {sin_phi[1] * cos_theta[1], sin_phi[1] * sin_theta[1], cos_phi[1]},
+        {sin_phi[2] * cos_theta[2], sin_phi[2] * sin_theta[2], cos_phi[2]},
+        {sin_phi[3] * cos_theta[3], sin_phi[3] * sin_theta[3], cos_phi[3]},
+    };
+}
+*/
+/*
+ **********************************************/
+
 Vec3 :: [3]f32;
 
 Ray :: struct {
