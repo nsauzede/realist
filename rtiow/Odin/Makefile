@@ -28,8 +28,8 @@ ifdef PROF
 OPT+=-pg
 endif
 
-%.$(EXEXT): %.odin
-	$(ODIN) build $^ -out:$@ $(OPT)
+%.$(EXEXT): %.odin pcg/pcg.odin
+	$(ODIN) build $< -out:$@ $(OPT)
 
 %.ppm: %.$(EXEXT)
 	./$^ $(ARGS) > $@
