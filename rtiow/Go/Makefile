@@ -17,8 +17,8 @@ ifdef PROF
 OPT+=-pg
 endif
 
-%.elf: %.go
-	$(GO) build $(OPT) -o $@ $^
+%.elf: %.go src/pcg/pcg.go
+	$(GO) build $(OPT) -o $@ $<
 
 %.ppm: %.elf
 	./$^ $(ARGS) > $@
