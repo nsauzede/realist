@@ -55,6 +55,39 @@ INLINE float random_f() {
         return (float)pcg_rand() / ((float)PCG_RAND_MAX + (float)1.0);
 }
 
+// unroll loop tentative by Cieric
+// seems slightly slower..
+//#define UNROLL_LOOP
+#ifdef UNROLL_LOOP
+void random_in_unit_sphere(vec3 p) {
+#ifdef DEBUG
+    riuscnt++;
+#endif
+    float u = random_f();
+    float v = random_f();
+    float theta = u * 2.0f * (float)M_PI;
+    float phi = acosf(2.0f * v - 1.0f);
+    float r = cbrtf(random_f());
+    float sinTheta = sinf(theta);
+    float cosTheta = cosf(theta);
+    float sinPhi = sinf(phi);
+    float cosPhi = cosf(phi);
+    p[0] = r * sinPhi * cosTheta;
+    p[1] = r * sinPhi * sinTheta;
+    p[2] = r * cosPhi;
+}
+
+void random_in_unit_disk(vec3 p) {
+#ifdef DEBUG
+    riudcnt++;
+#endif
+    float a = random_f() * 2.0f * (float)M_PI;
+    float r = sqrt(random_f());
+    p[0] = r * cosf(a);
+    p[1] = r * sinf(a);
+    p[2] = 0.0f;
+}
+#else
 void random_in_unit_sphere(vec3 p) {
 #ifdef DEBUG
         riuscnt++;
@@ -79,5 +112,6 @@ void random_in_unit_disk(vec3 p) {
                 vsub(p, p, VEC3(1,1,0));
         } while (vsqlen(p) >= 1.0);
 }
+#endif
 
 #endif
