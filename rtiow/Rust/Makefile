@@ -6,11 +6,18 @@ RSC=rustc
 all: $(PPM)
 	md5sum *.ppm
 
-OPT=-O
+# 3 9s
+#OPT=-C opt-level=3
+# 2 7s
+#OPT=-C opt-level=2
+# 1 43s
+OPT=-C opt-level=1
+# 0 crash
+#OPT=-C opt-level=0
 #OPT=-O0 -g
 #DEBUG:=1
 ifdef DEBUG
-OPT+=-DDEBUG
+OPT+=--cfg 'DEBUG'
 endif
 
 #PROF:=1

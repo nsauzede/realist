@@ -134,7 +134,8 @@ fn render(w, h int, fnameout string) {
 	// we create the output file unconditionally, before checking if fnameout
 	// is empty. This is due to a bug where mut os.File reassigned by os.create
 	// in sub-block seems to be wiped at block exit (??)
-	mut fout := os.create(fnameout) or { exit }
+//	mut fout := os.create(fnameout) or { exit }
+	mut fout := os.create(fnameout) or { os.File{cfile: 0} }
 	mut bytes := byteptr(0)
 	mut nbytes := 0
 	mut picture_string := strings.new_builder(1024)

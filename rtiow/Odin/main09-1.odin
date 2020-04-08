@@ -141,16 +141,16 @@ hit :: proc(world: []Hittable, r: Ray, t_min: f32, t_max: f32, rec: ^Hit_Record)
 
 scatter :: proc(material: Material, ray_in: Ray, rec: ^Hit_Record, attenuation: ^Vec3, scattered: ^Ray) -> bool {
 	switch m in material {
-	case Material_Metal:
-		reflected := vreflect(unit_vector(ray_in.direction), rec.normal);
-		scattered^ = Ray{rec.p, reflected};
-		attenuation^ = m.albedo;
-		return vdot(scattered.direction, rec.normal) > 0;
 	case Material_Lambertian:
 		target := rec.normal + random_in_unit_sphere();
 		scattered^ = Ray{rec.p, target};
 		attenuation^ = m.albedo;
 		return true;
+	case Material_Metal:
+		reflected := vreflect(unit_vector(ray_in.direction), rec.normal);
+		scattered^ = Ray{rec.p, reflected};
+		attenuation^ = m.albedo;
+		return vdot(scattered.direction, rec.normal) > 0.;
 	}
 	return false;
 }
@@ -158,18 +158,102 @@ scatter :: proc(material: Material, ray_in: Ray, rec: ^Hit_Record, attenuation: 
 color :: proc(world: []Hittable, r: Ray, depth: int) -> Vec3 {
 	rec := Hit_Record{};
 	if hit(world, r, 0.001, FLT_MAX, &rec) {
+when #defined(DEBUG) {
+                fmt.printf("HIT\n");
+}
 		scattered := Ray{};
 		attenuation := Vec3{};
 		if depth < 50 && scatter(rec.mat, r, &rec, &attenuation, &scattered) {
+when #defined(DEBUG) {
+                        fmt.printf("ATT\n");
+                        tv := Vec3{rec.t, 0, 0};
+                        fmt.printf("tv=");
+                        vprint(tv);
+                        fmt.printf(" \np=");
+                        vprint(rec.p);
+                        fmt.printf(" \n");
+                        fmt.printf("nor=");
+                        vprint(rec.normal);
+                        fmt.printf(" \n");
+//                        fmt.printf("h=");
+//                        hprint(h);
+                        fmt.printf("\nsca=");
+//                        fmt.printf("sca=");
+                        rprint(scattered);
+                        fmt.printf(" \n");
+}
 			return attenuation * color(world, scattered, depth + 1);
 		} else {
+when #defined(DEBUG) {
+                        fmt.printf("NOT ATT\n");
+}
 			return Vec3{0, 0, 0};
 		}
 	} else {
 		unit_direction := unit_vector(r.direction);
+when #defined(DEBUG) {
+                fmt.printf("NOT HIT");
+                fmt.printf(" dir=");
+                vprint(r.direction);
+                fmt.printf(" ud=");
+                vprint(unit_direction);
+                fmt.printf(" \n");
+}
 		t := 0.5 * (unit_direction[1] + 1.0);
 		return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0};
 	}
+}
+
+mprint :: proc(material: Material) {
+        switch m in material {
+        case Material_Metal:
+                fmt.printf("{{MM:");vprint(m.albedo);fmt.printf(" }}");
+        case Material_Lambertian:
+                fmt.printf("{{ML:");vprint(m.albedo);fmt.printf(" }}");
+        }
+}
+
+hprint :: proc(hittable: ^Hittable) {
+        switch h in hittable {
+        case Sphere:
+                fmt.printf("{{HS:");vprint(h.center);fmt.printf(" ,%.6f,", h.radius);
+                mprint(h.material);
+                fmt.printf("}}");
+        }
+}
+
+vprint :: proc(v: Vec3) {
+        fmt.printf("{{%.6f, %.6f, %.6f;%x, %x, %x}}", v[0], v[1], v[2], transmute(u32)v[0], transmute(u32)v[1], transmute(u32)v[2]);
+}
+
+rprint :: proc(ray: Ray) {
+        fmt.printf("{{");
+        vprint(ray.origin);
+        fmt.printf(", ");
+        vprint(ray.direction);
+        fmt.printf("}}");
+}
+
+cam_print :: proc(cam: Camera) {
+        fmt.printf("{{\n\tlower_left_corner: ");vprint(cam.lower_left_corner);fmt.printf(" ");
+        fmt.printf("\n\thorizontal: ");vprint(cam.horizontal);fmt.printf(" ");
+        fmt.printf("\n\tvertical: ");vprint(cam.vertical);fmt.printf(" ");
+        fmt.printf("\n\torigin: ");vprint(cam.origin);fmt.printf(" ");
+        fmt.printf("\n}}\n");
+}
+
+wprint :: proc(world: []Hittable) {
+        fmt.printf("[\n");
+        for hittable in world {
+                switch h in hittable {
+                case Sphere:
+                        fmt.printf("{{HS:");vprint(h.center);fmt.printf(" ,%.6f,", h.radius);
+                        mprint(h.material);
+                        fmt.printf("}}");
+                }
+                fmt.printf(",\n");
+        }
+        fmt.printf("]\n");
 }
 
 main :: proc() {
@@ -192,6 +276,10 @@ main :: proc() {
 		Vec3{0.,2.,0.},
 		Vec3{0.,0.,0.}
 	};
+when #defined(DEBUG) {
+	cam_print(cam);
+	wprint(world[:]);
+}
 	for j := ny - 1; j >= 0; j -= 1 {
 		for i := 0; i < nx; i += 1 {
 			col := Vec3{0, 0, 0};
