@@ -17,7 +17,7 @@ fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) bool {
 }
 
 fn color(r ray.Ray) vec.Vec3 {
-	if hit_sphere(vec.Vec3{0, 0, -1}, .5, r) {
+	if hit_sphere(vec.Vec3{0, 0, -1}, 0.5, r) {
 		return vec.Vec3{1, 0, 0}
 	}
 	unit_direction := r.direction().unit_vector()

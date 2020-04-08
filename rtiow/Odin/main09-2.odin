@@ -7,7 +7,7 @@ import "pcg"
 
 FLT_MAX : f32 = 340282346638528859811704183484516925440.000000;
 
-Vec3 :: [3]f32;
+Vec3 :: distinct [3]f32;
 
 Ray :: struct {
 	origin: Vec3,
@@ -20,12 +20,12 @@ Material :: union {
 }
 
 Material_Metal :: struct {
-	albedo: [3]f32,
+	albedo: Vec3,
 	fuzz: f32
 }
 
 Material_Lambertian :: struct {
-	albedo: [3]f32,
+	albedo: Vec3,
 }
 
 Hittable :: union {
