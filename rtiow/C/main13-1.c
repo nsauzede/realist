@@ -498,7 +498,7 @@ int main() {
 		aperture, dist_to_focus);
 #ifdef DEBUG
 	cam_print(&cam);
-//	wprint(world);
+	wprint(world);
 #endif
 	for (int j = ny-1; j >= 0; j--) {
 //		if (j==98) break;
