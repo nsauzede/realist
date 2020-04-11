@@ -7,7 +7,7 @@ use std::fmt;
 const FLT_MAX: f32 = 340282346638528859811704183484516925440.000000;
 
 trait Hittable {
-	fn hit(&self, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec) -> bool;
+	fn hit<'a>(&'a self, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec<'a>) -> bool;
 	fn print(&self);
 }
 
@@ -39,11 +39,11 @@ struct Sphere {
 	material: Box<dyn Material>
 }
 
-struct HitRec {
+struct HitRec<'a> {
 	t: f32,
 	p: Vec3,
 	normal: Vec3,
-	mat: Box<dyn Material>
+	mat: &'a dyn Material
 }
 
 #[derive(Copy, Clone)]
@@ -75,8 +75,6 @@ impl Material for Metal {
 		let reflected = vreflect(unit_vector(ray_in.direction), rec.normal);
 		*scattered = Ray{origin: rec.p, direction: reflected};
 		*attenuation = self.albedo;
-//		let target = rec.normal + random_in_unit_sphere();
-//		0.5 * color(world, Ray{origin: rec.p, direction: target}, depth + 1)
 		vdot(scattered.direction, rec.normal) > 0.
 	}
 	fn print(&self) {
@@ -85,7 +83,7 @@ impl Material for Metal {
 }
 
 impl Hittable for Sphere {
-	fn hit(&self, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec) -> bool {
+	fn hit<'a>(&'a self, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec<'a>) -> bool {
 		let center = self.center;
 		let radius = self.radius;
 		let oc = r.origin - center;
@@ -94,6 +92,8 @@ impl Hittable for Sphere {
 		let b = oc % r.direction;
 		let c = (oc % oc) - radius * radius;
 		let discriminant = b * b - a * c;
+//		let abc = Vec3([a, b, c]);
+//		println!("abc={}", abc);
 //		println!("a={} b={} c={} d={}", a, b, c, discriminant);
 		if discriminant > 0. {
 			let mut temp = (-b - f32::sqrt(discriminant)) / a;
@@ -101,6 +101,7 @@ impl Hittable for Sphere {
 				rec.t = temp;
 				rec.p = r.point_at_parameter(rec.t);
 				rec.normal = (rec.p - center) / radius;
+				rec.mat = self.material.as_ref();
 				return true;
 			}
 			temp = (-b + f32::sqrt(discriminant)) / a;
@@ -108,6 +109,7 @@ impl Hittable for Sphere {
 				rec.t = temp;
 				rec.p = r.point_at_parameter(rec.t);
 				rec.normal = (rec.p - center) / radius;
+				rec.mat = self.material.as_ref();
 				return true;
 			}
 		}
@@ -141,7 +143,7 @@ impl fmt::Display for Camera {
 
 impl fmt::Display for Ray {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(f, "{{{}, {}}} ",
+		write!(f, "{{{}, {}}}",
 			self.origin,
 			self.direction)
 	}
@@ -149,16 +151,9 @@ impl fmt::Display for Ray {
 
 impl fmt::Display for Vec3 {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-unsafe {
-		union MyUnion {
-			f: [f32; 3],
-			i: [u32; 3]
-		};
-		let u = MyUnion{f:self.0};
 		write!(f, "{{{:.6}, {:.6}, {:.6};{:x}, {:x}, {:x}}}",
 			self.0[0], self.0[1], self.0[2],
-			u.i[0], u.i[1], u.i[2])
-}
+			self.0[0].to_bits(), self.0[1].to_bits(), self.0[2].to_bits())
 	}
 }
 
@@ -249,11 +244,11 @@ fn unit_vector(v: Vec3) -> Vec3 {
 }
 
 fn vdot(v1: Vec3, v2: Vec3) -> f32 {
-        v1.0[0] * v2.0[0] + v1.0[1] * v2.0[1] + v1.0[2] * v2.0[2]
+	v1.0[0] * v2.0[0] + v1.0[1] * v2.0[1] + v1.0[2] * v2.0[2]
 }
 
 fn vreflect(v: Vec3, n: Vec3) -> Vec3 {
-        v - 2.0 * vdot(v, n) * n
+	v - 2.0 * vdot(v, n) * n
 }
 
 impl Ray {
@@ -285,7 +280,7 @@ fn wprint(world: &Vec<Box<dyn Hittable>>) {
 	println!("]");
 }
 
-fn hit(world: &Vec<Box<dyn Hittable>>, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec) -> bool {
+fn hit<'a>(world: &'a Vec<Box<dyn Hittable>>, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec<'a>) -> bool {
 	let mut hit_anything = false;
 	let mut closest_so_far = t_max;
 	for h in world {
@@ -298,13 +293,16 @@ fn hit(world: &Vec<Box<dyn Hittable>>, r: &Ray, t_min: f32, t_max: f32, rec: &mu
 }
 
 fn color(world: &Vec<Box<dyn Hittable>>, r: &Ray, depth: u32) -> Vec3 {
-	let mut rec = HitRec{t: 0., p: Vec3([0., 0., 0.]), normal: Vec3([0., 0., 0.]), mat: Box::new(Lambertian{albedo: Vec3([0., 0., 0.])})};
-//	let mut rec : HitRec;
+	let mut rec = HitRec{t: 0., p: Vec3([0., 0., 0.]), normal: Vec3([0., 0., 0.]), mat: &Lambertian{albedo: Vec3([0., 0., 0.])}};
+if cfg!(DEBUG) {
+	println!("{}", r);
+}
 	if hit(world, r, 0.001, FLT_MAX, &mut rec) {
 if cfg!(DEBUG) {
 		print!("HIT\n");
+		println!("t={:.6}", rec.t);
+		print!("mat=");rec.mat.print();println!();
 }
-//		println!("t={:.6}", rec.t);
 		let mut scattered = Ray{origin: Vec3([0., 0., 0.]), direction: Vec3([0., 0., 0.])};
 		let mut attenuation = Vec3([0., 0., 0.]);
 		if depth < 50 && rec.mat.scatter(r, &rec, &mut attenuation, &mut scattered) {
@@ -315,15 +313,16 @@ if cfg!(DEBUG) {
 			print!(" \np={}", rec.p);
 			print!(" \n");
 			print!("nor={}", rec.normal);
-			print!(" \n");
-//			printf("h={}", h);
-			print!("\nsca=");
-//			print!("sca=");
-//			rprint(scattered);
+//			print!(" \n");
+//			print!("h={}", h);
+			print!("\nsca={}", scattered);
 			print!(" \n");
 }
 			attenuation * color(world, &scattered, depth + 1)
 		} else {
+if cfg!(DEBUG) {
+			print!("NOT ATT\n");
+}
 			Vec3([0., 0., 0.])
 		}
 	} else {
@@ -349,8 +348,9 @@ fn main() {
 	println!("255");
 	let mut world: Vec<Box<dyn Hittable>> = vec!(
 		Box::new(Sphere {center: Vec3([0., 0., -1.]), radius: 0.5, material: Box::new(Lambertian { albedo: Vec3([0.8, 0.3, 0.3]) })}),
-		Box::new(Sphere {center: Vec3([0., -100.5, -1.]), radius: 100., material: Box::new(Lambertian { albedo: Vec3([0.8, 0.8, 0.8])})}),
+		Box::new(Sphere {center: Vec3([0., -100.5, -1.]), radius: 100., material: Box::new(Lambertian { albedo: Vec3([0.8, 0.8, 0.])})}),
 		Box::new(Sphere {center: Vec3([1., 0., -1.]), radius: 0.5, material: Box::new(Metal { albedo: Vec3([0.8, 0.6, 0.2])})}),
+//		Box::new(Sphere {center: Vec3([-1., 0., -1.]), radius: 0.5, material: Box::new(Metal { albedo: Vec3([0.8, 0.8, 0.8])})}),
 	);
 	// this is just to show an "append" example - could have been set statically above
 	world.push(
@@ -374,16 +374,15 @@ if cfg!(DEBUG) {
 				let v = (j as f32 + random_f()) / ny as f32;
 				let r = cam.get_ray(u, v);
 if cfg!(DEBUG) {
-//				println!("r={}", r);
+				println!("r={}", r);
 }
 				col = col + color(&world, &r, 0);
 if cfg!(DEBUG) {
-//				println!("col={} ", col);
+				println!("col={}", col);
 }
 			}
 			col = col / ns as f32;
 			col = Vec3([f32::sqrt(col.0[0]), f32::sqrt(col.0[1]), f32::sqrt(col.0[2])]);
-//			println!("col={}", col);
 			let _ir = (255.99*col.0[0]) as i32;
 			let _ig = (255.99*col.0[1]) as i32;
 			let _ib = (255.99*col.0[2]) as i32;

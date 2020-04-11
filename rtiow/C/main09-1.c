@@ -13,14 +13,15 @@
 struct hit_record_s;
 struct material_s;
 
-typedef bool (*scatter_t)(struct material_s *p, const ray *r_in, const struct hit_record_s *rec, vec3 attenuation, ray *scattered);
-
 typedef struct hit_record_s {
 	float t;
 	vec3 p;
 	vec3 normal;
 	struct material_s *mat_ptr;
 } hit_record;
+
+typedef bool (*scatter_t)(struct material_s *p, const ray *r_in, const struct hit_record_s *rec, vec3 attenuation, ray *scattered);
+typedef void (*print_t)(void *p);
 
 typedef struct {
 	vec3 albedo;
@@ -32,6 +33,7 @@ typedef struct {
 
 typedef struct material_s {
 	scatter_t scatter;
+	print_t print;
 	union {
 		void *null;
 		lambertian_t lambertian;
@@ -45,11 +47,11 @@ typedef struct {
 	material_t mat;
 } sphere_t;
 
-#define MLAMBERTIAN(ax, ay, az) ((material_t){lambertian_scatter, .u.lambertian=(lambertian_t){{ax, ay, az}}})
-#define MMETAL(ax, ay, az) ((material_t){metal_scatter, .u.metal=(metal_t){{ax, ay, az}}})
+#define MLAMBERTIAN(ax, ay, az) ((material_t){lambertian_scatter, lambertian_print, .u.lambertian=(lambertian_t){{ax, ay, az}}})
+#define MMETAL(ax, ay, az) ((material_t){metal_scatter, metal_print, .u.metal=(metal_t){{ax, ay, az}}})
 
-#define HSPHERE(cx, cy, cz, r, m) ((hittable_t){sphere_hit, .u.sphere=(sphere_t){{cx, cy, cz}, r, m}})
-#define HSTART ((hittable_t){list_hit, 0})
+#define HSPHERE(cx, cy, cz, r, m) ((hittable_t){sphere_hit, sphere_print, .u.sphere=(sphere_t){{cx, cy, cz}, r, m}})
+#define HSTART ((hittable_t){list_hit, list_print, 0})
 #define HEND ((hittable_t){0, 0})
 
 struct hittable_s;
@@ -57,11 +59,48 @@ typedef bool (*hit_t)(struct hittable_s *p, const ray *r, float t_min, float t_m
 
 typedef struct hittable_s {
 	hit_t hit;
+	print_t print;
 	union {
 		void *null;
 		sphere_t sphere;
 	} u;
 } hittable_t;
+
+void list_print(void *_p) {
+        hittable_t *p = (hittable_t *)_p;
+        printf("[\n");
+        while (1) {
+                p++;
+                if (!p->print) break;
+                p->print(p);
+                printf(",\n");
+        }
+        printf("]\n");
+}
+
+void sphere_print(void *_p) {
+        hittable_t *p = (hittable_t *)_p;
+        sphere_t *s = &p->u.sphere;
+        printf("{HS:");vprint(s->center);printf(" ,%.6f,", s->radius);
+//        p->mat.print(&p->mat);
+        p->u.sphere.mat.print(&p->u.sphere.mat);
+        printf("}");
+}
+
+void lambertian_print(void *_p) {
+        material_t *p = (material_t *)_p;
+        lambertian_t *l = &p->u.lambertian;
+        printf("{ML:");vprint(l->albedo);printf(" }");
+}
+
+void metal_print(void *_p) {
+        material_t *p = (material_t *)_p;
+        metal_t *m = &p->u.metal;
+        printf("{MM:");vprint(m->albedo);
+        printf(" ");
+//        printf(",%.6f", m->fuzz);
+        printf("}");
+}
 
 bool list_hit(hittable_t *p, const ray *r, float t_min, float t_max, hit_record *rec) {
 	hit_record temp_rec;
@@ -86,6 +125,8 @@ bool sphere_hit(hittable_t *p, const ray *r, float t_min, float t_max, hit_recor
 	float a = vdot(r->direction, r->direction);
 	float b = vdot(oc, r->direction);
 	float c = vdot(oc, oc) - s->radius*s->radius;
+//	vec3 abc = {a, b, c};
+//	printf("abc=");vprint(abc);printf("\n");
 	float discriminant = b*b - a*c;
 	if (discriminant > 0) {
 		float temp = (-b - sqrtf(discriminant))/a;
@@ -138,20 +179,56 @@ bool metal_scatter(struct material_s *p, const ray *r_in, const hit_record *rec,
 void color(vec3 col, const ray *r, hittable_t *world, int depth) {
 	if (!world->hit) return;
 	hit_record rec;
+#ifdef DEBUG
+	rprint(r);printf("\n");
+#endif
 	// remove acne by starting at 0.001
 	if (world->hit(world, r, 0.001, FLT_MAX, &rec)) {
+#ifdef DEBUG
+		printf("HIT\n");
+		printf("t=%.6f\n", (double)rec.t);
+		printf("mat=");rec.mat_ptr->print(rec.mat_ptr);printf("\n");
+#endif
 		ray scattered;
 		vec3 attenuation;
 		if (depth < 50 && rec.mat_ptr->scatter(rec.mat_ptr, r, &rec, attenuation, &scattered)) {
+#ifdef DEBUG
+			printf("ATT\n");
+			vec3 tv = {rec.t, 0, 0};
+			printf("tv=");
+			vprint(tv);
+			printf(" \np=");
+			vprint(rec.p);
+			printf(" \n");
+			printf("nor=");
+			vprint(rec.normal);
+//			printf(" \n");
+//			printf("h=");
+//			h->print(h);
+			printf("\nsca=");
+			rprint(&scattered);
+			printf(" \n");
+#endif
 			vec3 scat_col;
 			color(scat_col, &scattered, world, depth + 1);
 			vmulv(col, attenuation, scat_col);
 		} else {
+#ifdef DEBUG
+			printf("NOT ATT\n");
+#endif
 			vcopy(col, VEC3(0, 0, 0));
 		}
 	} else {
 		vec3 unit_direction;
 		unit_vector(unit_direction, r->direction);
+#ifdef DEBUG
+		printf("NOT HIT");
+		printf(" dir=");
+		vprint(r->direction);
+		printf(" ud=");
+		vprint(unit_direction);
+		printf(" \n");
+#endif
 		float t = 0.5*(unit_direction[1] + 1.0);
 		vec3 col0 = {1.0, 1.0, 1.0};
 		vec3 col1 = {0.5, 0.7, 1.0};
@@ -178,6 +255,23 @@ void get_ray(camera *cam, ray *r, float u, float v) {
 	rmake(r, cam->origin, direction);
 }
 
+void cam_print(const camera *cam) {
+        printf("{\n\tlower_left_corner: ");vprint(cam->lower_left_corner);printf(" ");
+        printf("\n\thorizontal: ");vprint(cam->horizontal);printf(" ");
+        printf("\n\tvertical: ");vprint(cam->vertical);printf(" ");
+        printf("\n\torigin: ");vprint(cam->origin);printf(" ");
+        printf("\n}\n");
+//        printf("\nu: ");vprint(cam->u);
+//        printf("\nv: ");vprint(cam->v);
+//        printf("\nw: ");vprint(cam->w);
+//        printf("\nlens_radius=%.6f\n", cam->lens_radius);
+}
+
+void wprint(hittable_t *world) {
+        if (!world->print) return;
+        world->print(world);
+}
+
 int main() {
 	pcg_srand(0);
 	int nx = 200;
@@ -198,6 +292,10 @@ int main() {
 		.vertical = {0.0, 2.0, 0.0},
 		.origin = {0.0, 0.0, 0.0}
 	};
+#ifdef DEBUG
+	cam_print(&cam);
+	wprint(world);
+#endif
 	for (int j = ny-1; j >= 0; j--) {
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
@@ -206,9 +304,18 @@ int main() {
 				float v = ((float)j + random_f()) / (float)ny;
 				ray r;
 				get_ray(&cam, &r, u, v);
+#ifdef DEBUG
+//				printf("j=%d i=%d s=%d r=", j, i, s);
+				printf("r=");
+				rprint(&r);
+				printf("\n");
+#endif
 				vec3 col0;
 				color(col0, &r, world, 0);
 				vadd(col, col, col0);
+#ifdef DEBUG
+				printf("col=");vprint(col);printf("\n");
+#endif
 			}
 			vdiv(col, col, (float)ns);
 			// Gamma 2 correction (square root)

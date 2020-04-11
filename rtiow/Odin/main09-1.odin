@@ -174,11 +174,10 @@ when #defined(DEBUG) {
                         fmt.printf(" \n");
                         fmt.printf("nor=");
                         vprint(rec.normal);
-                        fmt.printf(" \n");
+//                        fmt.printf(" \n");
 //                        fmt.printf("h=");
 //                        hprint(h);
                         fmt.printf("\nsca=");
-//                        fmt.printf("sca=");
                         rprint(scattered);
                         fmt.printf(" \n");
 }
@@ -287,7 +286,17 @@ when #defined(DEBUG) {
 				u := (f32(i) + random_f()) / f32(nx);
 				v := (f32(j) + random_f()) / f32(ny);
 				r := get_ray(cam, u, v);
+when #defined(DEBUG) {
+				fmt.printf("r=");
+				rprint(r);
+				fmt.printf("\n");
+}
 				col += color(world, r, 0);
+when #defined(DEBUG) {
+				fmt.printf("col=");
+				vprint(col);
+				fmt.printf("\n");
+}
 			}
 			col /= f32(ns);
 			col = Vec3{math.sqrt(col[0]), math.sqrt(col[1]), math.sqrt(col[2])};

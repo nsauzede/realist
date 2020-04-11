@@ -98,15 +98,12 @@ fn (h Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 }
 
 fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
-//	mut temp_rec := HitRec{mat:0}
-	mut temp_rec := HitRec{}
 	mut hit_anything := false
 	mut closest_so_far := t_max
 	for h in hh {
-		if h.hit(r, t_min, closest_so_far, mut temp_rec) {
+		if h.hit(r, t_min, closest_so_far, rec) {
 			hit_anything = true
-			closest_so_far = temp_rec.t
-			*rec = temp_rec
+			closest_so_far = rec.t
 		}
 	}
 	return hit_anything
