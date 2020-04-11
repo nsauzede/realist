@@ -142,16 +142,16 @@ hit :: proc(world: []Hittable, r: Ray, t_min: f32, t_max: f32, rec: ^Hit_Record)
 
 scatter :: proc(material: Material, ray_in: Ray, rec: ^Hit_Record, attenuation: ^Vec3, scattered: ^Ray) -> bool {
 	switch m in material {
-	case Material_Metal:
-		reflected := vreflect(unit_vector(ray_in.direction), rec.normal);
-		scattered^ = Ray{rec.p, reflected + m.fuzz * random_in_unit_sphere()};
-		attenuation^ = m.albedo;
-		return vdot(scattered.direction, rec.normal) > 0;
 	case Material_Lambertian:
 		target := rec.normal + random_in_unit_sphere();
 		scattered^ = Ray{rec.p, target};
 		attenuation^ = m.albedo;
 		return true;
+	case Material_Metal:
+		reflected := vreflect(unit_vector(ray_in.direction), rec.normal);
+		scattered^ = Ray{rec.p, reflected + m.fuzz * random_in_unit_sphere()};
+		attenuation^ = m.albedo;
+		return vdot(scattered.direction, rec.normal) > 0.;
 	}
 	return false;
 }
