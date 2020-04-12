@@ -458,12 +458,20 @@ fn random_scene() -> Vec<Box<dyn Hittable>> {
 	let mut world: Vec<Box<dyn Hittable>> = vec!(
 		Box::new(Sphere {center: Vec3([0., -1000., 0.]), radius: 1000., material: Box::new(Lambertian {albedo: Vec3([0.5, 0.5, 0.5])})}),
 	);
-	for a in -11..12 {
-		for b in -11..12 {
+	for a in -11..11 {
+		for b in -11..11 {
 			let choose_mat = random_f();
 			let r1 = random_f();
 			let r2 = random_f();
+if cfg!(DEBUG) {
+			let crr = Vec3([choose_mat, r1, r2]);
+			println!("crr={} ", crr);
+			println!("a={:.6} b={:.6}", a, b);
+}
 			let center = Vec3([a as f32 + 0.9 * r1, 0.2, b as f32 + 0.9 * r2]);
+if cfg!(DEBUG) {
+			println!("center={} ", center);
+}
 			if vlen(center - Vec3([4., 0.2, 0.])) > 0.9 {
 				if choose_mat < 0.8 {  // diffuse
 					let r1 = random_f();
@@ -491,10 +499,6 @@ fn random_scene() -> Vec<Box<dyn Hittable>> {
 			}
 		}
 	}
-/*
-		Box::new(Sphere {center: Vec3([1., 0., -1.]), radius: 0.5, material: Box::new(Metal {albedo: Vec3([0.8, 0.6, 0.2]), fuzz: 0.3})}),
-		Box::new(Sphere {center: Vec3([-1., 0., -1.]), radius: 0.5, material: Box::new(Dielectric {ref_idx: 1.5})}),
-*/
 	world.push(
 		Box::new(Sphere {center: Vec3([0., 1., 0.]), radius: 1., material: Box::new(Dielectric {ref_idx: 1.5})}),
 	);
