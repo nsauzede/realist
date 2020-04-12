@@ -368,7 +368,6 @@ when #defined(DEBUG) {
 //	fmt.printf("vap=");vprint(vap);fmt.printf(" \n");
 }
 	cam: Camera;
-	cam.lens_radius = aperture / 2;
 	theta := vfov * math.PI / 180;
 //	half_height := math.tan(theta / f32(2));
 	half_height := f32(math.tan(f64(theta) / 2));	// HACK : workaround to get same compute as C libm which has bug with tanf ?
