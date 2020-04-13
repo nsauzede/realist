@@ -117,7 +117,7 @@ impl Material for Dielectric {
 		let reflected = vreflect(ray_in.direction, rec.normal);
 		*attenuation = Vec3([1., 1., 1.]);
 		let mut refracted = Vec3([0., 0., 0.]);
-		let mut reflect_prob = 1 as f32;
+		let mut reflect_prob = 1.0f32;
 		let mut outward_normal = rec.normal;
 		let mut ni_over_nt = 1. / self.ref_idx;
 		let mut cosine = -vdot(ray_in.direction, rec.normal) / vlen(ray_in.direction);
@@ -439,7 +439,7 @@ if cfg!(DEBUG) {
 }
 
 fn make_camera(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f32, aspect: f32, aperture: f32, focus_dist: f32) -> Camera {
-	let theta = vfov * std::f32::consts::PI / 180 as f32;
+	let theta = vfov * std::f32::consts::PI / 180.0f32;
 	let half_height = f32::tan(theta / 2.);
 	let half_width = aspect * half_height;
 	let w = unit_vector(lookfrom - lookat);
@@ -487,7 +487,7 @@ if cfg!(DEBUG) {
 		Box::new(Sphere {center: center, radius: 0.2, material: Box::new(Lambertian {albedo: Vec3([r1 * r2, r3 * r4, r5 * r6])})}),
 	);
 				} else if choose_mat < 0.95 { // metal
-					let r1 = 0.5 as f32 * (1. + random_f());
+					let r1 = 0.5 * (1. + random_f());
 					let r2 = 0.5 * (1. + random_f());
 					let r3 = 0.5 * (1. + random_f());
 					let r4 = 0.5 * random_f();
@@ -517,44 +517,47 @@ if cfg!(DEBUG) {
 fn main() {
 	pcg::srand(0);
 	let mut fnameout = "";
-	let mut optfout = None;
-	let mut bytes : Vec<u8>;
 	let mut nx = 200;
 	let mut ny = 100;
 	let mut ns = 1;
 	let mut arg = 0;
 	let args : Vec<String> = env::args().collect();
-	if arg < args.len()-1 {
+	if arg < args.len() - 1 {
 		arg += 1;
 		nx = args[arg].parse().unwrap();
-		if arg < args.len()-1 {
+		if arg < args.len() - 1 {
 			arg += 1;
 			ny = args[arg].parse().unwrap();
-			if arg < args.len()-1 {
+			if arg < args.len() - 1 {
 				arg += 1;
 				ns = args[arg].parse().unwrap();
-				if arg < args.len()-1 {
+				if arg < args.len() - 1 {
 					arg += 1;
 					fnameout = &args[arg];
 				}
 			}
 		}
 	}
-	if fnameout != "" {
-		optfout = Some(File::create(fnameout).expect("Can't create file"));
-		let nbytes = 3 * ny * nx;
-		bytes = vec![0 as u8; nbytes];
+	let foutopt = if fnameout != "" {
+		Some(File::create(fnameout).expect("Can't create file"))
 	} else {
+		None
+	};
+	let mut bytes = if fnameout != "" {
+		vec![0u8; 3 * ny * nx]
+	} else {
+		vec![0u8; 0]
+	};
+	if fnameout == "" {
 		println!("P3");
 		println!("{} {}", nx, ny);
 		println!("255");
-		bytes = vec![0 as u8; 0];
 	}
 	let world = random_scene();
 	let lookfrom = Vec3([9., 2., 2.6]);
 	let lookat = Vec3([3., 0.8, 1.]);
 	let dist_to_focus = vlen(lookfrom - lookat);
-	let aperture = 0 as f32;
+	let aperture = 0.0f32;
 	let cam = make_camera(lookfrom, lookat, Vec3([0.,1.,0.]), 30., nx as f32 / ny as f32, aperture, dist_to_focus);
 if cfg!(DEBUG) {
 	println!("{}", cam);
@@ -592,7 +595,7 @@ if cfg!(DEBUG) {
 			println!("");
 		}
 	}
-	match optfout {
+	match foutopt {
 		Some(mut fout) => {
 			writeln!(fout, "P6").expect("Can't write");
 			writeln!(fout, "{} {}", nx, ny).expect("Can't write");
