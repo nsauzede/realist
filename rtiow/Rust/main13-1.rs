@@ -368,7 +368,7 @@ fn random_in_unit_disk() -> Vec3 {
 	p
 }
 
-fn wprint(world: &Vec<Box<dyn Hittable>>) {
+fn _wprint(world: &Vec<Box<dyn Hittable>>) {
 	println!("[");
 	for h in world {
 		h.print();
@@ -527,7 +527,7 @@ fn main() {
 	let cam = make_camera(lookfrom, lookat, Vec3([0.,1.,0.]), 30., nx as f32 / ny as f32, aperture, dist_to_focus);
 if cfg!(DEBUG) {
 	println!("{}", cam);
-	wprint(&world);
+	_wprint(&world);
 }
 	for j in (0..ny).rev() {
 		for i in 0..nx {
