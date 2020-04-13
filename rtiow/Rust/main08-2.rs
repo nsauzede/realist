@@ -51,7 +51,7 @@ impl fmt::Display for HSphere {
 	}
 }
 
-pub fn wprint(world: &[HSphere]) {
+pub fn _wprint(world: &[HSphere]) {
 	println!("[");
 	for h in world {
 		print!("{}", h);
@@ -273,7 +273,7 @@ fn main() {
 		origin: Vec3([0., 0., 0.]),
 	};
 //	println!("{}", cam);
-//	wprint(&world);
+//	_wprint(&world);
 	for j in (0..ny).rev() {
 		for i in 0..nx {
 			let mut col = Vec3([0., 0., 0.]);

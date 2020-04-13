@@ -345,7 +345,7 @@ fn random_in_unit_sphere() -> Vec3 {
 	p
 }
 
-fn wprint(world: &Vec<Box<dyn Hittable>>) {
+fn _wprint(world: &Vec<Box<dyn Hittable>>) {
 	println!("[");
 	for h in world {
 		h.print();
@@ -451,7 +451,7 @@ fn main() {
 	let cam = make_camera(Vec3([-2., 2., 1.]), Vec3([0.,0.,-1.]), Vec3([0.,1.,0.]), 20., nx as f32 / ny as f32);
 //if cfg!(DEBUG) {
 //	println!("{}", cam);
-//	wprint(&world);
+//	_wprint(&world);
 //}
 	for j in (0..ny).rev() {
 		for i in 0..nx {
