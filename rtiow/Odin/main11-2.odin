@@ -222,15 +222,29 @@ scatter :: proc(material: Material, ray_in: Ray, rec: ^Hit_Record, attenuation: 
 color :: proc(world: []Hittable, r: Ray, depth: int) -> Vec3 {
 	rec := Hit_Record{};
 	if hit(world, r, 0.001, FLT_MAX, &rec) {
+when #defined(DEBUG) {
+		fmt.printf("HIT\n");
+}
 		scattered := Ray{};
 		attenuation := Vec3{};
 		if depth < 50 && scatter(rec.mat, r, &rec, &attenuation, &scattered) {
+when #defined(DEBUG) {
+		fmt.printf("ATT\n");
+//		fmt.printf(" \n");
+}
 			return attenuation * color(world, scattered, depth + 1);
 		} else {
+when #defined(DEBUG) {
+		fmt.printf("NOT ATT\n");
+}
 			return Vec3{0, 0, 0};
 		}
 	} else {
 		unit_direction := unit_vector(r.direction);
+when #defined(DEBUG) {
+		fmt.printf("NOT HIT");
+		fmt.printf(" \n");
+}
 		t := 0.5 * (unit_direction[1] + 1.0);
 		return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0};
 	}
@@ -287,18 +301,25 @@ main :: proc() {
 		Sphere{Vec3{-1, 0, -1}, -0.45, Material_Dielectric{1.5}},
 	};
 	cam := make_camera(Vec3{-2, 2, 1}, Vec3{0,0,-1}, Vec3{0,1,0}, 90, f32(nx) / f32(ny));
-//	cam_print(cam);
+when #defined(DEBUG) {
+	cam_print(cam);
+}
 	for j := ny - 1; j >= 0; j -= 1 {
 		for i := 0; i < nx; i += 1 {
 			col := Vec3{0, 0, 0};
 			for s := 0; s < ns; s += 1 {
 				u := (f32(i) + random_f()) / f32(nx);
 				v := (f32(j) + random_f()) / f32(ny);
-//				fmt.printf("u=%.6f v=%.6f\n", u, v);
+when #defined(DEBUG) {
+				fmt.printf("u=%.6f v=%.6f\n", u, v);
+}
 				r := get_ray(cam, u, v);
+when #defined(DEBUG) {
 //				fmt.printf("j=%d i=%d s=%d r=", j, i, s);
-//				rprint(r);
-//				fmt.printf(" \n");
+				fmt.printf("r=");
+				rprint(r);
+				fmt.printf(" \n");
+}
 				col += color(world, r, 0);
 			}
 			col /= f32(ns);
