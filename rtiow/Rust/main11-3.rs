@@ -176,10 +176,10 @@ impl Hittable for Sphere {
 
 impl Camera {
 	fn get_ray(self, s: f32, t: f32) -> Ray {
-		Ray{
-			origin: self.origin,
-			direction: self.lower_left_corner + t * self.vertical + s * self.horizontal - self.origin
-		}
+		let direction0 = t * self.vertical;
+		let direction1 = s * self.horizontal;
+		let direction = direction0 + direction1;
+		Ray{origin: self.origin, direction: self.lower_left_corner + direction - self.origin}
 	}
 }
 
