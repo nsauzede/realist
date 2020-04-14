@@ -176,10 +176,10 @@ impl Hittable for Sphere {
 
 impl Camera {
 	fn get_ray(self, s: f32, t: f32) -> Ray {
-		Ray{
-			origin: self.origin,
-			direction: self.lower_left_corner + t * self.vertical + s * self.horizontal - self.origin
-		}
+		let direction0 = t * self.vertical;
+		let direction1 = s * self.horizontal;
+		let direction = direction0 + direction1;
+		Ray{origin: self.origin, direction: self.lower_left_corner + direction - self.origin}
 	}
 }
 
@@ -368,19 +368,22 @@ fn hit<'a>(world: &'a Vec<Box<dyn Hittable>>, r: &Ray, t_min: f32, t_max: f32, r
 
 fn color(world: &Vec<Box<dyn Hittable>>, r: &Ray, depth: u32) -> Vec3 {
 	let mut rec = HitRec{t: 0., p: Vec3([0., 0., 0.]), normal: Vec3([0., 0., 0.]), mat: &Lambertian{albedo: Vec3([0., 0., 0.])}};
-if cfg!(DEBUG) {
+if cfg!(aDEBUG) {
 	println!("{}", r);
 }
 	if hit(world, r, 0.001, FLT_MAX, &mut rec) {
 if cfg!(DEBUG) {
 		print!("HIT\n");
-		println!("t={:.6}", rec.t);
-		print!("mat=");rec.mat.print();println!();
+//		println!("t={:.6}", rec.t);
+//		print!("mat=");rec.mat.print();println!();
 }
 		let mut scattered = Ray{origin: Vec3([0., 0., 0.]), direction: Vec3([0., 0., 0.])};
 		let mut attenuation = Vec3([0., 0., 0.]);
 		if depth < 50 && rec.mat.scatter(r, &rec, &mut attenuation, &mut scattered) {
 if cfg!(DEBUG) {
+			print!("ATT\n");
+}
+if cfg!(aDEBUG) {
 			print!("ATT\n");
 			let tv = Vec3([rec.t, 0., 0.]);
 			print!("tv={}", tv);
@@ -403,8 +406,8 @@ if cfg!(DEBUG) {
 		let unit_direction = unit_vector(r.direction);
 if cfg!(DEBUG) {
 		print!("NOT HIT");
-		print!(" dir={}", r.direction);
-		print!(" ud={}", unit_direction);
+//		print!(" dir={}", r.direction);
+//		print!(" ud={}", unit_direction);
 		print!(" \n");
 }
 		let t = 0.5 * (unit_direction.0[1] + 1.);
@@ -449,23 +452,26 @@ fn main() {
 //		Box::new(Sphere {center: Vec3([-1., 0., -1.]), radius: 0.5, material: Box::new(Metal {albedo: Vec3([0.8, 0.8, 0.8]), fuzz: 0.3})}),
 //	);
 	let cam = make_camera(Vec3([-2., 2., 1.]), Vec3([0.,0.,-1.]), Vec3([0.,1.,0.]), 90., nx as f32 / ny as f32);
-//if cfg!(DEBUG) {
-//	println!("{}", cam);
+if cfg!(DEBUG) {
+	println!("{}", cam);
 //	_wprint(&world);
-//}
+}
 	for j in (0..ny).rev() {
 		for i in 0..nx {
 			let mut col = Vec3([0., 0., 0.]);
 			for _s in 0..ns {
 				let u = (i as f32 + random_f()) / nx as f32;
 				let v = (j as f32 + random_f()) / ny as f32;
+if cfg!(DEBUG) {
+				println!("u={:.6} v={:.6}", u, v);
+}
 				let r = cam.get_ray(u, v);
 if cfg!(DEBUG) {
-				println!("r={}", r);
+				println!("r={} ", r);
 }
 				col = col + color(&world, &r, 0);
 if cfg!(DEBUG) {
-				println!("col={}", col);
+//				println!("col={}", col);
 }
 			}
 			col = col / ns as f32;
