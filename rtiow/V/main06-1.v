@@ -24,8 +24,8 @@ fn color(r ray.Ray) vec.Vec3 {
 	mut t := hit_sphere(vec.Vec3{0, 0, -1}, .5, r)
 	if t > 0 {
 //		println('t=$t')
-		N := (r.point_at_parameter(t) - vec.Vec3{0, 0, -1}).unit_vector()
-		return vec.mult(.5, N + vec.Vec3{1, 1, 1})
+		n := (r.point_at_parameter(t) - vec.Vec3{0, 0, -1}).unit_vector()
+		return vec.mult(.5, n + vec.Vec3{1, 1, 1})
 	}
 	unit_direction := r.direction().unit_vector()
 	t = .5 * (unit_direction.y + 1.0)
