@@ -15,7 +15,7 @@ all: $(PPM)
 	md5sum *.ppm
 
 #OPT=-llvm-api
-OPT=-opt:3
+OPT=-opt:3 -no-bounds-check
 #OPT=-O0 -g
 #DEBUG:=1
 ifdef DEBUG
