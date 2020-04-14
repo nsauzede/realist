@@ -385,6 +385,16 @@ when #defined(DEBUG) {
 	return cam;
 }
 
+get_ray :: proc(c: Camera, s: f32, t: f32) -> Ray {
+//	return Ray{c.origin, c.lower_left_corner + u * c.horizontal + v * c.vertical - c.origin};
+//	st := Vec3{s, t, 0};
+//	fmt.printf("st=");vprint(st);fmt.printf(" \n");
+//	fmt.printf("vert=");vprint(c.vertical);fmt.printf(" \n");
+	rd := c.lens_radius * random_in_unit_disk();
+	offset := c.u * rd[0] + c.v * rd[1];
+	return Ray{c.origin + offset, c.lower_left_corner + s * c.horizontal + t * c.vertical - c.origin - offset};
+}
+
 vprint :: proc(v: Vec3) {
 	fmt.printf("{{%.6f, %.6f, %.6f;%x, %x, %x}}", v[0], v[1], v[2], transmute(u32)v[0], transmute(u32)v[1], transmute(u32)v[2]);
 }
@@ -407,16 +417,6 @@ cam_print :: proc(cam: Camera) {
         fmt.printf("\nv: ");vprint(cam.v);
         fmt.printf("\nw: ");vprint(cam.w);
         fmt.printf("\nlens_radius=%.6f\n", cam.lens_radius);
-}
-
-get_ray :: proc(c: Camera, s: f32, t: f32) -> Ray {
-//	return Ray{c.origin, c.lower_left_corner + u * c.horizontal + v * c.vertical - c.origin};
-//	st := Vec3{s, t, 0};
-//	fmt.printf("st=");vprint(st);fmt.printf(" \n");
-//	fmt.printf("vert=");vprint(c.vertical);fmt.printf(" \n");
-	rd := c.lens_radius * random_in_unit_disk();
-	offset := c.u * rd[0] + c.v * rd[1];
-	return Ray{c.origin + offset, c.lower_left_corner + s * c.horizontal + t * c.vertical - c.origin - offset};
 }
 
 main :: proc() {
