@@ -588,11 +588,11 @@ if cfg!(DEBUG) {
 				bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig;
 				bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib;
 			} else {
-				println!("{} {} {}  ", ir, ig, ib);
+				print!("{} {} {}  ", ir, ig, ib);
 			}
 		}
 		if fnameout == "" {
-			println!("");
+			println!();
 		}
 	}
 	match foutopt {
@@ -602,6 +602,6 @@ if cfg!(DEBUG) {
 			writeln!(fout, "255").expect("Can't write");
 			fout.write(&bytes).expect("Can't write");
 		}
-		None => println!("Bye")
+		None => {}
 	}
 }
