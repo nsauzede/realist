@@ -1,10 +1,15 @@
 SRC:=$(wildcard main*.v)
+EXE:=$(patsubst %.v,%.elf,$(SRC))
 PPM:=$(patsubst %.v,%.ppm,$(SRC))
 
 V:=v
 
-all: $(PPM)
+all: $(EXE)
+	du -sh .
+
+check: $(PPM)
 	md5sum *.ppm
+	md5sum *.ppm | md5sum
 
 OPT:=-O3
 #DEBUG:=1

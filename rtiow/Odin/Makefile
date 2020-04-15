@@ -1,4 +1,5 @@
 SRC:=$(wildcard main*.odin)
+EXE:=$(patsubst %.odin,%.elf,$(SRC))
 PPM:=$(patsubst %.odin,%.ppm,$(SRC))
 
 _SYS:=$(shell uname -o)
@@ -11,8 +12,12 @@ EXEXT:=elf
 ODIN=odin
 endif
 
-all: $(PPM)
+all: $(EXE)
+	du -sh .
+
+check: $(PPM)
 	md5sum *.ppm
+	md5sum *.ppm | md5sum
 
 #OPT=-llvm-api
 OPT=-opt:3 -no-bounds-check

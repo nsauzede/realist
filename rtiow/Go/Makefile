@@ -1,10 +1,15 @@
 SRC:=$(wildcard main*.go)
+EXE:=$(patsubst %.go,%.elf,$(SRC))
 PPM:=$(patsubst %.go,%.ppm,$(SRC))
 
 GO=go
 
-all: $(PPM)
+all: $(EXE)
+	du -sh .
+
+check: $(PPM)
 	md5sum *.ppm
+	md5sum *.ppm | md5sum
 
 #OPT:=--ldflags '-extldflags "-lm"'
 #DEBUG:=1

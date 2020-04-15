@@ -1,12 +1,17 @@
 SRC:=$(wildcard main*.c)
+EXE:=$(patsubst %.c,%.elf,$(SRC))
 PPM:=$(patsubst %.c,%.ppm,$(SRC))
 
 #CC=$(CXX)
 
-all: $(PPM)
-	md5sum *.ppm
+all: $(EXE)
+	du -sh .
 
-OPT=-O3
+check: $(PPM)
+	md5sum *.ppm
+	md5sum *.ppm | md5sum
+
+OPT=$(CFLAGS) -O3
 #OPT=-O0 -g
 #DEBUG:=1
 ifdef DEBUG
