@@ -525,20 +525,24 @@ fn main() {
 	let dist_to_focus = vlen(lookfrom - lookat);
 	let aperture = 0 as f32;
 	let cam = make_camera(lookfrom, lookat, Vec3([0.,1.,0.]), 30., nx as f32 / ny as f32, aperture, dist_to_focus);
-if cfg!(DEBUG) {
+//if cfg!(DEBUG) {
 	println!("{}", cam);
-	_wprint(&world);
-}
+//	_wprint(&world);
+//}
 	for j in (0..ny).rev() {
 		for i in 0..nx {
 			let mut col = Vec3([0., 0., 0.]);
 			for _s in 0..ns {
 				let u = (i as f32 + random_f()) / nx as f32;
 				let v = (j as f32 + random_f()) / ny as f32;
+//if cfg!(DEBUG) {
+				let uv = Vec3([u, v, 0.]);
+				println!("uv={} ", uv);
+//}
 				let r = cam.get_ray(u, v);
-if cfg!(DEBUG) {
+//if cfg!(DEBUG) {
 				println!("r={}", r);
-}
+//}
 				col = col + color(&world, &r, 0);
 if cfg!(DEBUG) {
 				println!("col={}", col);

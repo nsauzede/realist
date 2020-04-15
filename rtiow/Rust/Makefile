@@ -1,10 +1,15 @@
 SRC:=$(wildcard main*.rs)
+EXE:=$(patsubst %.rs,%.elf,$(SRC))
 PPM:=$(patsubst %.rs,%.ppm,$(SRC))
 
 RSC=rustc
 
-all: $(PPM)
+all: $(EXE)
+	du -sh .
+
+check: $(PPM)
 	md5sum *.ppm
+	md5sum *.ppm | md5sum
 
 OPT=-C opt-level=3
 #DEBUG:=1
