@@ -191,7 +191,7 @@ impl Camera {
 
 impl fmt::Display for Camera {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(f, "{{\n\tlower_left_corner: {} \n\thorizontal: {} \n\tvertical: {} \n\torigin: {} \n}}\nu: {}\nv: {}\nw: {}\nlens_radius={:.6}\n",
+		write!(f, "{{\n\tlower_left_corner: {} \n\thorizontal: {} \n\tvertical: {} \n\torigin: {} \n}}\nu: {}\nv: {}\nw: {}\nlens_radius={:.6}",
 			self.lower_left_corner,
 			self.horizontal,
 			self.vertical,
@@ -439,12 +439,20 @@ fn make_camera(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f32, aspect: f32, 
 	let theta = vfov * std::f32::consts::PI / 180 as f32;
 	let half_height = f32::tan(theta / 2.);
 	let half_width = aspect * half_height;
+if cfg!(DEBUG) {
+	let thw = Vec3([theta, half_height, half_width]);
+	println!("thw={} ", thw);
+}
 	let w = unit_vector(lookfrom - lookat);
 	let u = unit_vector(vcross(vup, w));
 	let v = vcross(w, u);
 	Camera {
 		origin: lookfrom,
-		lower_left_corner: lookfrom - half_width * focus_dist * u - half_height * focus_dist * v - focus_dist * w,
+lower_left_corner: 
+	lookfrom - 
+	half_width * focus_dist * u - 
+	half_height * focus_dist * v - 
+	focus_dist * w,
 		horizontal: 2. * half_width * focus_dist * u,
 		vertical: 2. * half_height * focus_dist * v,
 		u: u,
@@ -525,24 +533,24 @@ fn main() {
 	let dist_to_focus = vlen(lookfrom - lookat);
 	let aperture = 0 as f32;
 	let cam = make_camera(lookfrom, lookat, Vec3([0.,1.,0.]), 30., nx as f32 / ny as f32, aperture, dist_to_focus);
-//if cfg!(DEBUG) {
+if cfg!(DEBUG) {
 	println!("{}", cam);
 //	_wprint(&world);
-//}
+}
 	for j in (0..ny).rev() {
 		for i in 0..nx {
 			let mut col = Vec3([0., 0., 0.]);
 			for _s in 0..ns {
 				let u = (i as f32 + random_f()) / nx as f32;
 				let v = (j as f32 + random_f()) / ny as f32;
-//if cfg!(DEBUG) {
+if cfg!(DEBUG) {
 				let uv = Vec3([u, v, 0.]);
 				println!("uv={} ", uv);
-//}
+}
 				let r = cam.get_ray(u, v);
-//if cfg!(DEBUG) {
-				println!("r={}", r);
-//}
+if cfg!(DEBUG) {
+				println!("r={} ", r);
+}
 				col = col + color(&world, &r, 0);
 if cfg!(DEBUG) {
 				println!("col={}", col);
