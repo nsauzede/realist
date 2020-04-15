@@ -1,7 +1,7 @@
 # Ray tracing in one weekend
 See here : https://raytracing.github.io
 This repo contains my experiments following the excellent book above,
-in C, C++, Odin, Rust and V.
+in C, C++, Go, Odin, Rust and V.
 
 # rtiow
 Benchmark :
@@ -10,13 +10,15 @@ Benchmark :
 
 ```
 /usr/bin/time C/main14.elf 1024 768 10 main14.ppm
-51.86user 0.00system 0:51.96elapsed 99%CPU (0avgtext+0avgdata 4348maxresident)k
+62.14user 0.00system 1:02.15elapsed 99%CPU (0avgtext+0avgdata 4400maxresident)k
 /usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm
-62.18user 0.10system 1:02.91elapsed 99%CPU (0avgtext+0avgdata 5820maxresident)k
+70.04user 0.00system 1:10.04elapsed 99%CPU (0avgtext+0avgdata 5728maxresident)k
+/usr/bin/time Go/main14.elf 1024 768 10 main14.ppm
+388.17user 0.31system 6:27.53elapsed 100%CPU (0avgtext+0avgdata 8640maxresident)k
 /usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
-77.58user 0.01system 1:18.09elapsed 99%CPU (0avgtext+0avgdata 4200maxresident)k
+113.26user 0.08system 1:54.34elapsed 99%CPU (0avgtext+0avgdata 3888maxresident)k
 /usr/bin/time Rust/main14.elf 1024 768 10 main14.ppm
-63.24user 0.07system 1:03.99elapsed 98%CPU (0avgtext+0avgdata 4796maxresident)k
+74.16user 0.00system 1:14.35elapsed 99%CPU (0avgtext+0avgdata 4676maxresident)k
 ```
 
 Conclusion (old) :
