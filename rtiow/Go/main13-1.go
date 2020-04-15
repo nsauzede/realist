@@ -302,7 +302,7 @@ func cam_print(cam Camera) {
 	fmt.Printf("\n\thorizontal: ");vprint(cam.horizontal);fmt.Printf(" ");
 	fmt.Printf("\n\tvertical: ");vprint(cam.vertical);fmt.Printf(" ");
 	fmt.Printf("\n\torigin: ");vprint(cam.origin);fmt.Printf(" ");
-	fmt.Printf("\n}\n");
+	fmt.Printf("\n}");
 	fmt.Printf("\nu: ");vprint(cam.u);
 	fmt.Printf("\nv: ");vprint(cam.v);
 	fmt.Printf("\nw: ");vprint(cam.w);
@@ -314,11 +314,29 @@ func make_camera(lookfrom Vec3, lookat Vec3, vup Vec3, vfov float32, aspect floa
 	theta := vfov * float32(math.Pi) / float32(180)
 	half_height := Tanf(theta / 2)
 	half_width := aspect * half_height
+//	thw := Vec3{theta, half_height, half_width}
+//	fmt.Print("thw=");thw.print();fmt.Printf(" \n")
 	cam.w = vsub(lookfrom, lookat).unit_vector()
 	cam.u = vcross(vup, cam.w).unit_vector()
 	cam.v = vcross(cam.w, cam.u)
 	cam.origin = lookfrom
-	cam.lower_left_corner = vsub(lookfrom, vadd(vmul(half_width * focus_dist, cam.u), vadd(vmul(half_height * focus_dist, cam.v), vmul(focus_dist, cam.w))))
+/*
+cam.lower_left_corner = 
+vsub(
+ lookfrom, 
+ vadd(
+ vmul(half_width * focus_dist, cam.u), 
+ vadd(
+  vmul(half_height * focus_dist, cam.v), 
+  vmul(focus_dist, cam.w))))
+*/
+	tmp := vmul(half_width * focus_dist, cam.u)
+	cam.lower_left_corner = vsub(cam.origin, tmp)
+	tmp = vmul(half_height * focus_dist, cam.v)
+	cam.lower_left_corner = vsub(cam.lower_left_corner, tmp)
+	tmp = vmul(focus_dist, cam.w)
+	cam.lower_left_corner = vsub(cam.lower_left_corner, tmp)
+
 	cam.horizontal = vmul(2 * half_width * focus_dist, cam.u)
 	cam.vertical = vmul(2 * half_height * focus_dist, cam.v)
 	cam.lens_radius = aperture / 2
@@ -326,9 +344,22 @@ func make_camera(lookfrom Vec3, lookat Vec3, vup Vec3, vfov float32, aspect floa
 }
 
 func (c Camera) get_ray(s float32, t float32) Ray {
+	ray := Ray{}
 	rd := vmul(c.lens_radius, random_in_unit_disk())
-	offset := vadd(vmul(rd[0], c.u), vmul(rd[1], c.v))
-	return Ray{vadd(c.origin, offset),vsub(vadd(c.lower_left_corner, vadd(vmul(s,c.horizontal), vmul(t,c.vertical))),vadd(c.origin,offset))}
+//	offset := vadd(vmul(rd[0], c.u), vmul(rd[1], c.v))
+//	return Ray{vadd(c.origin, offset),
+//vsub(vadd(c.lower_left_corner, vadd(vmul(s,c.horizontal), vmul(t,c.vertical))),vadd(c.origin,offset))}
+	offset := vmul(rd[0], c.u)
+	tmp := vmul(rd[1], c.v)
+	offset = vadd(offset, tmp)
+	tmp = vmul(s, c.horizontal)
+	ray.direction = vadd(c.lower_left_corner, tmp)
+	tmp = vmul(t, c.vertical)
+	ray.direction = vadd(ray.direction, tmp)
+	ray.direction = vsub(ray.direction, c.origin)
+	ray.direction = vsub(ray.direction, offset)
+	ray.origin = vadd(c.origin, offset)
+	return ray
 }
 
 func random_scene() []Hittable {
@@ -382,17 +413,17 @@ func main() {
 	dist_to_focus := vsub(lookfrom, lookat).len()
 	aperture := float32(0)
 	cam := make_camera(lookfrom, lookat, Vec3{0,1,0}, 30, float32(nx) / float32(ny), aperture, dist_to_focus);
-	cam_print(cam)
+//	cam_print(cam)
 	for j := ny-1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
 			col := Vec3{0, 0, 0}
 			for s := 0; s < ns; s++ {
 				u := (float32(i) + random_double()) / float32(nx)
 				v := (float32(j) + random_double()) / float32(ny)
-				uv := Vec3{u, v, 0}
-				fmt.Print("uv=");uv.print();fmt.Printf(" \n")
+//				uv := Vec3{u, v, 0}
+//				fmt.Print("uv=");uv.print();fmt.Printf(" \n")
 				r := cam.get_ray(u, v)
-				fmt.Print("r=");r.print();fmt.Printf(" \n")
+//				fmt.Print("r=");r.print();fmt.Printf("\n")
 				col0 := color(r, world, 0)
 				col = vadd(col, col0)
 			}
