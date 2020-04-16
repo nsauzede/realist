@@ -133,7 +133,8 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 fn cb_scatter_lambertian(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
 	l := &MLambertian(obj)
 	target := rec.normal + random_in_unit_sphere()
-	*scattered = ray.Ray{rec.p, target}
+	// workaround buggy compiler
+	{*scattered = ray.Ray{rec.p, target}}
 	*attenuation = l.albedo
 	return true
 }
@@ -141,7 +142,8 @@ fn cb_scatter_lambertian(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut 
 fn cb_scatter_metal(obj voidptr, r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
 	m := &MMetal(obj)
 	reflected := r_in.direction().unit_vector().reflect(rec.normal)
-	*scattered = ray.Ray{rec.p, reflected + vec.mult(m.fuzz, random_in_unit_sphere())}
+	// workaround buggy compiler
+	{*scattered = ray.Ray{rec.p, reflected + vec.mult(m.fuzz, random_in_unit_sphere())}}
 	*attenuation = m.albedo
 	return scattered.direction().dot(rec.normal) > 0
 }
