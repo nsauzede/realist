@@ -124,13 +124,15 @@ fn random_in_unit_sphere() vec.Vec3 {
 fn (m Material) scatter(r_in ray.Ray, rec HitRec, attenuation mut vec.Vec3, scattered mut ray.Ray) bool {
 	if m.generic.mtype == .lambertian {
 		target := rec.normal + random_in_unit_sphere()
-		*scattered = ray.Ray{rec.p, target}
+		// workaround buggy compiler
+		{*scattered = ray.Ray{rec.p, target}}
 		*attenuation = m.lambertian.albedo
 //		eprintln('Hello !!!!!!! lambertian ${m.lambertian.mtype}')
 		return true
 	} else {
 		reflected := r_in.direction().unit_vector().reflect(rec.normal)
-		*scattered = ray.Ray{rec.p, reflected}
+		// workaround buggy compiler
+		{*scattered = ray.Ray{rec.p, reflected}}
 		*attenuation = m.metal.albedo
 //		eprintln('Hello !!!!!!! non-lambertian ${m.metal.mtype}')
 		return scattered.direction().dot(rec.normal) > 0
