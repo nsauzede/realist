@@ -10,15 +10,15 @@ Benchmark :
 
 ```
 /usr/bin/time C/main14.elf 1024 768 10 main14.ppm
-62.14user 0.00system 1:02.15elapsed 99%CPU (0avgtext+0avgdata 4400maxresident)k
+53.84user 0.13system 0:54.29elapsed 99%CPU (0avgtext+0avgdata 4348maxresident)k
 /usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm
-70.04user 0.00system 1:10.04elapsed 99%CPU (0avgtext+0avgdata 5728maxresident)k
+61.04user 0.08system 1:01.46elapsed 99%CPU (0avgtext+0avgdata 5584maxresident)k
 /usr/bin/time Go/main14.elf 1024 768 10 main14.ppm
-388.17user 0.31system 6:27.53elapsed 100%CPU (0avgtext+0avgdata 8640maxresident)k
+325.66user 1.17system 5:26.44elapsed 100%CPU (0avgtext+0avgdata 12124maxresident)k
 /usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
-113.26user 0.08system 1:54.34elapsed 99%CPU (0avgtext+0avgdata 3888maxresident)k
+76.43user 0.12system 1:16.94elapsed 99%CPU (0avgtext+0avgdata 4188maxresident)k
 /usr/bin/time Rust/main14.elf 1024 768 10 main14.ppm
-74.16user 0.00system 1:14.35elapsed 99%CPU (0avgtext+0avgdata 4676maxresident)k
+38.02user 0.08system 0:38.58elapsed 98%CPU (0avgtext+0avgdata 4760maxresident)k
 ```
 
 Conclusion (old) :

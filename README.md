@@ -36,8 +36,9 @@ GOPATH=`pwd`/ray_go go build -o raygo ray_go/raygo.go
 ```
 
 # Acknowledgements
-Many thanks to Aurel and Rust community for help with my initial Rust rampup.
+Many thanks to Aurélie Alvet for her significant Rust optimization
+and the Rust community for help with my initial Rust rampup.
 Many thanks to Cieric for his C/C++ PCG implementation.
-Many thanks to spytheman (delian66@gmail.com) for his significant improvements
+Many thanks to Delyan Angelov for his significant V optimization
 done to the V port (both perfs and accuracy).
 Many thanks to Amaury for initial rust port.
