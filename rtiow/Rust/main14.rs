@@ -9,52 +9,41 @@ use std::io::Write;
 
 const FLT_MAX: f32 = 340282346638528859811704183484516925440.000000;
 
-trait Hittable {
-	fn hit<'a>(&'a self, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec<'a>) -> bool;
-	fn print(&self);
+macro_rules! vec3 {
+    ($x:expr, $y:expr, $z:expr) => {
+        Vec3 { x: $x, y: $y, z: $z }
+    };
 }
 
-trait Material {
-	fn scatter(&self, ray_in: &Ray, rec: &HitRec, attenuation: &mut Vec3, scattered: &mut Ray) -> bool;
-	fn print(&self);
+enum Material {
+	Lambertian(Vec3),
+	Metal(Vec3, f32),
+	Dielectric(f32)
+}
+
+enum Hittable {
+	Sphere(Vec3, f32, Material)
 }
 
 #[derive(Copy, Clone)]
-struct Vec3([f32; 3]);
+struct Vec3 {
+	x: f32,
+	y: f32,
+	z: f32
+}
 
-#[derive(Copy, Clone)]
 struct Ray {
 	origin: Vec3,
 	direction: Vec3
-}
-
-struct Lambertian {
-	albedo: Vec3,
-}
-
-struct Metal {
-	albedo: Vec3,
-	fuzz: f32
-}
-
-struct Dielectric {
-	ref_idx: f32
-}
-
-struct Sphere {
-	center: Vec3,
-	radius: f32,
-	material: Box<dyn Material>
 }
 
 struct HitRec<'a> {
 	t: f32,
 	p: Vec3,
 	normal: Vec3,
-	mat: &'a dyn Material
+	mat: &'a Material
 }
 
-#[derive(Copy, Clone)]
 struct Camera {
 	origin: Vec3,
 	lower_left_corner: Vec3,
@@ -70,27 +59,59 @@ fn random_f() -> f32 {
 	pcg::rand() as f32 / (pcg::RAND_MAX as f32 + 1.0)
 }
 
-impl Material for Lambertian {
-	fn scatter(&self, _ray_in: &Ray, rec: &HitRec, attenuation: &mut Vec3, scattered: &mut Ray) -> bool {
-		let target = rec.normal + random_in_unit_sphere();
-		*scattered = Ray{origin: rec.p, direction: target};
-		*attenuation = self.albedo;
-		true
-	}
-	fn print(&self) {
-		print!("{{ML:{} }}", self.albedo);
-	}
-}
-
-impl Material for Metal {
+impl Material {
 	fn scatter(&self, ray_in: &Ray, rec: &HitRec, attenuation: &mut Vec3, scattered: &mut Ray) -> bool {
-		let reflected = vreflect(unit_vector(ray_in.direction), rec.normal);
-		*scattered = Ray{origin: rec.p, direction: reflected + self.fuzz * random_in_unit_sphere()};
-		*attenuation = self.albedo;
-		vdot(scattered.direction, rec.normal) > 0.
+		match *self {
+			Material::Lambertian(albedo) => {
+				let target = rec.normal + random_in_unit_sphere();
+				*scattered = Ray{origin: rec.p, direction: target};
+				*attenuation = albedo;
+				true
+			},
+			Material::Metal(albedo, fuzz) => {
+				let reflected = vreflect(unit_vector(ray_in.direction), rec.normal);
+				*scattered = Ray{origin: rec.p, direction: reflected + fuzz * random_in_unit_sphere()};
+				*attenuation = albedo;
+				vdot(scattered.direction, rec.normal) > 0.
+			},
+			Material::Dielectric(ref_idx) => {
+				let reflected = vreflect(ray_in.direction, rec.normal);
+				*attenuation = vec3! {1., 1., 1.};
+				let mut refracted = vec3! {0., 0., 0.};
+				let mut reflect_prob = 1.0f32;
+				let mut outward_normal = rec.normal;
+				let mut ni_over_nt = 1. / ref_idx;
+				let mut cosine = -vdot(ray_in.direction, rec.normal) / vlen(ray_in.direction);
+				if vdot(ray_in.direction, rec.normal) > 0. {
+					outward_normal = -rec.normal;
+					ni_over_nt = ref_idx;
+					cosine = ref_idx * vdot(ray_in.direction, rec.normal) / vlen(ray_in.direction);
+				}
+				if refract(ray_in.direction, outward_normal, ni_over_nt, &mut refracted) {
+					reflect_prob = schlick(cosine, ref_idx);
+				}
+				if random_f() < reflect_prob {
+					*scattered = Ray{origin: rec.p, direction: reflected};
+				} else {
+					*scattered = Ray{origin: rec.p, direction: refracted};
+				}
+				true
+			}
+		}
 	}
+
 	fn print(&self) {
-		print!("{{MM:{} }}", self.albedo);
+		match *self {
+			Material::Lambertian(albedo) => {
+				print!("{{ML:{} }}", albedo);
+			},
+			Material::Metal(albedo, _) => {
+				print!("{{MM:{} }}", albedo);
+			},
+			Material::Dielectric(ref_idx) => {
+				print!("{{MD:{} }}", ref_idx);
+			}
+		}
 	}
 }
 
@@ -112,79 +133,59 @@ fn schlick(cosine: f32, ref_idx: f32) -> f32 {
 	r0 + (1.0 - r0) * f32::powf(1.0 - cosine, 5.0)
 }
 
-impl Material for Dielectric {
-	fn scatter(&self, ray_in: &Ray, rec: &HitRec, attenuation: &mut Vec3, scattered: &mut Ray) -> bool {
-		let reflected = vreflect(ray_in.direction, rec.normal);
-		*attenuation = Vec3([1., 1., 1.]);
-		let mut refracted = Vec3([0., 0., 0.]);
-		let mut reflect_prob = 1.0f32;
-		let mut outward_normal = rec.normal;
-		let mut ni_over_nt = 1. / self.ref_idx;
-		let mut cosine = -vdot(ray_in.direction, rec.normal) / vlen(ray_in.direction);
-		if vdot(ray_in.direction, rec.normal) > 0. {
-			outward_normal = -rec.normal;
-			ni_over_nt = self.ref_idx;
-			cosine = self.ref_idx * vdot(ray_in.direction, rec.normal) / vlen(ray_in.direction);
-		}
-		if refract(ray_in.direction, outward_normal, ni_over_nt, &mut refracted) {
-			reflect_prob = schlick(cosine, self.ref_idx);
-		}
-		if random_f() < reflect_prob {
-			*scattered = Ray{origin: rec.p, direction: reflected};
-		} else {
-			*scattered = Ray{origin: rec.p, direction: refracted};
-		}
-		return true;
-	}
-	fn print(&self) {
-		print!("{{MD:{} }}", self.ref_idx);
-	}
-}
-
-impl Hittable for Sphere {
+impl Hittable {
 	fn hit<'a>(&'a self, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec<'a>) -> bool {
-		let center = self.center;
-		let radius = self.radius;
-		let oc = r.origin - center;
+		match self {
+			Hittable::Sphere(center, radius, material) => {
+				let center = *center;
+				let radius = *radius;
+				let oc = r.origin - center;
 //		println!("oc={:?}", oc);
-		let a = r.direction % r.direction;
-		let b = oc % r.direction;
-		let c = (oc % oc) - radius * radius;
-		let discriminant = b * b - a * c;
-//		let abc = Vec3([a, b, c]);
+				let a = r.direction % r.direction;
+				let b = oc % r.direction;
+				let c = (oc % oc) - radius * radius;
+				let discriminant = b * b - a * c;
+//		let abc = vec3! {a, b, c};
 //		println!("abc={}", abc);
 //		println!("a={} b={} c={} d={}", a, b, c, discriminant);
-		if discriminant > 0. {
-			let mut temp = (-b - f32::sqrt(discriminant)) / a;
-			if temp < t_max && temp > t_min {
-				rec.t = temp;
-				rec.p = r.point_at_parameter(rec.t);
-				rec.normal = (rec.p - center) / radius;
-				rec.mat = self.material.as_ref();
-				return true;
-			}
-			temp = (-b + f32::sqrt(discriminant)) / a;
-			if temp < t_max && temp > t_min {
-				rec.t = temp;
-				rec.p = r.point_at_parameter(rec.t);
-				rec.normal = (rec.p - center) / radius;
-				rec.mat = self.material.as_ref();
-				return true;
+				if discriminant > 0. {
+					let mut temp = (-b - f32::sqrt(discriminant)) / a;
+					if temp < t_max && temp > t_min {
+						rec.t = temp;
+						rec.p = r.point_at_parameter(rec.t);
+						rec.normal = (rec.p - center) / radius;
+						rec.mat = &material;
+						return true;
+					}
+					temp = (-b + f32::sqrt(discriminant)) / a;
+					if temp < t_max && temp > t_min {
+						rec.t = temp;
+						rec.p = r.point_at_parameter(rec.t);
+						rec.normal = (rec.p - center) / radius;
+						rec.mat = &material;
+						return true;
+					}
+				}
+				false
 			}
 		}
-		false
 	}
+
 	fn print(&self) {
-		print!("{{HS:{} ,{:.6},", self.center, self.radius);
-		self.material.print();
-		print!("}}");
+		match self {
+			Hittable::Sphere(center, radius, material) => {
+				print!("{{HS:{} ,{:.6},", center, radius);
+				material.print();
+				print!("}}");
+			}
+		}
 	}
 }
 
 impl Camera {
-	fn get_ray(self, s: f32, t: f32) -> Ray {
+	fn get_ray(&self, s: f32, t: f32) -> Ray {
 		let rd = self.lens_radius * random_in_unit_disk();
-		let offset = rd.0[0] * self.u + rd.0[1] * self.v;
+		let offset = rd.x * self.u + rd.y * self.v;
 		Ray{
 			origin: self.origin + offset,
 			direction: self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset
@@ -217,15 +218,14 @@ impl fmt::Display for Ray {
 impl fmt::Display for Vec3 {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(f, "{{{:.6}, {:.6}, {:.6};{:x}, {:x}, {:x}}}",
-			self.0[0], self.0[1], self.0[2],
-			self.0[0].to_bits(), self.0[1].to_bits(), self.0[2].to_bits())
+			self.x, self.y, self.z,
+			self.x.to_bits(), self.y.to_bits(), self.z.to_bits())
 	}
 }
 
 impl Vec3 {
 	fn squared_length(self) -> f32 {
-		let Self([x1, y1, z1]) = self;
-		x1 * x1 + y1 * y1 + z1 * z1
+		self.x * self.x + self.y * self.y + self.z * self.z
 	}
 	fn length(self) -> f32 {
 		f32::sqrt(self.squared_length())
@@ -236,10 +236,7 @@ impl std::ops::Rem for Vec3 {
 	type Output = f32;
 
 	fn rem(self, rhs: Vec3) -> f32 {
-		let Self([x1, y1, z1]) = self;
-		let Self([x2, y2, z2]) = rhs;
-
-		x1 * x2 + y1 * y2 + z1 * z2
+		self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
 	}
 }
 
@@ -247,10 +244,7 @@ impl std::ops::Div for Vec3 {
 	type Output = Vec3;
 
 	fn div(self, rhs: Vec3) -> Self::Output {
-		let Self([x1, y1, z1]) = self;
-		let Self([x2, y2, z2]) = rhs;
-
-		Self([x1 / x2, y1 / y2, z1 / z2])
+		Self{x: self.x / rhs.x, y: self.y / rhs.y, z: self.z / rhs.z}
 	}
 }
 
@@ -258,10 +252,7 @@ impl std::ops::Mul for Vec3 {
 	type Output = Vec3;
 
 	fn mul(self, rhs: Vec3) -> Self::Output {
-		let Self([x1, y1, z1]) = self;
-		let Self([x2, y2, z2]) = rhs;
-
-		Self([x1 * x2, y1 * y2, z1 * z2])
+		Self{x: self.x * rhs.x, y: self.y * rhs.y, z: self.z * rhs.z}
 	}
 }
 
@@ -269,10 +260,7 @@ impl std::ops::Add for Vec3 {
 	type Output = Vec3;
 
 	fn add(self, rhs: Vec3) -> Self::Output {
-		let Self([x1, y1, z1]) = self;
-		let Self([x2, y2, z2]) = rhs;
-
-		Self([x1 + x2, y1 + y2, z1 + z2])
+		Self{x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z}
 	}
 }
 
@@ -280,10 +268,7 @@ impl std::ops::Sub for Vec3 {
 	type Output = Vec3;
 
 	fn sub(self, rhs: Vec3) -> Self::Output {
-		let Self([x1, y1, z1]) = self;
-		let Self([x2, y2, z2]) = rhs;
-
-		Self([x1 - x2, y1 - y2, z1 - z2])
+		Self{x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z}
 	}
 }
 
@@ -291,9 +276,7 @@ impl std::ops::Neg for Vec3 {
 	type Output = Vec3;
 
 	fn neg(self) -> Self::Output {
-		let Self([x1, y1, z1]) = self;
-
-		Self([-x1, -y1, -z1])
+		Self{x: -self.x, y: -self.y, z: -self.z}
 	}
 }
 
@@ -301,8 +284,7 @@ impl Div<f32> for Vec3 {
 	type Output = Self;
 
 	fn div(self, rhs: f32) -> Self::Output {
-		let Self([x1, y1, z1]) = self;
-		Self([x1 / rhs, y1 / rhs, z1 / rhs])
+		Self{ x: self.x / rhs, y: self.y / rhs, z: self.z / rhs}
 	}
 }
 
@@ -310,12 +292,12 @@ impl Mul<Vec3> for f32 {
 	type Output = Vec3;
 
 	fn mul(self, rhs: Vec3) -> Vec3 {
-		Vec3([self * rhs.0[0], self * rhs.0[1], self * rhs.0[2]])
+		vec3! {self * rhs.x, self * rhs.y, self * rhs.z }
 	}
 }
 
 fn vlen(v: Vec3) -> f32 {
-	f32::sqrt(v.0[0] * v.0[0] + v.0[1] * v.0[1] + v.0[2] * v.0[2])
+	f32::sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
 }
 
 fn unit_vector(v: Vec3) -> Vec3 {
@@ -323,15 +305,15 @@ fn unit_vector(v: Vec3) -> Vec3 {
 }
 
 fn vdot(v1: Vec3, v2: Vec3) -> f32 {
-	v1.0[0] * v2.0[0] + v1.0[1] * v2.0[1] + v1.0[2] * v2.0[2]
+	v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
 }
 
 fn vcross(v1: Vec3, v2: Vec3) -> Vec3 {
-	Vec3([
-		v1.0[1] * v2.0[2] - v1.0[2] * v2.0[1],
-		v1.0[2] * v2.0[0] - v1.0[0] * v2.0[2],
-		v1.0[0] * v2.0[1] - v1.0[1] * v2.0[0]
-	])
+	vec3! {
+		v1.y * v2.z - v1.z * v2.y,
+		v1.z * v2.x - v1.x * v2.z,
+		v1.x * v2.y - v1.y * v2.x
+	}
 }
 
 fn vreflect(v: Vec3, n: Vec3) -> Vec3 {
@@ -339,7 +321,7 @@ fn vreflect(v: Vec3, n: Vec3) -> Vec3 {
 }
 
 impl Ray {
-	fn point_at_parameter(self, t: f32) -> Vec3 {
+	fn point_at_parameter(&self, t: f32) -> Vec3 {
 		self.origin + t * self.direction
 	}
 }
@@ -350,7 +332,7 @@ fn random_in_unit_sphere() -> Vec3 {
 		let r1 = random_f();
 		let r2 = random_f();
 		let r3 = random_f();
-		p = 2.0 * Vec3([r1, r2, r3]) - Vec3([1., 1., 1.]);
+		p = 2.0 * vec3! {r1, r2, r3} - vec3! {1., 1., 1.};
 		if p.squared_length() < 1.0 {
 			break;
 		}
@@ -363,7 +345,7 @@ fn random_in_unit_disk() -> Vec3 {
 	loop {
 		let r1 = random_f();
 		let r2 = random_f();
-		p = 2.0 * Vec3([r1, r2, 0.]) - Vec3([1., 1., 0.]);
+		p = 2.0 * vec3! {r1, r2, 0.} - vec3! {1., 1., 0.};
 		if p.squared_length() < 1.0 {
 			break;
 		}
@@ -371,7 +353,7 @@ fn random_in_unit_disk() -> Vec3 {
 	p
 }
 
-fn _wprint(world: &Vec<Box<dyn Hittable>>) {
+fn _wprint(world: &Vec<Hittable>) {
 	println!("[");
 	for h in world {
 		h.print();
@@ -380,7 +362,7 @@ fn _wprint(world: &Vec<Box<dyn Hittable>>) {
 	println!("]");
 }
 
-fn hit<'a>(world: &'a Vec<Box<dyn Hittable>>, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec<'a>) -> bool {
+fn hit<'a>(world: &'a Vec<Hittable>, r: &Ray, t_min: f32, t_max: f32, rec: &mut HitRec<'a>) -> bool {
 	let mut hit_anything = false;
 	let mut closest_so_far = t_max;
 	for h in world {
@@ -392,8 +374,8 @@ fn hit<'a>(world: &'a Vec<Box<dyn Hittable>>, r: &Ray, t_min: f32, t_max: f32, r
 	hit_anything
 }
 
-fn color(world: &Vec<Box<dyn Hittable>>, r: &Ray, depth: u32) -> Vec3 {
-	let mut rec = HitRec{t: 0., p: Vec3([0., 0., 0.]), normal: Vec3([0., 0., 0.]), mat: &Lambertian{albedo: Vec3([0., 0., 0.])}};
+fn color(world: &Vec<Hittable>, r: &Ray, depth: u32) -> Vec3 {
+	let mut rec = HitRec{t: 0., p: vec3! {0., 0., 0.}, normal: vec3! {0., 0., 0.}, mat: &Material::Lambertian{0: vec3! {0., 0., 0.}}};
 if cfg!(DEBUG) {
 	println!("{}", r);
 }
@@ -403,12 +385,12 @@ if cfg!(DEBUG) {
 		println!("t={:.6}", rec.t);
 		print!("mat=");rec.mat.print();println!();
 }
-		let mut scattered = Ray{origin: Vec3([0., 0., 0.]), direction: Vec3([0., 0., 0.])};
-		let mut attenuation = Vec3([0., 0., 0.]);
+		let mut scattered = Ray{origin: vec3! {0., 0., 0.}, direction: vec3! {0., 0., 0.}};
+		let mut attenuation = vec3! {0., 0., 0.};
 		if depth < 50 && rec.mat.scatter(r, &rec, &mut attenuation, &mut scattered) {
 if cfg!(DEBUG) {
 			print!("ATT\n");
-			let tv = Vec3([rec.t, 0., 0.]);
+			let tv = vec3! {rec.t, 0., 0.};
 			print!("tv={}", tv);
 			print!(" \np={}", rec.p);
 			print!(" \n");
@@ -423,7 +405,7 @@ if cfg!(DEBUG) {
 if cfg!(DEBUG) {
 			print!("NOT ATT\n");
 }
-			Vec3([0., 0., 0.])
+			vec3! {0., 0., 0.}
 		}
 	} else {
 		let unit_direction = unit_vector(r.direction);
@@ -433,8 +415,8 @@ if cfg!(DEBUG) {
 		print!(" ud={}", unit_direction);
 		print!(" \n");
 }
-		let t = 0.5 * (unit_direction.0[1] + 1.);
-		(1. - t) * Vec3([1., 1., 1.]) + t * Vec3([0.5, 0.7, 1.])
+		let t = 0.5 * (unit_direction.y + 1.);
+		(1. - t) * vec3! {1., 1., 1.} + t * vec3! {0.5, 0.7, 1.}
 	}
 }
 
@@ -457,9 +439,9 @@ fn make_camera(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f32, aspect: f32, 
 	}
 }
 
-fn random_scene() -> Vec<Box<dyn Hittable>> {
-	let mut world: Vec<Box<dyn Hittable>> = vec!(
-		Box::new(Sphere {center: Vec3([0., -1000., 0.]), radius: 1000., material: Box::new(Lambertian {albedo: Vec3([0.5, 0.5, 0.5])})}),
+fn random_scene() -> Vec<Hittable> {
+	let mut world: Vec<Hittable> = vec!(
+		Hittable::Sphere {0: vec3! {0., -1000., 0.}, 1: 1000., 2: Material::Lambertian {0: vec3! {0.5, 0.5, 0.5}}},
 	);
 	for a in -11..11 {
 		for b in -11..11 {
@@ -467,15 +449,15 @@ fn random_scene() -> Vec<Box<dyn Hittable>> {
 			let r1 = random_f();
 			let r2 = random_f();
 if cfg!(DEBUG) {
-			let crr = Vec3([choose_mat, r1, r2]);
+			let crr = vec3! {choose_mat, r1, r2};
 			println!("crr={} ", crr);
 			println!("a={:.6} b={:.6}", a, b);
 }
-			let center = Vec3([a as f32 + 0.9 * r1, 0.2, b as f32 + 0.9 * r2]);
+			let center = vec3! {a as f32 + 0.9 * r1, 0.2, b as f32 + 0.9 * r2};
 if cfg!(DEBUG) {
 			println!("center={} ", center);
 }
-			if vlen(center - Vec3([4., 0.2, 0.])) > 0.9 {
+			if vlen(center - vec3! {4., 0.2, 0.}) > 0.9 {
 				if choose_mat < 0.8 {  // diffuse
 					let r1 = random_f();
 					let r2 = random_f();
@@ -484,7 +466,7 @@ if cfg!(DEBUG) {
 					let r5 = random_f();
 					let r6 = random_f();
 	world.push(
-		Box::new(Sphere {center: center, radius: 0.2, material: Box::new(Lambertian {albedo: Vec3([r1 * r2, r3 * r4, r5 * r6])})}),
+		Hittable::Sphere {0: center, 1: 0.2, 2: Material::Lambertian {0: vec3! {r1 * r2, r3 * r4, r5 * r6}}},
 	);
 				} else if choose_mat < 0.95 { // metal
 					let r1 = 0.5 * (1. + random_f());
@@ -492,24 +474,24 @@ if cfg!(DEBUG) {
 					let r3 = 0.5 * (1. + random_f());
 					let r4 = 0.5 * random_f();
 	world.push(
-		Box::new(Sphere {center: center, radius: 0.2, material: Box::new(Metal {albedo: Vec3([r1, r2, r3]), fuzz: r4})}),
+		Hittable::Sphere {0: center, 1: 0.2, 2: Material::Metal {0: vec3! {r1, r2, r3}, 1: r4}},
 	);
 				} else {  // glass
 	world.push(
-		Box::new(Sphere {center: center, radius: 0.2, material: Box::new(Dielectric {ref_idx: 1.5})}),
+		Hittable::Sphere {0: center, 1: 0.2, 2: Material::Dielectric {0: 1.5}},
 	);
 				}
 			}
 		}
 	}
 	world.push(
-		Box::new(Sphere {center: Vec3([0., 1., 0.]), radius: 1., material: Box::new(Dielectric {ref_idx: 1.5})}),
+		Hittable::Sphere {0: vec3! {0., 1., 0.}, 1: 1., 2: Material::Dielectric {0: 1.5}},
 	);
 	world.push(
-		Box::new(Sphere {center: Vec3([-4., 1., 0.]), radius: 1., material: Box::new(Lambertian {albedo: Vec3([0.4, 0.2, 0.1]) })}),
+		Hittable::Sphere {0: vec3! {-4., 1., 0.}, 1: 1., 2: Material::Lambertian {0: vec3! {0.4, 0.2, 0.1} }},
 	);
 	world.push(
-		Box::new(Sphere {center: Vec3([4., 1., 0.]), radius: 1., material: Box::new(Metal {albedo: Vec3([0.7, 0.6, 0.5]), fuzz: 0.})}),
+		Hittable::Sphere {0: vec3! {4., 1., 0.}, 1: 1., 2: Material::Metal {0: vec3! {0.7, 0.6, 0.5}, 1: 0.}},
 	);
 	world
 }
@@ -554,18 +536,18 @@ fn main() {
 		println!("255");
 	}
 	let world = random_scene();
-	let lookfrom = Vec3([9., 2., 2.6]);
-	let lookat = Vec3([3., 0.8, 1.]);
+	let lookfrom = vec3! {9., 2., 2.6};
+	let lookat = vec3! {3., 0.8, 1.};
 	let dist_to_focus = vlen(lookfrom - lookat);
 	let aperture = 0.0f32;
-	let cam = make_camera(lookfrom, lookat, Vec3([0.,1.,0.]), 30., nx as f32 / ny as f32, aperture, dist_to_focus);
+	let cam = make_camera(lookfrom, lookat, vec3! {0.,1.,0.}, 30., nx as f32 / ny as f32, aperture, dist_to_focus);
 if cfg!(DEBUG) {
 	println!("{}", cam);
 	_wprint(&world);
 }
 	for j in (0..ny).rev() {
 		for i in 0..nx {
-			let mut col = Vec3([0., 0., 0.]);
+			let mut col = vec3! {0., 0., 0.};
 			for _s in 0..ns {
 				let u = (i as f32 + random_f()) / nx as f32;
 				let v = (j as f32 + random_f()) / ny as f32;
@@ -579,10 +561,10 @@ if cfg!(DEBUG) {
 }
 			}
 			col = col / ns as f32;
-			col = Vec3([f32::sqrt(col.0[0]), f32::sqrt(col.0[1]), f32::sqrt(col.0[2])]);
-			let ir = (255.99*col.0[0]) as u8;
-			let ig = (255.99*col.0[1]) as u8;
-			let ib = (255.99*col.0[2]) as u8;
+			col = vec3! {f32::sqrt(col.x), f32::sqrt(col.y), f32::sqrt(col.z)};
+			let ir = (255.99*col.x) as u8;
+			let ig = (255.99*col.y) as u8;
+			let ib = (255.99*col.z) as u8;
 			if fnameout != "" {
 				bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir;
 				bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig;
