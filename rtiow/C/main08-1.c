@@ -106,13 +106,12 @@ bool sphere_hit(hittable *p, const ray *r, float t_min, float t_max, hit_record 
 }
 
 #define HSPHERE(cx, cy, cz, r) ((hittable){sphere_hit, .obj.sphere=(sphere_t){{cx, cy, cz}, r}})
-#define HSTART ((hittable){list_hit, 0})
-#define HEND ((hittable){0, 0})
+#define HSTART {list_hit, .obj.null=0}
+#define HEND {0, .obj.null=0}
 
 void color(vec3 col, const ray *r, hittable *world) {
-	if (!world->hit) return;
 	hit_record rec;
-	float max = FLT_MAX;
+//	float max = FLT_MAX;
 //	printf("max=%.6f\n", max);
 //	if (world->hit(world, r, 0, FLT_MAX, &rec)) {
 	if (world->hit(world, r, 0.001, FLT_MAX, &rec)) {

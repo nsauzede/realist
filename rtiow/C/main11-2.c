@@ -238,7 +238,6 @@ bool dielectric_scatter(struct material_s *p, const ray *r_in,
 }
 
 void color(vec3 col, const ray *r, hittable_t *world, int depth) {
-	if (!world->hit) return;
 	hit_record rec;
 	// remove acne by starting at 0.001
 //	rprint(r);
@@ -343,7 +342,6 @@ int main() {
 	int ny = 100;
 	int ns = 100;
 	printf("P3\n"); printf("%d %d\n", nx, ny); printf("255\n");
-	float R = cosf((float)M_PI/4);
 	hittable_t world[] = {
 		HSTART,
 		HSPHERE(0, 0, -1, 0.5, MLAMBERTIAN(0.1, 0.2, 0.5)),

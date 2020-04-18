@@ -275,7 +275,6 @@ bool dielectric_scatter(struct material_s *p, const ray *r_in,
 }
 
 void color(vec3 col, const ray *r, hittable_t *world, int depth) {
-	if (!world->hit) return;
 	hit_record rec;
 	// remove acne by starting at 0.001
 #ifdef DEBUG

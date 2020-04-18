@@ -50,8 +50,8 @@ typedef struct {
 #define MMETAL(ax, ay, az, f) ((material_t){metal_scatter, .u.metal=(metal_t){{ax, ay, az}, f}})
 
 #define HSPHERE(cx, cy, cz, r, m) ((hittable_t){sphere_hit, .u.sphere=(sphere_t){{cx, cy, cz}, r, m}})
-#define HSTART ((hittable_t){list_hit, 0})
-#define HEND ((hittable_t){0, 0})
+#define HSTART {list_hit, .u.null=0}
+#define HEND {0, .u.null=0}
 
 struct hittable_s;
 typedef bool (*hit_t)(struct hittable_s *p, const ray *r, float t_min, float t_max, hit_record *rec);
@@ -140,7 +140,6 @@ bool metal_scatter(struct material_s *p, const ray *r_in, const hit_record *rec,
 }
 
 void color(vec3 col, const ray *r, hittable_t *world, int depth) {
-	if (!world->hit) return;
 	hit_record rec;
 	// remove acne by starting at 0.001
 	if (world->hit(world, r, 0.001, FLT_MAX, &rec)) {

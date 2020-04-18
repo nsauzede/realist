@@ -204,8 +204,8 @@ bool refract(const vec3 v, const vec3 n, float ni_over_nt, vec3 refracted) {
 #endif
 	float dt = vdot(uv, n);
 	float discriminant = 1.f - ni_over_nt * ni_over_nt * (1.f - dt * dt);
-	vec3 ddn = {dt, discriminant, ni_over_nt};
 #ifdef DEBUG
+	vec3 ddn = {dt, discriminant, ni_over_nt};
 	printf("ddn=");vprint(ddn);printf(" \n");
 #endif
 	if (discriminant > 0) {
@@ -294,7 +294,6 @@ bool dielectric_scatter(struct material_s *p, const ray *r_in,
 }
 
 void color(vec3 col, const ray *r, hittable_t *world, int depth) {
-	if (!world->hit) return;
 	hit_record rec;
 	// remove acne by starting at 0.001
 //	rprint(r);
@@ -420,7 +419,6 @@ int main() {
 	int ny = 100;
 	int ns = 100;
 	printf("P3\n"); printf("%d %d\n", nx, ny); printf("255\n");
-	float R = cosf((float)M_PI/4);
 	hittable_t world[] = {
 		HSTART,
 		HSPHERE(0, 0, -1, 0.5, MLAMBERTIAN(0.1, 0.2, 0.5)),
