@@ -66,7 +66,7 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
 	mut hit_anything := false
 	mut closest_so_far := t_max
 	for h in hh {
-		if h.hit(r, t_min, closest_so_far, rec) {
+		if h.hit(r, t_min, closest_so_far, mut rec) {
 			hit_anything = true
 			closest_so_far = rec.t
 		}

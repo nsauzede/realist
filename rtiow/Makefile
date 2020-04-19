@@ -4,8 +4,7 @@ TARGET+=CPP/main14.elf
 TARGET+=Go/main14.elf
 TARGET+=Odin/main14.elf
 TARGET+=Rust/main14.elf
-#TARGET+=V/A14_v
-#TARGET+=V/A14_v.c
+TARGET+=V/main14.elf
 
 all: $(TARGET)
 
@@ -27,11 +26,8 @@ Odin/main14.elf:
 Rust/main14.elf:
 	(cd Rust; make clean ; /usr/bin/time make main14.elf)
 
-V/A14_v: V/A14_v.c
-	(cd V; gcc -o A14_v A14_v.c -O3 -lm)
-
-V/A14_v.c: V/A14.v
-	(cd V; v -o A14_v.c A14.v)
+V/A14.elf:
+	(cd V; make clean ; /usr/bin/time make main14.elf)
 
 bench: $(TARGET)
 	/usr/bin/time C/main14.elf 1024 768 10 main14.ppm
@@ -39,7 +35,7 @@ bench: $(TARGET)
 	/usr/bin/time Go/main14.elf 1024 768 10 main14.ppm
 	/usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
 	/usr/bin/time Rust/main14.elf 1024 768 10 main14.ppm
-#	/usr/bin/time V/A14_v 200 100 100 A14.ppm
+	/usr/bin/time V/main14.elf 1024 768 10 main14.ppm
 
 clean:
 	$(RM) $(TARGET)

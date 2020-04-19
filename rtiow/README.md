@@ -2,6 +2,7 @@
 See here : https://raytracing.github.io
 This repo contains my experiments following the excellent book above,
 in C, C++, Go, Odin, Rust and V.
+NOTE: current V (AST) is buggy; only v0.1.25 is know to work.
 
 # rtiow
 Benchmark :
@@ -10,15 +11,17 @@ Benchmark :
 
 ```
 /usr/bin/time C/main14.elf 1024 768 10 main14.ppm
-53.84user 0.13system 0:54.29elapsed 99%CPU (0avgtext+0avgdata 4348maxresident)k
+50.56user 0.00system 0:50.63elapsed 99%CPU (0avgtext+0avgdata 4320maxresident)k
 /usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm
-61.04user 0.08system 1:01.46elapsed 99%CPU (0avgtext+0avgdata 5584maxresident)k
+59.41user 0.09system 0:59.76elapsed 99%CPU (0avgtext+0avgdata 5912maxresident)k
 /usr/bin/time Go/main14.elf 1024 768 10 main14.ppm
-325.66user 1.17system 5:26.44elapsed 100%CPU (0avgtext+0avgdata 12124maxresident)k
+331.14user 1.12system 5:35.48elapsed 99%CPU (0avgtext+0avgdata 14168maxresident)k
 /usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
-76.43user 0.12system 1:16.94elapsed 99%CPU (0avgtext+0avgdata 4188maxresident)k
+79.13user 0.01system 1:19.49elapsed 99%CPU (0avgtext+0avgdata 4160maxresident)k
 /usr/bin/time Rust/main14.elf 1024 768 10 main14.ppm
-38.02user 0.08system 0:38.58elapsed 98%CPU (0avgtext+0avgdata 4760maxresident)k
+37.40user 0.09system 0:37.93elapsed 98%CPU (0avgtext+0avgdata 4668maxresident)k
+/usr/bin/time V/main14.elf 1024 768 10 main14.ppm
+84.65user 0.11system 1:25.66elapsed 98%CPU (0avgtext+0avgdata 4364maxresident)k
 ```
 
 Conclusion (old) :
