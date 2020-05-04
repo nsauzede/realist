@@ -197,7 +197,7 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 		mut scattered := ray.Ray{}
 		mut attenuation := vec.Vec3{}
 		h := &Hittable(rec.ph)
-		if depth < 50 && h.generic.material.generic.scattercb(h.generic.material.generic, r, rec, mut attenuation, mut scattered) {
+		if depth < 50 && h.generic.material.generic.scattercb(&h.generic.material.generic, r, rec, mut &attenuation, mut &scattered) {
 //		println('ATT')
 			return attenuation * world.color(scattered, depth + 1)
 		} else {
@@ -238,7 +238,7 @@ c.lower_left_corner + vec.mult(u, c.horizontal) + vec.mult(v, c.vertical) - c.or
 }
 
 pub fn (h Hittable) str() string {
-	return h.generic.strcb(h)
+	return h.generic.strcb(&h)
 }
 
 fn main() {
@@ -250,13 +250,13 @@ fn main() {
 	mut cam := Camera{}
 	cam.make(90, f32(nx)/f32(ny))
 //	println(cam)
-	R := math.cosf(math.pi / 4.)
+	r := math.cosf(math.pi / 4.)
 	world := [
-		Hittable(HSphere{center: vec.Vec3{-R, 0, -1}, radius: R,
+		Hittable(HSphere{center: vec.Vec3{-r, 0, -1}, radius: r,
 			material: Material(
 				MLambertian{albedo: vec.Vec3{0, 0, 1}})
 		}),
-		Hittable(HSphere{center: vec.Vec3{R, 0, -1}, radius: R
+		Hittable(HSphere{center: vec.Vec3{r, 0, -1}, radius: r
 			material: Material(
 				MLambertian{albedo: vec.Vec3{1, 0, 0}})
 		})
@@ -269,9 +269,9 @@ fn main() {
 //				println('rfcnt=$rfcnt riuscnt=$riuscnt riudcnt=$riudcnt')
 				u := (f32(i) + random_f()) / f32(nx)
 				v := (f32(j) + random_f()) / f32(ny)
-				r := cam.get_ray(u, v)
-//				println('j=$j i=$i r=$r')
-				col = col + world.color(r, 0)
+				ray := cam.get_ray(u, v)
+//				println('j=$j i=$i r=$ray')
+				col = col + world.color(ray, 0)
 			}
 			col = vec.div(col, ns)
 			// Gamma 2 correction (square root)

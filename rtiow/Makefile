@@ -26,7 +26,7 @@ Odin/main14.elf:
 Rust/main14.elf:
 	(cd Rust; make clean ; /usr/bin/time make main14.elf)
 
-V/A14.elf:
+V/main14.elf:
 	(cd V; make clean ; /usr/bin/time make main14.elf)
 
 bench: $(TARGET)

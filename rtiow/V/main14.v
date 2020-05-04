@@ -114,7 +114,7 @@ union Hittable {
 }
 
 fn cb_str_sphere(obj voidptr) string {
-	s := &HSphere(obj) return '{HS:$s.center,$s.radius,${s.material.generic.strcb(s.material)}}'
+	s := &HSphere(obj) return '{HS:$s.center,$s.radius,${s.material.generic.strcb(&s.material)}}'
 }
 
 fn cb_hit_sphere(obj voidptr, r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
@@ -245,7 +245,7 @@ $if dbg? {
 		mut scattered := ray.Ray{}
 		mut attenuation := vec.Vec3{}
 		h := &Hittable(rec.ph)
-		if depth < 50 && h.generic.material.generic.scattercb(h.generic.material.generic, r, rec, mut attenuation, mut scattered) {
+		if depth < 50 && h.generic.material.generic.scattercb(&h.generic.material.generic, r, rec, mut &attenuation, mut &scattered) {
 //			println('ATT')
 //			tv := vec.Vec3{rec.t, 0, 0}
 //			println('tv=$tv')
@@ -332,7 +332,7 @@ $if dbg? {
 }
 
 pub fn (h Hittable) str() string {
-	return h.generic.strcb(h)
+	return h.generic.strcb(&h)
 }
 
 fn new_world() []Hittable {
@@ -351,7 +351,8 @@ fn new_world() []Hittable {
 				f32(a)+0.9*r01,
 				0.2,
 				f32(b)+0.9*r02}
-			if (center - vec.Vec3{4,0.2,0}).length() > 0.9 {
+			c0 := vec.Vec3{4,0.2,0}
+			if (center - c0).length() > 0.9 {
 				if choose_mat < 0.8 {  // diffuse
 					r1 := random_f()
 					r2 := random_f()
@@ -427,7 +428,7 @@ fn main() {
 	mut bytes := byteptr(0)
 	mut nbytes := 0
 	if fnameout != '' {
-		t := os.create(fnameout) or { exit }
+		t := os.create(fnameout) or { panic("can't create file") }
 		fout = t
 		fout.writeln('P6')
 		nbytes = 3 * ny * nx

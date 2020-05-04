@@ -113,7 +113,7 @@ union Hittable {
 }
 
 fn cb_str_sphere(obj voidptr) string {
-	s := &HSphere(obj) return '{HS:$s.center,$s.radius,${s.material.generic.strcb(s.material)}}'
+	s := &HSphere(obj) return '{HS:$s.center,$s.radius,${s.material.generic.strcb(&s.material)}}'
 }
 
 fn cb_hit_sphere(obj voidptr, r ray.Ray, t_min f32, t_max f32, rec mut HitRec) bool {
@@ -246,7 +246,7 @@ $if dbg? {
 		mut scattered := ray.Ray{}
 		mut attenuation := vec.Vec3{}
 		h := &Hittable(rec.ph)
-		if depth < 50 && h.generic.material.generic.scattercb(h.generic.material.generic, r, rec, mut attenuation, mut scattered) {
+		if depth < 50 && h.generic.material.generic.scattercb(&h.generic.material.generic, r, rec, mut &attenuation, mut &scattered) {
 $if dbg? {
 			println('ATT')
 			tv := vec.Vec3{rec.t, 0, 0}
@@ -337,7 +337,7 @@ $if dbg? {
 }
 
 pub fn (h Hittable) str() string {
-	return h.generic.strcb(h)
+	return h.generic.strcb(&h)
 }
 
 fn main() {
