@@ -21,12 +21,12 @@ struct MGeneric {
 }
 
 struct MLambertian {
-	mtype MType = MType.lambertian
+	mtype MType = .lambertian
 	albedo vec.Vec3
 }
 
 struct MMetal {
-	mtype MType = MType.metal
+	mtype MType = .metal
 	albedo vec.Vec3
 }
 
@@ -41,7 +41,7 @@ struct HGeneric {
 }
 
 struct HSphere {
-	htype HType = HType.sphere
+	htype HType = .sphere
 	center vec.Vec3
 	radius f32
 	material Material

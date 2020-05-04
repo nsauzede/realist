@@ -184,7 +184,7 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 		mut scattered := ray.Ray{}
 		mut attenuation := vec.Vec3{}
 		h := &Hittable(rec.ph)
-		if depth < 50 && h.generic.material.generic.scattercb(h.generic.material.generic, r, rec, mut attenuation, mut scattered) {
+		if depth < 50 && h.generic.material.generic.scattercb(&h.generic.material.generic, r, rec, mut &attenuation, mut &scattered) {
 //		println('ATT')
 			return attenuation * world.color(scattered, depth + 1)
 		} else {
@@ -214,7 +214,7 @@ c.lower_left_corner + vec.mult(u, c.horizontal) + vec.mult(v, c.vertical) - c.or
 }
 
 pub fn (h Hittable) str() string {
-	return h.generic.strcb(h)
+	return h.generic.strcb(&h)
 }
 
 fn main() {

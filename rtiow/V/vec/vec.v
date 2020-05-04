@@ -10,6 +10,7 @@ pub:
 }
 
 union U0 {
+mut:
 	v [3]f32
 	i [3]u32
 }
