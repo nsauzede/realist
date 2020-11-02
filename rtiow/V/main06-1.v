@@ -1,5 +1,3 @@
-#!/bin/env -S v run
-
 module main
 
 import vec
@@ -12,18 +10,18 @@ fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) f32 {
 	b := 2.0 * oc.dot(r.direction())
 	c := oc.dot(oc) - radius * radius
 	discriminant := b * b - 4.0 * a * c
-//	println('a=$a b=$b c=$c d=$discriminant')
+	// println('a=$a b=$b c=$c d=$discriminant')
 	if discriminant < 0 {
 		return -1.0
 	} else {
-		return (-b - math.sqrtf(discriminant) ) / (2.0*a)
+		return (-b - math.sqrtf(discriminant)) / (2.0 * a)
 	}
 }
 
 fn color(r ray.Ray) vec.Vec3 {
 	mut t := hit_sphere(vec.Vec3{0, 0, -1}, .5, r)
 	if t > 0 {
-//		println('t=$t')
+		// println('t=$t')
 		n := (r.point_at_parameter(t) - vec.Vec3{0, 0, -1}).unit_vector()
 		return vec.mult(.5, n + vec.Vec3{1, 1, 1})
 	}
@@ -38,20 +36,15 @@ fn main() {
 	println('P3')
 	println('$nx $ny')
 	println(255)
-	lower_left_corner := vec.Vec3 {-2, -1, -1}
-	horizontal := vec.Vec3 {4, 0, 0}
-	vertical := vec.Vec3 {0, 2, 0}
-	origin := vec.Vec3 {0, 0, 0}
-	for j := ny-1; j >= 0; j-- {
+	lower_left_corner := vec.Vec3{-2, -1, -1}
+	horizontal := vec.Vec3{4, 0, 0}
+	vertical := vec.Vec3{0, 2, 0}
+	origin := vec.Vec3{0, 0, 0}
+	for j := ny - 1; j >= 0; j-- {
 		for i := 0; i < nx; i++ {
 			u := f32(i) / f32(nx)
 			v := f32(j) / f32(ny)
-			r := ray.Ray {
-				origin,
-				lower_left_corner
-					+ vec.mult(u, horizontal)
-					+ vec.mult(v, vertical)
-			}
+			r := ray.Ray{origin, lower_left_corner + vec.mult(u, horizontal) + vec.mult(v, vertical)}
 			col := color(r)
 			ir := int(f32(255.99) * col.x)
 			ig := int(f32(255.99) * col.y)
