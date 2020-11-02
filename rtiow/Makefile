@@ -2,9 +2,9 @@ TARGET:=
 TARGET+=C/main14.elf
 TARGET+=CPP/main14.elf
 TARGET+=Go/main14.elf
-TARGET+=Odin/main14.elf
 TARGET+=Rust/main14.elf
 TARGET+=V/main14.elf
+TARGET+=Odin/main14.elf
 
 all: $(TARGET)
 
@@ -31,11 +31,11 @@ V/main14.elf:
 
 bench: $(TARGET)
 	/usr/bin/time C/main14.elf 1024 768 10 main14.ppm
-	/usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm
-	/usr/bin/time Go/main14.elf 1024 768 10 main14.ppm
-	/usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
 	/usr/bin/time Rust/main14.elf 1024 768 10 main14.ppm
+	/usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm
 	/usr/bin/time V/main14.elf 1024 768 10 main14.ppm
+	/usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
+	/usr/bin/time Go/main14.elf 1024 768 10 main14.ppm
 
 clean:
 	$(RM) $(TARGET)

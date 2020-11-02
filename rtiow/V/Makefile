@@ -13,11 +13,9 @@ check: $(PPM)
 
 OPT:=-O3
 #DEBUG:=1
+VFLAGS+=--enable-globals
 ifdef DEBUG
-#VFLAGS:=--enable-globals -d dbg
-VFLAGS:=-d dbg
-else
-#VFLAGS:=--enable-globals
+VFLAGS+=-d dbg
 endif
 
 #PROF:=1
