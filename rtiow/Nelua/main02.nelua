@@ -1,0 +1,17 @@
+require 'C.stdio'
+local nx = 200
+local ny = 100
+print('P3')
+C.printf("%d %d\n", nx,ny)
+print(255)
+for j=ny-1,0,-1 do
+    for i=0,<nx do
+        local r = (@number)(i) / (@number)(nx)
+        local g = (@number)(j) / (@number)(ny)
+        local b = 0.2
+        local ir = (@integer)((@number)(255.99) * r)
+        local ig = (@integer)((@number)(255.99) * g)
+        local ib = (@integer)((@number)(255.99) * b)
+        C.printf("%d %d %d\n", ir, ig, ib)
+    end
+end
