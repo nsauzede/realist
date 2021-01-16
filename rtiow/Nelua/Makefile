@@ -13,7 +13,7 @@ check: $(PPM)
 
 OPT:=-O3
 #DEBUG:=1
-NFLAGS+=--no-cache --cache-dir . -c
+NFLAGS+=-q --no-cache --cache-dir . -c
 ifdef DEBUG
 #NFLAGS+=
 endif
