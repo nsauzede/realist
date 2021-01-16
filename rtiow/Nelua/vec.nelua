@@ -1,0 +1,26 @@
+require 'math'
+global vec3: type = @record{a: array(float32,3)}
+
+function vec3.__add(a: vec3, b: vec3)
+    return (@vec3){{a.a[0]+b.a[0], a.a[1]+b.a[1], a.a[2]+b.a[2]}}
+end
+
+function vec3.__mul(t: float32, v: vec3)
+    return (@vec3){{t*v.a[0], t*v.a[1], t*v.a[2]}}
+end
+
+function vec3.__div(v: vec3, t: float32)
+    return (@vec3){{v.a[0] / t, v.a[1] / t, v.a[2] / t}}
+end
+
+function vec3.print(self: vec3)
+    print(self.a[0], self.a[1], self.a[2])
+end
+
+function vec3.length(self: vec3)
+    return math.sqrt(self.a[0] * self.a[0] + self.a[1] * self.a[1] + self.a[2] * self.a[2])
+end
+
+function vec3.unit_vector(self: vec3)
+    return self / self:length()
+end

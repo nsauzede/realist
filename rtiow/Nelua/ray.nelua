@@ -1,0 +1,5 @@
+require 'vec'
+global ray:type=@record{a:vec3, b:vec3}
+function ray.direction(self: ray)
+    return self.b
+end
