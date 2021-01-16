@@ -2,7 +2,11 @@ require 'math'
 global vec3: type = @record{a: array(float32,3)}
 
 function vec3.__add(a: vec3, b: vec3)
-    return (@vec3){{a.a[0]+b.a[0], a.a[1]+b.a[1], a.a[2]+b.a[2]}}
+    return (@vec3){{a.a[0] + b.a[0], a.a[1] + b.a[1], a.a[2] + b.a[2]}}
+end
+
+function vec3.__sub(a: vec3, b: vec3)
+    return (@vec3){{a.a[0] - b.a[0], a.a[1] - b.a[1], a.a[2] - b.a[2]}}
 end
 
 function vec3.__mul(t: float32, v: vec3)
@@ -11,6 +15,10 @@ end
 
 function vec3.__div(v: vec3, t: float32)
     return (@vec3){{v.a[0] / t, v.a[1] / t, v.a[2] / t}}
+end
+
+global function dot(v1: vec3, v2: vec3)
+    return v1.a[0] *v2.a[0] + v1.a[1] * v2.a[1] + v1.a[2] * v2.a[2]
 end
 
 function vec3.print(self: vec3)
