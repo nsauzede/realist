@@ -7,10 +7,10 @@ C.printf("%d %d\n", nx,ny)
 print(255)
 for j=ny-1,0,-1 do
     for i=0,<nx do
-        local col: vector(number) = {(@number)(i) / (@number)(nx), (@number)(j) / (@number)(ny), 0.2}
-        local ir = (@integer)(255.99 * col[0])
-        local ig = (@integer)(255.99 * col[1])
-        local ib = (@integer)(255.99 * col[2])
+        local col: vector(float32) = {(@float32)(i) / (@float32)(nx), (@float32)(j) / (@float32)(ny), 0.2}
+        local ir = (@int32)(255.99 * col[0])
+        local ig = (@int32)(255.99 * col[1])
+        local ib = (@int32)(255.99 * col[2])
         C.printf("%d %d %d\n", ir, ig, ib)
     end
 end
