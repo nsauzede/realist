@@ -1,0 +1,45 @@
+require 'C.stdio'
+require 'vec'
+require 'ray'
+
+local function hit_sphere(center: vec3, radius: float32, r: ray)
+    local oc = r:origin() - center
+    local a = dot(r:direction(), r:direction())
+    local b = 2.0 * dot(oc, r:direction())
+    local c = dot(oc, oc) - radius*radius
+    local discriminant = b*b - 4*a*c
+    if discriminant<0 then
+        return -1
+    else
+        return (-b - math.sqrt(discriminant)) / 2 / a
+    end
+end
+
+local function color(r: ray)
+    local t = hit_sphere((@vec3){{0,0,-1}}, 0.5, r)
+    if t > 0.0 then
+        local N = (r:point_at_parameter(t) - (vec3){{0,0,-1}}):unit_vector()
+        return 0.5*(@vec3){{N.a[0]+1, N.a[1]+1, N.a[2]+1}}
+    end
+    local unit_direction = r:direction():unit_vector()
+    local t = 0.5 * (unit_direction.a[1] + 1.0)
+    return (1.0 - t) * (@vec3){{1.0, 1.0, 1.0}} + t * (@vec3){{0.5, 0.7, 1.0}}
+end
+
+local nx, ny = 200, 100
+C.printf("P3\n%d %d\n255\n", nx,ny)
+local lower_left_corner:vec3={{-2, -1, -1}}
+local horizontal:vec3={{4, 0, 0}}
+local vertical:vec3={{0, 2, 0}}
+local origin:vec3={{0, 0, 0}}
+for j=ny-1,0,-1 do
+    for i=0,<nx do
+        local u, v = (@float32)(i) / nx, (@float32)(j) / ny
+        local r:ray={origin, lower_left_corner + u*horizontal + v*vertical}
+        local col = color(r)
+        local ir = (@int32)(255.99 * col.a[0])
+        local ig = (@int32)(255.99 * col.a[1])
+        local ib = (@int32)(255.99 * col.a[2])
+        C.printf("%d %d %d\n", ir, ig, ib)
+    end
+end
