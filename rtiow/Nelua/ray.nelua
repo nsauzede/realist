@@ -6,3 +6,6 @@ end
 function ray.direction(self: ray)
     return self.b
 end
+function ray.point_at_parameter(self: ray, t: float32)
+    return self.a + t * self.b
+end
