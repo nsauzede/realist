@@ -21,6 +21,10 @@ global function dot(v1: vec3, v2: vec3)
     return v1.a[0] *v2.a[0] + v1.a[1] * v2.a[1] + v1.a[2] * v2.a[2]
 end
 
+function vec3.dot(self: vec3, v2: vec3)
+    return self.a[0] * v2.a[0] + self.a[1] * v2.a[1] + self.a[2] * v2.a[2]
+end
+
 function vec3.print(self: vec3)
     print(self.a[0], self.a[1], self.a[2])
 end
