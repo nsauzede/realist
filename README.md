@@ -1,7 +1,9 @@
 # rtiow
 This is my implementation of the excellent RTIOW ray tracing book in C, C++, V, Odin, Rust and Go
 
-Check out rtiow/README.md
+![C RTIOW screenshot](main14.png)
+
+Check out [RTIOW Readme](rtiow/README.md)
 
 # realist
 Simple, naive, C++ ray-tracer
