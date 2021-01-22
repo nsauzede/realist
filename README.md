@@ -1,5 +1,5 @@
 # rtiow
-This is my implementation of the excellent RTIOW ray tracing book in C, C++, V, Odin, Rust and Go
+This is my implementation of the excellent [RTIOW ray tracing book](https://raytracing.github.io/) in C, C++, V, Odin, Rust and Go
 
 ![C RTIOW screenshot](main14.png)
 
