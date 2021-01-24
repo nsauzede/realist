@@ -3,6 +3,8 @@ This is my implementation of the excellent [RTIOW ray tracing book](https://rayt
 
 ![C RTIOW screenshot](main14.png)
 
+![C++ RTTNW screenshot](rttnw11.png)
+
 Check out [RTIOW Readme](rtiow/README.md)
 
 # realist
