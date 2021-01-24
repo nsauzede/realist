@@ -4,26 +4,26 @@ require 'ray'
 
 local function color(r: ray)
     local unit_direction = r:direction():unit_vector()
-    local t = 0.5 * (unit_direction.a[1] + 1.0)
-    return (1.0 - t) * (@vec3){{1.0, 1.0, 1.0}} + t * (@vec3){{0.5, 0.7, 1.0}}
+    local t = 0.5 * (unit_direction.y + 1.0)
+    return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0}
 end
 
 local nx, ny = 200, 100
 print('P3')
 C.printf("%d %d\n", nx,ny)
 print(255)
-local lower_left_corner:vec3={{-2, -1, -1}}
-local horizontal:vec3={{4, 0, 0}}
-local vertical:vec3={{0, 2, 0}}
-local origin:vec3={{0, 0, 0}}
+local lower_left_corner=Vec3{-2, -1, -1}
+local horizontal=Vec3{4, 0, 0}
+local vertical=Vec3{0, 2, 0}
+local origin=Vec3{0, 0, 0}
 for j=ny-1,0,-1 do
     for i=0,<nx do
-        local u, v = (@float32)(i) / nx, (@float32)(j) / ny
+        local u, v = float32(i) / nx, float32(j) / ny
         local r:ray={origin, lower_left_corner + u*horizontal + v*vertical}
         local col = color(r)
-        local ir = (@int32)(255.99 * col.a[0])
-        local ig = (@int32)(255.99 * col.a[1])
-        local ib = (@int32)(255.99 * col.a[2])
+        local ir = (@int32)(255.99 * col.x)
+        local ig = (@int32)(255.99 * col.y)
+        local ib = (@int32)(255.99 * col.z)
         C.printf("%d %d %d\n", ir, ig, ib)
     end
 end

@@ -1,0 +1,94 @@
+require 'C.stdio'
+require 'vec'
+require 'ray'
+require 'span'
+
+##[[
+local DEBUG=DEBUG or false
+if DEBUG then
+]]
+print('hello debug')
+##[[ end ]]
+
+local HitRec: type = @record{
+    t: float32,
+    p: Vec3,
+    normal: Vec3,
+}
+
+local HSphere: type = @record{
+    center: Vec3,
+    radius: float32,
+}
+
+local function hit_sphere(sphere: HSphere, r: ray, t_min: float32, t_max: float32, rec: *HitRec)
+    local oc = r:origin() - sphere.center
+    local a = Vec3.dot(ray.direction(r),ray.direction(r))
+    local b = oc:dot(r:direction())
+    local c = oc:dot(oc) - sphere.radius*sphere.radius
+    local discriminant = b*b - a*c
+    if discriminant>0 then
+        local temp = (-b - math.sqrt(discriminant)) / a
+        if temp < t_max and temp > t_min then
+            rec.t = temp
+            rec.p = r:point_at_parameter(rec.t)
+            rec.normal = (rec.p - sphere.center) / sphere.radius
+            return true
+        end
+        temp = (-b + math.sqrt(discriminant)) / a
+        if temp < t_max and temp > t_min then
+            rec.t = temp
+            rec.p = r:point_at_parameter(rec.t)
+            rec.normal = (rec.p - sphere.center) / sphere.radius
+            return true
+        end
+    end
+    return false
+end
+
+local function hit(world: span(HSphere), r: ray, t_min: float32, t_max: float32, rec: *HitRec)
+    local hit_anything = false
+    local temp_rec = HitRec{}
+    local closest_so_far = t_max
+    for i=0,<#world do
+        if hit_sphere(world[i], r, t_min, closest_so_far, &temp_rec) then
+            hit_anything = true
+            closest_so_far = temp_rec.t
+            $rec = temp_rec
+        end
+    end
+    return hit_anything
+end
+
+local function color(r: ray, world: span(HSphere))
+    local rec=HitRec{}
+    if hit(world, r, 0, 99999, &rec) then
+        return 0.5 * (rec.normal + Vec3{1, 1, 1})
+    else
+        local unit_direction = r:direction():unit_vector()
+        local t = 0.5 * (unit_direction.y + 1.0)
+        return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0}
+    end
+end
+
+local nx, ny = 200, 100
+C.printf("P3\n%d %d\n255\n", nx,ny)
+local lower_left_corner=Vec3{-2, -1, -1}
+local horizontal=Vec3{4, 0, 0}
+local vertical=Vec3{0, 2, 0}
+local origin=Vec3{0, 0, 0}
+local world: []HSphere = {
+    {{0,0,-1}, 0.5},
+    {{0,-100.5, -1}, 100.},
+}
+for j=ny-1,0,-1 do
+    for i=0,<nx do
+        local u, v = float32(i) / nx, float32(j) / ny
+        local r=ray{origin, lower_left_corner + u*horizontal + v*vertical}
+        local col = color(r, &world)
+        local ir = int32(255.99 * col.x)
+        local ig = int32(255.99 * col.y)
+        local ib = int32(255.99 * col.z)
+        C.printf("%d %d %d\n", ir, ig, ib)
+    end
+end
