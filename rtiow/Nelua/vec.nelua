@@ -1,38 +1,39 @@
 require 'math'
-global vec3: type = @record{a: array(float32,3)}
+global Vec3: type = @record{a: array(float32,3)}
+global Vec3: type = @record{x:float32,y:float32,z:float32}
 
-function vec3.__add(a: vec3, b: vec3)
-    return (@vec3){{a.a[0] + b.a[0], a.a[1] + b.a[1], a.a[2] + b.a[2]}}
+function Vec3.__add(a: Vec3, b: Vec3)
+    return Vec3{a.x + b.x, a.y + b.y, a.z + b.z}
 end
 
-function vec3.__sub(a: vec3, b: vec3)
-    return (@vec3){{a.a[0] - b.a[0], a.a[1] - b.a[1], a.a[2] - b.a[2]}}
+function Vec3.__sub(a: Vec3, b: Vec3)
+    return Vec3{a.x - b.x, a.y - b.y, a.z - b.z}
 end
 
-function vec3.__mul(t: float32, v: vec3)
-    return (@vec3){{t*v.a[0], t*v.a[1], t*v.a[2]}}
+function Vec3.__mul(t: float32, v: Vec3)
+    return Vec3{t*v.x, t*v.y, t*v.z}
 end
 
-function vec3.__div(v: vec3, t: float32)
-    return (@vec3){{v.a[0] / t, v.a[1] / t, v.a[2] / t}}
+function Vec3.__div(v: Vec3, t: float32)
+    return Vec3{v.x / t, v.y / t, v.z / t}
 end
 
-global function dot(v1: vec3, v2: vec3)
-    return v1.a[0] *v2.a[0] + v1.a[1] * v2.a[1] + v1.a[2] * v2.a[2]
+global function dot(v1: Vec3, v2: Vec3)
+    return v1.x *v2.x + v1.y * v2.y + v1.z * v2.z
 end
 
-function vec3.dot(self: vec3, v2: vec3)
-    return self.a[0] * v2.a[0] + self.a[1] * v2.a[1] + self.a[2] * v2.a[2]
+function Vec3.dot(self: Vec3, v2: Vec3)
+    return self.x * v2.x + self.y * v2.y + self.z * v2.z
 end
 
-function vec3.print(self: vec3)
-    print(self.a[0], self.a[1], self.a[2])
+function Vec3.print(self: Vec3)
+    print(self.x, self.y, self.z)
 end
 
-function vec3.length(self: vec3)
-    return math.sqrt(self.a[0] * self.a[0] + self.a[1] * self.a[1] + self.a[2] * self.a[2])
+function Vec3.length(self: Vec3)
+    return math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
 end
 
-function vec3.unit_vector(self: vec3)
+function Vec3.unit_vector(self: Vec3)
     return self / self:length()
 end

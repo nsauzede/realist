@@ -1,5 +1,5 @@
 require 'vec'
-global ray:type=@record{a:vec3, b:vec3}
+global ray:type=@record{a:Vec3, b:Vec3}
 function ray.origin(self: ray)
     return self.a
 end
