@@ -481,11 +481,11 @@ fn main() {
 			panic("can't create file")
 		}
 		fout = t
-		fout.writeln('P6')
+		fout.writeln('P6')?
 		nbytes = 3 * ny * nx
 		bytes = malloc(nbytes)
-		fout.writeln('$nx $ny')
-		fout.writeln('255')
+		fout.writeln('$nx $ny')?
+		fout.writeln('255')?
 	} else {
 		println('P3')
 		println('$nx $ny')
