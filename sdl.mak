@@ -36,7 +36,7 @@ SDL_CHECK:
 endif
 
 ifdef SDLCONFIG
-SDL_FLAGS+=`$(SDLCONFIG) --cflags`
+SDL_FLAGS+=$(shell $(SDLCONFIG) --cflags)
 endif
 
 OP_SYS=$(shell uname -o)
@@ -56,9 +56,9 @@ USE_SDL1=
 endif
 
 ifdef SDL_STATIC
-SDL_LIBS+=`$(SDLCONFIG) --static-libs` -static
+SDL_LIBS+=$(shell $(SDLCONFIG) --static-libs) -static
 else
-SDL_LIBS+=`$(SDLCONFIG) --libs`
+SDL_LIBS+=$(shell $(SDLCONFIG) --libs)
 endif
 ifdef WINDOWS
 # this one to get text console output

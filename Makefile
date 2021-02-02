@@ -33,14 +33,14 @@ LDFLAGS+=-pipe
 
 CXXFLAGS+=-std=c++11
 
-CFLAGS+=-std=c99
+CFLAGS+=-std=gnu99
 
 LDLIBS+=-lm
 
 USE_OPT=1
 ifdef USE_OPT
-CXXFLAGS+=-O3
-CFLAGS+=-O3
+CXXFLAGS+=-O3 -flto
+CFLAGS+=-O3 -flto
 #CXXFLAGS+=-DUSE_OPT
 else
 CXXFLAGS+=-O0
@@ -102,7 +102,7 @@ rayv_v.c: $(V)
 	cd ray_v ; ../$(V) $(VFLAGS) -o ../$@ . ; cd ..
 
 rayv: rayv_v.c
-	$(CC) $(CFLAGS)  $(LDFLAGS) $^ -lm -o $@ -w
+	$(CC) -w $(CFLAGS)  $(LDFLAGS) $^ -lm -o $@
 
 realist: realist.cpp vec.h CSDL.h
 
