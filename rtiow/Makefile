@@ -30,12 +30,12 @@ V/main14.elf:
 	(cd V; make clean ; /usr/bin/time make main14.elf)
 
 bench: $(TARGET)
-	/usr/bin/time C/main14.elf 1024 768 10 main14.ppm
-	/usr/bin/time Rust/main14.elf 1024 768 10 main14.ppm
-	/usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm
-	/usr/bin/time V/main14.elf 1024 768 10 main14.ppm
-	/usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
-	/usr/bin/time Go/main14.elf 1024 768 10 main14.ppm
+	/usr/bin/time C/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
+	/usr/bin/time Rust/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
+	/usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
+	/usr/bin/time V/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
+	/usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
+	/usr/bin/time Go/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
 
 clean:
 	$(RM) $(TARGET)
