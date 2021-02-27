@@ -13,7 +13,7 @@ __global (
 	seed    PCG32Random 
 )
 
-const (
+pub const (
 	pcg_rand_max = 4294967295
 )
 
