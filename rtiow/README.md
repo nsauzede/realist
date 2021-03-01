@@ -2,7 +2,6 @@
 See here : https://raytracing.github.io
 This repo contains my experiments following the excellent book above,
 in C, C++, Go, Odin, Rust and V.
-NOTE: current V (AST) is buggy; only v0.1.25 is know to work.
 
 # rtiow
 Benchmark :
@@ -28,6 +27,8 @@ Conclusion (old) :
 -------------------
 - V version is slower than C++ (+89%, x1.85)
 - This is both suspect and frustrating
+
+NOTE: current V (AST) is buggy; only v0.1.25 is know to work.
 
 ```
 $ /usr/bin/time V/A14 > A14.ppm
