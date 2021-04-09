@@ -1,10 +1,15 @@
 SRC:=$(wildcard main*.nim)
+EXE:=$(patsubst %.nim,%.elf,$(SRC))
 PPM:=$(patsubst %.nim,%.ppm,$(SRC))
 
 NIM=nim
 
-all: $(PPM)
+all: $(EXE)
+	du -sh .
+
+check: $(PPM)
 	md5sum *.ppm
+	md5sum *.ppm | md5sum
 
 #OPT=-O
 #OPT=-O0 -g
@@ -19,7 +24,8 @@ OPT+=-pg
 endif
 
 %.elf: %.nim
-	$(NIM) build-exe --name $@ $^ $(OPT)
+	$(NIM) c --hints:off $^ $(OPT)
+	mv $(*) $@
 
 %.ppm: %.elf
 	./$^ $(ARGS) > $@
