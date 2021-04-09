@@ -40,6 +40,7 @@ pub fn (a Vec3) str() string {
 	return '{$a.x, $a.y, $a.z;$p1, $p2, $p3}'
 }
 
+[inline]
 pub fn (a Vec3) +(b Vec3) Vec3 {
 	return Vec3 {
 		a.x + b.x,
@@ -48,6 +49,7 @@ pub fn (a Vec3) +(b Vec3) Vec3 {
 	}
 }
 
+[inline]
 pub fn (a Vec3) *(b Vec3) Vec3 {
 	return Vec3 {
 		a.x * b.x,
@@ -56,6 +58,7 @@ pub fn (a Vec3) *(b Vec3) Vec3 {
 	}
 }
 
+[inline]
 pub fn (v Vec3) cross(ov Vec3) Vec3 {
 	return Vec3 {
 		v.y * ov.z - v.z * ov.y,
@@ -64,6 +67,7 @@ pub fn (v Vec3) cross(ov Vec3) Vec3 {
 	}
 }
 
+[inline]
 pub fn (a Vec3) -(b Vec3) Vec3 {
 	return Vec3 {
 		a.x - b.x,
@@ -72,6 +76,7 @@ pub fn (a Vec3) -(b Vec3) Vec3 {
 	}
 }
 
+[inline]
 pub fn mult(k f32, v Vec3) Vec3 {
 	return Vec3 {
 		k * v.x,
@@ -80,6 +85,7 @@ pub fn mult(k f32, v Vec3) Vec3 {
 	}
 }
 
+[inline]
 pub fn div(v Vec3, k f32) Vec3 {
 	return Vec3 {
 		v.x / k,
@@ -109,6 +115,7 @@ pub fn (v Vec3) refract(n Vec3, ni_over_nt f32, mut refracted Vec3) bool {
 	}
 }
 
+[inline]
 pub fn (v Vec3) squared_length() f32 {
 	return v.x * v.x + v.y * v.y + v.z * v.z
 }
@@ -122,6 +129,7 @@ pub fn (v Vec3) unit_vector() Vec3 {
 	return div(v, v.length())
 }
 
+[inline]
 pub fn (a Vec3) dot(b Vec3) f32 {
 	return a.x * b.x +
 		a.y * b.y +
