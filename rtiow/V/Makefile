@@ -14,6 +14,7 @@ check: $(PPM)
 OPT:=-O3
 #DEBUG:=1
 VFLAGS+=--enable-globals
+#VFLAGS+=-profile profile.txt
 ifdef DEBUG
 VFLAGS+=-d dbg
 endif
