@@ -23,8 +23,14 @@ ifdef PROF
 OPT+=-pg
 endif
 
+NIMOPT:=
+NIMOPT+=--hints:off
+#NIMOPT+=-d:release
+#NIMOPT+=-d:danger
+#NIMOPT+=--gc:orc
+
 %.elf: %.nim
-	$(NIM) c --hints:off -d:release -d:danger --gc:orc $^ $(OPT)
+	$(NIM) c $(NIMOPT) $^ $(OPT)
 	mv $(*) $@
 
 %.ppm: %.elf
