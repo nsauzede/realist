@@ -24,7 +24,7 @@ OPT+=-pg
 endif
 
 %.elf: %.nim
-	$(NIM) c --hints:off $^ $(OPT)
+	$(NIM) c --hints:off -d:release -d:danger --gc:orc $^ $(OPT)
 	mv $(*) $@
 
 %.ppm: %.elf
