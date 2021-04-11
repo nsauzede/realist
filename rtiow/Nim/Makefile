@@ -30,8 +30,7 @@ NIMOPT+=--hints:off
 #NIMOPT+=--gc:orc
 
 %.elf: %.nim
-	$(NIM) c $(NIMOPT) $^ $(OPT)
-	mv $(*) $@
+	$(NIM) c $(NIMOPT) -o:$@ $^ $(OPT)
 
 %.ppm: %.elf
 	./$^ $(ARGS) > $@
