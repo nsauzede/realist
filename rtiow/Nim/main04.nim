@@ -2,7 +2,7 @@ import strformat
 import vec3
 import ray
 
-func color(r:Ray): Vec3 =
+func color(r: Ray): Vec3 =
  var unit_direction = unit_vector(r.direction)
  var t = 0.5 * (unit_direction.y + 1)
  result = (1 - t) * vec3(1, 1, 1) + t * vec3(0.5, 0.7, 1)

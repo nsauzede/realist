@@ -12,13 +12,13 @@ func hit_sphere(center: Vec3, radius: float32, r: Ray): float32 =
  if discriminant < 0:
   return -1
  else:
-  return (-b - sqrt(discriminant) ) / (2*a)
+  return (-b - sqrt(discriminant)) / (2*a)
 
-func color(r:Ray): Vec3 =
- var t = hit_sphere(vec3(0,0,-1), 0.5, r)
+func color(r: Ray): Vec3 =
+ var t = hit_sphere(vec3(0, 0, -1), 0.5, r)
  if t > 0:
-  var N = unit_vector(r.point_at_parameter(t) - vec3(0,0,-1))
-  return 0.5*vec3(N.x+1,N.y+1,N.z+1)
+  var N = unit_vector(r.point_at_parameter(t) - vec3(0, 0, -1))
+  return 0.5*vec3(N.x+1, N.y+1, N.z+1)
  var unit_direction = unit_vector(r.direction)
  t = 0.5 * (unit_direction.y + 1)
  result = (1 - t) * vec3(1, 1, 1) + t * vec3(0.5, 0.7, 1)
