@@ -6,16 +6,20 @@ type Pcg32RandomT* = object
 
 var SEED = Pcg32RandomT(state: 0, inc: 0)
 
-proc srand*(val: uint32) {.inline.} =
+{.push inline.}
+
+proc srand*(val: uint32) =
     SEED.state = val
     SEED.inc = 0
 
-proc rand*(): uint32 {.inline.} =
+proc rand*(): uint32 =
     var oldstate = SEED.state
     SEED.state = oldstate * uint64(6364136223846793005) + (SEED.inc or 1)
     var xorshifted = uint32(((oldstate shr 18) xor oldstate) shr 27)
     var rot = uint32(oldstate shr 59)
     return (xorshifted shr rot) or (xorshifted shl ((-int32(rot)) and 31))
 
-proc random_double*(): float32 {.inline.} =
+proc random_double*(): float32 =
     float32(rand()) / (float32(RAND_MAX) + 1)
+
+{.pop.}
