@@ -8,8 +8,11 @@ type Vec3* = object
 func vec3*(x, y, z: float32): Vec3 =
     Vec3(x: x, y: y, z: z)
 
+func squared_length*(v: Vec3): float32 =
+    v.x * v.x + v.y * v.y + v.z * v.z
+
 func length*(v: Vec3): float32 =
-    sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+    sqrt(v.squared_length())
 
 func dot*(v1, v2: Vec3): float32 =
     v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
