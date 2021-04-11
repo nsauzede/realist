@@ -19,7 +19,7 @@ proc rand*(): uint32 =
     var rot = uint32(oldstate shr 59)
     return (xorshifted shr rot) or (xorshifted shl ((-int32(rot)) and 31))
 
-proc random_double*(): float32 =
+proc random_f*(): float32 =
     float32(rand()) / (float32(RAND_MAX) + 1)
 
 {.pop.}
