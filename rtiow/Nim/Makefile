@@ -11,26 +11,31 @@ check: $(PPM)
 	md5sum *.ppm
 	md5sum *.ppm | md5sum
 
-#OPT=-O
-#OPT=-O0 -g
+NIMOPT:=
+NIMOPT+=--hints:off
+
 #DEBUG:=1
 ifdef DEBUG
-OPT+=-DDEBUG
+NIMOPT+=--debugger:native
 endif
 
 #PROF:=1
 ifdef PROF
-OPT+=-pg
+NIMOPT+=--profiler:on --stackTrace:on
 endif
 
-NIMOPT:=
-NIMOPT+=--hints:off
-#NIMOPT+=-d:release
-#NIMOPT+=-d:danger
+#OPT:=1
+ifdef OPT
+NIMOPT+=-d:release
+NIMOPT+=-d:danger
 #NIMOPT+=--gc:orc
+NIMOPT+=--passC:"-march=native"
+NIMOPT+=--gc:arc
+NIMOPT+=-d:lto
+endif
 
 %.elf: %.nim
-	$(NIM) c $(NIMOPT) -o:$@ $^ $(OPT)
+	$(NIM) c $(NIMOPT) -o:$@ $^
 
 %.ppm: %.elf
 	./$^ $(ARGS) > $@
