@@ -434,10 +434,12 @@ int main() {
 	cam_print(&cam);
 //	wprint(world);
 #endif
+	// cam_print(&cam);
 	for (int j = ny-1; j >= 0; j--) {
 //		if (j==98) break;
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
+			// printf("j=%d i=%d\n", j, i);
 			for (int s = 0; s < ns; s++) {
 #ifdef DEBUG
 				printf("j=%d i=%d s=%d\n", j, i, s);
@@ -456,14 +458,20 @@ int main() {
 				float u = ((float)i + r1) / (float)nx;
 				float v = ((float)j + r2) / (float)ny;
 #endif
+				n_rand += 2;
+				extern uint32_t n_rand;
+				// printf("u=%.6f v=%.6f nr=%d\n", u, v, n_rand);
 #ifdef DEBUG
 //				printf("u=%g v=%g rfcnt=%lu riuscnt=%lu\n", u, v, rfcnt, riuscnt);
 				vec3 uv = {u, v, 0};
 				printf("uv=");vprint(uv);printf(" \n");
 //				printf("j=%d i=%d s=%d riuscnt=%lu\n", j, i, s, riuscnt);
 #endif
+				// vec3 uv = {u, v, 0};
+				// printf("uv=");vprint(uv);printf(" nr=%d\n", n_rand);
 				ray r;
 				get_ray(&cam, &r, u, v);
+				// printf("r=");rprint(&r);printf("\n");
 #ifdef aDEBUG
 				printf("j=%d i=%d s=%d r=", j, i, s);
 				rprint(&r);
