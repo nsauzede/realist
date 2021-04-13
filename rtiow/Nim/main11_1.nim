@@ -86,7 +86,8 @@ proc scatter(self: Dielectric, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
     if vdot(ray_in.direction, rec.normal) > 0f:
         outward_normal = -rec.normal
         ni_over_nt = self.ref_idx
-        cosine = self.ref_idx * vdot(ray_in.direction, rec.normal) / length(ray_in.direction)
+        cosine = self.ref_idx * vdot(ray_in.direction, rec.normal) / length(
+                ray_in.direction)
     if refract(ray_in.direction, outward_normal, ni_over_nt, refracted):
         reflect_prob = schlick(cosine, self.ref_idx)
     if random_f() < reflect_prob:

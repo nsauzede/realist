@@ -17,16 +17,23 @@ type Material = ref object
     of mkMetal: metal: Metal
     of mkDielectric: dielectric: Dielectric
 
-type HitRec = object
-    t: float32
-    p: Vec3
-    normal: Vec3
-    mat_ptr: Material
-
 type HSphere = object
     center: Vec3
     radius: float32
     material: Material
+
+type
+    HittableKind = enum hkSphere
+    Hittable = HittableObj
+    HittableObj = object
+        case kind: HittableKind
+        of hkSphere: sphere: HSphere
+    HitRec = object
+        t: float32
+        p: Vec3
+        normal: Vec3
+        mat_ptr: Material
+
 var n_rand: uint32 = 0
 proc random_in_unit_sphere(): Vec3 =
     while true:
@@ -82,12 +89,13 @@ proc scatter(self: Dielectric, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
     var reflect_prob = 1f
     var outward_normal = rec.normal
     var ni_over_nt = 1f / self.ref_idx
-    var cosine = -vdot(ray_in.direction, rec.normal) / length(ray_in.direction)
-    if vdot(ray_in.direction, rec.normal) > 0f:
+    var dot = vdot(ray_in.direction, rec.normal)
+    var len = length(ray_in.direction)
+    var cosine = -dot / len
+    if dot > 0f:
         outward_normal = -rec.normal
         ni_over_nt = self.ref_idx
-        cosine = self.ref_idx * vdot(ray_in.direction, rec.normal) / length(
-                ray_in.direction)
+        cosine = self.ref_idx * dot / len
     if refract(ray_in.direction, outward_normal, ni_over_nt, refracted):
         reflect_prob = schlick(cosine, self.ref_idx)
     if random_f() < reflect_prob:
@@ -106,22 +114,17 @@ proc scatter(self: Material, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
     of mkDielectric:
         self.dielectric.scatter(ray_in, rec, attenuation, scattered)
 
-type
-    HittableKind = enum hkSphere
-    Hittable = HittableObj
-    HittableObj = object
-        case kind: HittableKind
-        of hkSphere: sphere: HSphere
-
 type Camera = object
     origin: Vec3
     lower_left_corner: Vec3
     horizontal: Vec3
     vertical: Vec3
 
-func get_ray(cam: Camera, u, v: float32): Ray =
-    result = ray(cam.origin, cam.lower_left_corner + u * cam.horizontal +
-                v * cam.vertical)
+func get_ray(self: Camera, s, t: float32): Ray =
+    var direction0 = t * self.vertical
+    var direction1 = s * self.horizontal
+    var direction = direction0 + direction1
+    result = ray(self.origin, direction + self.lower_left_corner - self.origin)
 
 func hsphere(center: Vec3, radius: float32, material: Material): Hittable =
     Hittable(kind: hkSphere, sphere: HSphere(center: center, radius: radius,
@@ -182,22 +185,46 @@ proc color(r: Ray, world: openArray[Hittable], depth: int32): Vec3 =
     var t = 0.5f * (unit_direction.y + 1f)
     result = (1f - t) * vec3(1, 1, 1) + t * vec3(0.5, 0.7, 1)
 
+func make_camera(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: float32,
+        aspect: float32): Camera =
+    const PI32 = float32(PI)
+    var theta = vfov * PI32 / 180f
+    var half_height = tan(theta / 2f)
+    var half_width = aspect * half_height
+    var w = unit_vector(lookfrom - lookat)
+    var u = unit_vector(vcross(vup, w))
+    var v = vcross(w, u)
+    result = Camera(
+        origin: lookfrom,
+        lower_left_corner: lookfrom - half_width * u - half_height * v - w,
+        horizontal: 2f * half_width * u,
+        vertical: 2f * half_height * v,
+    )
+
+proc vprint(v: Vec3) =
+    stdout.write(&"{{{v.x:.6f}, {v.y:.6f}, {v.z:.6f};{cast[uint32](v.x):x}, {cast[uint32](v.y):x}, {cast[uint32](v.z):x}}}")
+
+proc cam_print(cam: Camera) =
+    (stdout.write("{\n\tlower_left_corner: "); vprint(cam.lower_left_corner);
+             stdout.write(" "))
+    (stdout.write("\n\thorizontal: "); vprint(cam.horizontal); stdout.write(" "))
+    (stdout.write("\n\tvertical: "); vprint(cam.vertical); stdout.write(" "))
+    (stdout.write("\n\torigin: "); vprint(cam.origin); stdout.write(" "))
+    (stdout.write("\n}\n"))
+
 pcg.srand(0)
 var (nx, ny, ns) = (200, 100, 100)
 echo(&"P3\n{nx} {ny}\n255")
 var world: seq[Hittable] = @[
     hsphere(vec3(0, 0, -1), 0.5, lambertian(vec3(0.1, 0.2, 0.5))),
-    hsphere(vec3(0, -100.5, -1), 100, lambertian(vec3(0.8, 0.8, 0.0))),
+    hsphere(vec3(0, -100.5, -1), 100, lambertian(vec3(0.8, 0.8, 0))),
     hsphere(vec3(1, 0, -1), 0.5, metal(vec3(0.8, 0.6, 0.2), 0.3)),
     hsphere(vec3(-1, 0, -1), 0.5, dielectric(1.5)),
     hsphere(vec3(-1, 0, -1), -0.45, dielectric(1.5)),
 ]
-var cam = Camera(
-    lower_left_corner: vec3(-2, -1, -1),
-    horizontal: vec3(4, 0, 0),
-    vertical: vec3(0, 2, 0),
-    origin: vec3(0, 0, 0),
-)
+var cam = make_camera(vec3(-2f, 2f, 1f), vec3(0f, 0f, -1f), vec3(0f, 1f, 0f),
+        20f, float32(nx) / float32(ny))
+# cam_print(cam)
 for j in countdown(ny - 1, 0):
     for i in countup(0, nx - 1):
         var col = vec3(0, 0, 0)
@@ -207,8 +234,11 @@ for j in countdown(ny - 1, 0):
             var v = (float32(j) + random_f()) / float32(ny)
             n_rand+=2
             # stdout.write(&"u={u:.6f} v={v:.6f}\n")
-            # stdout.write(&"u={u:.6f} v={v:.6f} nr={n_rand}\n")
+            # stdout.write(&"u={u:.6f;} v={v:.6f} nr={n_rand}\n")
+            # var uv = vec3(u, v, 0)
+            # stdout.write(&"uv={{{uv.x:.6f}, {uv.y:.6f}, {uv.z:.6f};{cast[uint32](uv.x):x}, {cast[uint32](uv.y):x}, {cast[uint32](uv.z):x}}} nr={n_rand}\n")
             var r = cam.get_ray(u, v)
+            # stdout.write(&"r={{{{{r.origin.x:.6f}, {r.origin.y:.6f}, {r.origin.z:.6f};{cast[uint32](r.origin.x):x}, {cast[uint32](r.origin.y):x}, {cast[uint32](r.origin.z):x}}}, {{{r.direction.x:.6f}, {r.direction.y:.6f}, {r.direction.z:.6f};{cast[uint32](r.direction.x):x}, {cast[uint32](r.direction.y):x}, {cast[uint32](r.direction.z):x}}}}}\n")
             col = col + color(r, world, 0)
             # stdout.write(&"col={col}\n")
             # stdout.write(&"col=(x: {col.x:.16f}, y: {col.y:.16f}, z: {col.z:.16f})\n")
