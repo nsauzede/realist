@@ -37,7 +37,15 @@ func `-`*(v1: Vec3, v2: Vec3): Vec3 =
     result.y = v1.y - v2.y
     result.z = v1.z - v2.z
 
+func `*`*(v1: Vec3, v2: Vec3): Vec3 =
+    result.x = v1.x * v2.x
+    result.y = v1.y * v2.y
+    result.z = v1.z * v2.z
+
 func unit_vector*(v: Vec3): Vec3 =
     v / v.length()
+
+func vreflect*(v: Vec3, n: Vec3): Vec3 =
+    v - 2f * dot(v, n) * n
 
 {.pop.}

@@ -12,6 +12,7 @@ check: $(PPM)
 	md5sum *.ppm | md5sum
 
 OPT=$(CFLAGS) -O3
+# OPT+=-march=native
 #OPT=-O0 -g
 #DEBUG:=1
 ifdef DEBUG
