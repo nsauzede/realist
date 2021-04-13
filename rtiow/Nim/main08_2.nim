@@ -37,9 +37,9 @@ func hsphere(center: Vec3, radius: float32): HSphere =
 func hit_sphere(s: HSphere, r: Ray, t_min, t_max: float32,
     rec: var HitRec): bool =
     var oc = r.origin - s.center
-    var a = dot(r.direction, r.direction)
-    var b = dot(oc, r.direction)
-    var c = dot(oc, oc) - s.radius * s.radius
+    var a = vdot(r.direction, r.direction)
+    var b = vdot(oc, r.direction)
+    var c = vdot(oc, oc) - s.radius * s.radius
     var discriminant = b*b - a*c
     if discriminant > 0:
         var temp = (-b - sqrt(discriminant)) / a

@@ -52,7 +52,7 @@ proc scatter(self: Metal, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
     var reflected = vreflect(unit_vector(ray_in.direction), rec.normal)
     scattered = ray(rec.p, reflected + self.fuzz * random_in_unit_sphere())
     attenuation = self.albedo
-    return dot(scattered.direction, rec.normal) > 0f
+    return vdot(scattered.direction, rec.normal) > 0f
 
 proc scatter(self: Material, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
         scattered: var Ray): bool =
@@ -86,9 +86,9 @@ func hsphere(center: Vec3, radius: float32, material: Material): Hittable =
 func hit_sphere(s: HSphere, r: Ray, t_min, t_max: float32,
     rec: var HitRec): bool =
     var oc = r.origin - s.center
-    var a = dot(r.direction, r.direction)
-    var b = dot(oc, r.direction)
-    var c = dot(oc, oc) - s.radius * s.radius
+    var a = vdot(r.direction, r.direction)
+    var b = vdot(oc, r.direction)
+    var c = vdot(oc, oc) - s.radius * s.radius
     var discriminant = b*b - a*c
     if discriminant > 0:
         var temp = (-b - sqrt(discriminant)) / a

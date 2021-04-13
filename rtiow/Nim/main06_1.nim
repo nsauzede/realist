@@ -5,9 +5,9 @@ import ray
 
 func hit_sphere(center: Vec3, radius: float32, r: Ray): float32 =
  var oc = r.origin - center
- var a = dot(r.direction, r.direction)
- var b = 2 * dot(oc, r.direction)
- var c = dot(oc, oc) - radius * radius
+ var a = vdot(r.direction, r.direction)
+ var b = 2 * vdot(oc, r.direction)
+ var c = vdot(oc, oc) - radius * radius
  var discriminant = b*b - 4*a*c
  if discriminant < 0:
   return -1
