@@ -57,11 +57,11 @@ proc scatter(self: Metal, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
     var reflected = vreflect(unit_vector(ray_in.direction), rec.normal)
     scattered = ray(rec.p, reflected + self.fuzz * random_in_unit_sphere())
     attenuation = self.albedo
-    return dot(scattered.direction, rec.normal) > 0f
+    return vdot(scattered.direction, rec.normal) > 0f
 
 func refract(v: Vec3, n: Vec3, ni_over_nt: float32, refracted: var Vec3): bool =
     var uv = unit_vector(v)
-    var dt = dot(uv, n)
+    var dt = vdot(uv, n)
     var discriminant = 1f - ni_over_nt * ni_over_nt * (1f - dt * dt)
     if discriminant > 0f:
         refracted = ni_over_nt * (uv - dt * n) - sqrt(discriminant) * n
@@ -82,11 +82,11 @@ proc scatter(self: Dielectric, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
     var reflect_prob = 1f
     var outward_normal = rec.normal
     var ni_over_nt = 1f / self.ref_idx
-    var cosine = -dot(ray_in.direction, rec.normal) / length(ray_in.direction)
-    if dot(ray_in.direction, rec.normal) > 0f:
+    var cosine = -vdot(ray_in.direction, rec.normal) / length(ray_in.direction)
+    if vdot(ray_in.direction, rec.normal) > 0f:
         outward_normal = -rec.normal
         ni_over_nt = self.ref_idx
-        cosine = self.ref_idx * dot(ray_in.direction, rec.normal) / length(ray_in.direction)
+        cosine = self.ref_idx * vdot(ray_in.direction, rec.normal) / length(ray_in.direction)
     if refract(ray_in.direction, outward_normal, ni_over_nt, refracted):
         reflect_prob = schlick(cosine, self.ref_idx)
     if random_f() < reflect_prob:
@@ -129,9 +129,9 @@ func hsphere(center: Vec3, radius: float32, material: Material): Hittable =
 func hit_sphere(s: HSphere, r: Ray, t_min, t_max: float32,
     rec: var HitRec): bool =
     var oc = r.origin - s.center
-    var a = dot(r.direction, r.direction)
-    var b = dot(oc, r.direction)
-    var c = dot(oc, oc) - s.radius * s.radius
+    var a = vdot(r.direction, r.direction)
+    var b = vdot(oc, r.direction)
+    var c = vdot(oc, oc) - s.radius * s.radius
     var discriminant = b*b - a*c
     if discriminant > 0:
         var temp = (-b - sqrt(discriminant)) / a

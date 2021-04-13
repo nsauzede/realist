@@ -14,8 +14,13 @@ func squared_length*(v: Vec3): float32 =
 func length*(v: Vec3): float32 =
     sqrt(v.squared_length())
 
-func dot*(v1, v2: Vec3): float32 =
+func vdot*(v1, v2: Vec3): float32 =
     v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+
+func vcross*(v1: Vec3, v2: Vec3): Vec3 =
+    result.x = v1.y * v2.z - v1.z * v2.y
+    result.y = v1.z * v2.x - v1.x * v2.z
+    result.z = v1.x * v2.y - v1.y * v2.x
 
 func `-`*(v: Vec3): Vec3 =
     result.x = -v.x
@@ -51,6 +56,6 @@ func unit_vector*(v: Vec3): Vec3 =
     v / v.length()
 
 func vreflect*(v: Vec3, n: Vec3): Vec3 =
-    v - 2f * dot(v, n) * n
+    v - 2f * vdot(v, n) * n
 
 {.pop.}
