@@ -212,9 +212,14 @@ int main() {
 	for (int j = ny-1; j >= 0; j--) {
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
+			extern uint32_t n_rand;
+			// printf("j=%d i=%d\n", j, i);
 			for (int s = 0; s < ns; s++) {
 				float u = ((float)i + random_f()) / (float)nx;
 				float v = ((float)j + random_f()) / (float)ny;
+				n_rand+=2;
+				// printf("u=%.6f v=%.6f\n", u, v);
+				// printf("u=%.6f v=%.6f nr=%d\n", u, v, n_rand);
 				ray r;
 				get_ray(&cam, &r, u, v);
 				vec3 col0;

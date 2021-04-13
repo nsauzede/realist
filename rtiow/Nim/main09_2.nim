@@ -7,6 +7,7 @@ type Lambertian = object
     albedo: Vec3
 type Metal = object
     albedo: Vec3
+    fuzz: float32
 type MaterialKind = enum mkLambertian, mkMetal
 type Material = ref object
     case kind: MaterialKind
@@ -23,20 +24,22 @@ type HSphere = object
     center: Vec3
     radius: float32
     material: Material
-
+var n_rand: uint32 = 0
 proc random_in_unit_sphere(): Vec3 =
     while true:
         var r1 = random_f()
         var r2 = random_f()
         var r3 = random_f()
+        n_rand+=3
         result = 2f * vec3(r1, r2, r3) - vec3(1, 1, 1)
-        if result.squared_length() < 1:
+        if result.squared_length() < 1f:
             break
 
 func lambertian(albedo: Vec3): Material =
     Material(kind: mkLambertian, lambertian: Lambertian(albedo: albedo))
-func metal(albedo: Vec3): Material =
-    Material(kind: mkMetal, metal: Metal(albedo: albedo))
+func metal(albedo: Vec3, fuzz: float32): Material =
+    Material(kind: mkMetal, metal: Metal(albedo: albedo, fuzz: fuzz))
+
 proc scatter(self: Lambertian, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
         scattered: var Ray): bool =
     var target = rec.normal + random_in_unit_sphere()
@@ -47,7 +50,7 @@ proc scatter(self: Lambertian, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
 proc scatter(self: Metal, ray_in: Ray, rec: HitRec, attenuation: var Vec3,
         scattered: var Ray): bool =
     var reflected = vreflect(unit_vector(ray_in.direction), rec.normal)
-    scattered = ray(rec.p, reflected)
+    scattered = ray(rec.p, reflected + self.fuzz * random_in_unit_sphere())
     attenuation = self.albedo
     return dot(scattered.direction, rec.normal) > 0f
 
@@ -139,10 +142,10 @@ pcg.srand(0)
 var (nx, ny, ns) = (200, 100, 100)
 echo(&"P3\n{nx} {ny}\n255")
 var world: seq[Hittable] = @[
-    hsphere(vec3(0, 0, -1), 0.5, lambertian(vec3(0.8, 0.3, 0.3))),
+    hsphere(vec3(0, 0, -1), 0.5, lambertian(vec3(0.1, 0.2, 0.5))),
     hsphere(vec3(0, -100.5, -1), 100, lambertian(vec3(0.8, 0.8, 0.0))),
-    hsphere(vec3(1, 0, -1), 0.5, metal(vec3(0.8, 0.6, 0.2))),
-    hsphere(vec3(-1, 0, -1), 0.5, metal(vec3(0.8, 0.8, 0.8))),
+    hsphere(vec3(1, 0, -1), 0.5, metal(vec3(0.8, 0.6, 0.2), 1)),
+    hsphere(vec3(-1, 0, -1), 0.5, metal(vec3(0.8, 0.8, 0.8), 0.3)),
 ]
 var cam = Camera(
     lower_left_corner: vec3(-2, -1, -1),
@@ -157,8 +160,10 @@ for j in countdown(ny - 1, 0):
         for s in countup(0, ns-1):
             var u = (float32(i) + random_f()) / float32(nx)
             var v = (float32(j) + random_f()) / float32(ny)
-            var r = cam.get_ray(u, v)
+            n_rand+=2
             # stdout.write(&"u={u:.6f} v={v:.6f}\n")
+            # stdout.write(&"u={u:.6f} v={v:.6f} nr={n_rand}\n")
+            var r = cam.get_ray(u, v)
             col = col + color(r, world, 0)
             # stdout.write(&"col={col}\n")
             # stdout.write(&"col=(x: {col.x:.16f}, y: {col.y:.16f}, z: {col.z:.16f})\n")
