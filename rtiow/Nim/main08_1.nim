@@ -1,6 +1,8 @@
 import strformat, math
 import vec3, ray, pcg
 
+const FLT_MAX = 340282346638528859811704183484516925440.000000f
+
 type HitRec = object
     t: float32
     p: Vec3
@@ -22,7 +24,7 @@ proc random_in_unit_sphere(): Vec3 =
         var r2 = random_f()
         var r3 = random_f()
         result = 2f * vec3(r1, r2, r3) - vec3(1, 1, 1)
-        if result.squared_length() < 1:
+        if result.squared_length() < 1f:
             break
 
 func get_ray(cam: Camera, u, v: float32): Ray =
@@ -39,7 +41,7 @@ func hit_sphere(s: HSphere, r: Ray, t_min, t_max: float32,
     var b = dot(oc, r.direction)
     var c = dot(oc, oc) - s.radius * s.radius
     var discriminant = b*b - a*c
-    if discriminant > 0:
+    if discriminant > 0f:
         var temp = (-b - sqrt(discriminant)) / a
         if temp < t_max and temp > t_min:
             rec.t = temp
@@ -68,7 +70,7 @@ func hit(hh: openArray[HSphere], r: Ray, t_min, t_max: float32,
 
 proc color(r: Ray, world: openArray[HSphere]): Vec3 =
     var rec: HitRec
-    if hit(world, r, 0.001, 99999, rec):
+    if hit(world, r, 0.001, FLT_MAX, rec):
         var target = rec.normal + random_in_unit_sphere()
         return 0.5f * color(ray(rec.p, target), world)
     var unit_direction = unit_vector(r.direction)
@@ -94,11 +96,13 @@ for j in countdown(ny - 1, 0):
         for s in countup(0, ns-1):
             var u = (float32(i) + random_f()) / float32(nx)
             var v = (float32(j) + random_f()) / float32(ny)
-            var r = cam.get_ray(u, v)
             # stdout.write(&"u={u:.6f} v={v:.6f}\n")
+            var r = cam.get_ray(u, v)
+            # stdout.write(&"r={{{{{r.origin.x:.6f}, {r.origin.y:.6f}, {r.origin.z:.6f};{cast[uint32](r.origin.x):x}, {cast[uint32](r.origin.y):x}, {cast[uint32](r.origin.z):x}}}, {{{r.direction.x:.6f}, {r.direction.y:.6f}, {r.direction.z:.6f};{cast[uint32](r.direction.x):x}, {cast[uint32](r.direction.y):x}, {cast[uint32](r.direction.z):x}}}}} \n")
             col = col + color(r, world)
             # stdout.write(&"col={col}\n")
             # stdout.write(&"col=(x: {col.x:.16f}, y: {col.y:.16f}, z: {col.z:.16f})\n")
+            # stdout.write(&"col={{{col.x:.6f}, {col.y:.6f}, {col.z:.6f};{cast[uint32](col.x):x}, {cast[uint32](col.y):x}, {cast[uint32](col.z):x}}}\n")
         col = col / float32(ns)
         # stdout.write(&"col=(x: {col.x:.16f}, y: {col.y:.16f}, z: {col.z:.16f})\n")
         # stdout.write(&"{{{col.x:.6f}, {col.y:.6f}, {col.z:.6f};{cast[uint32](col.x):x}, {cast[uint32](col.y):x}, {cast[uint32](col.z):x}}}")

@@ -194,12 +194,14 @@ int main() {
 	for (int j = ny-1; j >= 0; j--) {
 		for (int i = 0; i < nx; i++) {
 			vec3 col = {0, 0, 0};
+			// printf("j=%d i=%d\n", j, i);
 			for (int s = 0; s < ns; s++) {
 #ifdef DEBUG
 //printf("rfcnt=%lu riuscnt=%lu riudcnt=%lu\n", rfcnt, riuscnt, riudcnt);
 #endif
 				float u = ((float)i + (float)random_f()) / (float)nx;
 				float v = ((float)j + (float)random_f()) / (float)ny;
+            //    printf("u=%.6f v=%.6f\n", u, v);
 #ifdef DEBUG
 //                printf("u=%.6f v=%.6f\n", u, v);
 #endif
@@ -210,14 +212,17 @@ int main() {
 #ifdef DEBUG
                 printf("r=");rprint(&r);printf(" \n");
 #endif
+                // printf("r=");rprint(&r);printf(" \n");
 				vec3 col0;
 				color(col0, &r, world);
 				vadd(col, col, col0);
 #ifdef DEBUG
 printf("rfcnt=%lu riuscnt=%lu riudcnt=%lu\n", rfcnt, riuscnt, riudcnt);
 #endif
+				// printf("col=");vprint(col);printf("\n");
 			}
 			vdiv(col, col, (float)ns);
+			// vprint(col);
 			int ir = (int)(255.99f*col[0]);
 			int ig = (int)(255.99f*col[1]);
 			int ib = (int)(255.99f*col[2]);

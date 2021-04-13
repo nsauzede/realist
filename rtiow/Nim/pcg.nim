@@ -20,6 +20,6 @@ proc rand*(): uint32 =
     return (xorshifted shr rot) or (xorshifted shl ((-int32(rot)) and 31))
 
 proc random_f*(): float32 =
-    float32(rand()) / (float32(RAND_MAX) + 1)
+    float32(rand()) / (float32(RAND_MAX) + 1f)
 
 {.pop.}
