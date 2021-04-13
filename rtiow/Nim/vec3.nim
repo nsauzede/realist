@@ -17,6 +17,11 @@ func length*(v: Vec3): float32 =
 func dot*(v1, v2: Vec3): float32 =
     v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
 
+func `-`*(v: Vec3): Vec3 =
+    result.x = -v.x
+    result.y = -v.y
+    result.z = -v.z
+
 func `/`*(v: Vec3, t: float32): Vec3 =
     result.x = v.x / t
     result.y = v.y / t
