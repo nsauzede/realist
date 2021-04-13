@@ -24,7 +24,7 @@ ifdef PROF
 NIMOPT+=--profiler:on --stackTrace:on
 endif
 
-#OPT:=1
+OPT:=1
 ifdef OPT
 NIMOPT+=-d:release
 NIMOPT+=-d:danger
