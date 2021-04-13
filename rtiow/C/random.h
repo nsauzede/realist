@@ -54,7 +54,7 @@ INLINE float random_f() {
 #endif
         return (float)pcg_rand() / ((float)PCG_RAND_MAX + (float)1.0);
 }
-
+uint32_t n_rand = 0;
 // unroll loop tentative by Cieric
 // seems slightly slower..
 //#define UNROLL_LOOP
@@ -96,6 +96,7 @@ void random_in_unit_sphere(vec3 p) {
                 float r1 = random_f();
                 float r2 = random_f();
                 float r3 = random_f();
+                n_rand+=3;
                 vmul(p, 2.0, VEC3(r1,r2,r3));
                 vsub(p, p, VEC3(1,1,1));
         } while (vsqlen(p) >= 1.0);
@@ -108,6 +109,7 @@ void random_in_unit_disk(vec3 p) {
         do {
                 float r1 = random_f();
                 float r2 = random_f();
+                n_rand+=2;
                 vmul(p, 2.0, VEC3(r1,r2,0));
                 vsub(p, p, VEC3(1,1,0));
         } while (vsqlen(p) >= 1.0);
