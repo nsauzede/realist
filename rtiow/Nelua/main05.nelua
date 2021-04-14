@@ -20,7 +20,7 @@ local function color(r: ray)
     return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0}
 end
 
-local nx, ny = 200, 100
+local nx, ny = 200_i32, 100_i32
 C.printf("P3\n%d %d\n255\n", nx,ny)
 local lower_left_corner=Vec3{-2, -1, -1}
 local horizontal=Vec3{4, 0, 0}

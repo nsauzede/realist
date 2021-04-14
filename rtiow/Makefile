@@ -57,3 +57,4 @@ mrproper: clobber
 	$(MAKE) -C Go clean
 	$(MAKE) -C Odin clean
 	$(MAKE) -C Nim clean
+	$(MAKE) -C Nelua clean

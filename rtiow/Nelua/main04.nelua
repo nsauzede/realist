@@ -8,7 +8,7 @@ local function color(r: ray)
     return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0}
 end
 
-local nx, ny = 200, 100
+local nx, ny = 200_i32, 100_i32
 print('P3')
 C.printf("%d %d\n", nx,ny)
 print(255)
