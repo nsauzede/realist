@@ -2,7 +2,7 @@ require 'C.stdio'
 require 'vec'
 require 'ray'
 
-local function hit_sphere(center: Vec3, radius: float32, r: ray)
+local function hit_sphere(center: Vec3, radius: float32, r: Ray)
     local oc = r:origin() - center
     local a = r:direction():dot(r:direction())
     local b = 2.0 * oc:dot(r:direction())
@@ -15,7 +15,7 @@ local function hit_sphere(center: Vec3, radius: float32, r: ray)
     end
 end
 
-local function color(r: ray)
+local function color(r: Ray)
     local t = hit_sphere(Vec3{0,0,-1}, 0.5, r)
     if t > 0.0 then
         local N = (r:point_at_parameter(t) - Vec3{0,0,-1}):unit_vector()
@@ -35,7 +35,7 @@ local origin=Vec3{0, 0, 0}
 for j=ny-1,0,-1 do
     for i=0,<nx do
         local u, v = float32(i) / nx, float32(j) / ny
-        local r=ray{origin, lower_left_corner + u*horizontal + v*vertical}
+        local r=Ray{origin, lower_left_corner + u*horizontal + v*vertical}
         local col = color(r)
         local ir = int32(255.99 * col.x)
         local ig = int32(255.99 * col.y)
