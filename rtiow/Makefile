@@ -1,12 +1,16 @@
 TARGET:=
+TARGET+=Rust/main14.elf
+TARGET+=Nim/main14.elf
 TARGET+=C/main14.elf
 TARGET+=CPP/main14.elf
-TARGET+=Go/main14.elf
-TARGET+=Rust/main14.elf
-TARGET+=V/main14.elf
 TARGET+=Odin/main14.elf
+TARGET+=V/main14.elf
+TARGET+=Go/main14.elf
 
 all: $(TARGET)
+
+Nim/main14.elf:
+	(cd Nim; make clean ; /usr/bin/time make main14.elf)
 
 CPP/main14.elf:
 	(cd CPP; make clean ; /usr/bin/time make main14.elf)
@@ -30,12 +34,13 @@ V/main14.elf:
 	(cd V; make clean ; /usr/bin/time make main14.elf)
 
 bench: $(TARGET)
-	/usr/bin/time C/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
-	/usr/bin/time Rust/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
-	/usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
-	/usr/bin/time V/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
-	/usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
-	/usr/bin/time Go/main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
+	/usr/bin/time Rust/main14.elf 1024 768 10 main14_rust.ppm && md5sum main14_rust.ppm
+	/usr/bin/time Nim/main14.elf 1024 768 10 main14_nim.ppm && md5sum main14_nim.ppm
+	/usr/bin/time C/main14.elf 1024 768 10 main14_c.ppm && md5sum main14_c.ppm
+	/usr/bin/time CPP/main14.elf 1024 768 10 main14_cpp.ppm && md5sum main14_cpp.ppm
+	/usr/bin/time Odin/main14.elf 1024 768 10 main14_odin.ppm && md5sum main14_odin.ppm
+	/usr/bin/time V/main14.elf 1024 768 10 main14_v.ppm && md5sum main14_v.ppm
+	/usr/bin/time Go/main14.elf 1024 768 10 main14_go.ppm && md5sum main14_go.ppm
 
 clean:
 	$(RM) $(TARGET)

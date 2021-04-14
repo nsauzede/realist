@@ -268,8 +268,9 @@ proc random_scene(): seq[Hittable] =
     return world
 
 pcg.srand(0)
+var fnameout = ""
+var fout = stdout
 var (nx, ny, ns) = (200, 100, 1)
-echo(&"P3\n{nx} {ny}\n255")
 var argc = paramCount()
 # echo(&"paramCount={argc}")
 var arg = 1
@@ -282,6 +283,21 @@ if arg <= argc:
         if arg <= argc:
             ns = paramStr(arg).parseInt()
             arg+=1
+            if arg <= argc:
+                fnameout = paramStr(arg)
+                arg+=1
+
+var bytes: seq[byte]
+var nbytes = 0
+if fnameout == "":
+    fout.write("P3\n")
+else:
+    fout = open(fnameout, fmWrite)
+    fout.write("P6\n")
+    nbytes = 3 * ny * nx
+    bytes.newSeq(nbytes)
+
+fout.write(&"{nx} {ny}\n255\n")
 
 var world = random_scene()
 var lookfrom = vec3(9, 2, 2.6)
@@ -312,8 +328,17 @@ for j in countdown(ny - 1, 0):
         col = vec3(sqrt(col.x), sqrt(col.y), sqrt(col.z))
         # stdout.write(&"col=(x: {col.x:.16f}, y: {col.y:.16f}, z: {col.z:.16f})\n")
         # stdout.write(&"{{{col.x:.6f}, {col.y:.6f}, {col.z:.6f};{cast[uint32](col.x):x}, {cast[uint32](col.y):x}, {cast[uint32](col.z):x}}}")
-        var ir = int32(255.99f * col.x)
-        var ig = int32(255.99f * col.y)
-        var ib = int32(255.99f * col.z)
-        stdout.write(&"{ir} {ig} {ib}  ")
-    echo ""
+        var ir = uint8(255.99f * col.x)
+        var ig = uint8(255.99f * col.y)
+        var ib = uint8(255.99f * col.z)
+        if fnameout == "":
+            fout.write(&"{ir} {ig} {ib}  ")
+        else:
+            bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir
+            bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig
+            bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib
+    if fnameout == "":
+        echo ""
+if fnameout != "":
+    if fout.writeBuffer(addr bytes[0], nbytes) != nbytes:
+        echo("Can't write")
