@@ -1,7 +1,7 @@
 # Ray tracing in one weekend
 See here : https://raytracing.github.io
 This repo contains my experiments following the excellent book above,
-in C, C++, Go, Odin, Rust and V.
+implemented in Rust, Nim, C, C++, Odin, V and Go. (sorted by runtime perf)
 
 # rtiow
 Benchmark :
@@ -9,18 +9,20 @@ Benchmark :
 `$ make mrproper bench`
 
 ```
-/usr/bin/time C/main14.elf 1024 768 10 main14.ppm
-50.56user 0.00system 0:50.63elapsed 99%CPU (0avgtext+0avgdata 4320maxresident)k
-/usr/bin/time CPP/main14.elf 1024 768 10 main14.ppm
-59.41user 0.09system 0:59.76elapsed 99%CPU (0avgtext+0avgdata 5912maxresident)k
-/usr/bin/time Go/main14.elf 1024 768 10 main14.ppm
-331.14user 1.12system 5:35.48elapsed 99%CPU (0avgtext+0avgdata 14168maxresident)k
-/usr/bin/time Odin/main14.elf 1024 768 10 main14.ppm
-79.13user 0.01system 1:19.49elapsed 99%CPU (0avgtext+0avgdata 4160maxresident)k
-/usr/bin/time Rust/main14.elf 1024 768 10 main14.ppm
-37.40user 0.09system 0:37.93elapsed 98%CPU (0avgtext+0avgdata 4668maxresident)k
-/usr/bin/time V/main14.elf 1024 768 10 main14.ppm
-84.65user 0.11system 1:25.66elapsed 98%CPU (0avgtext+0avgdata 4364maxresident)k
+/usr/bin/time Rust/main14.elf 1024 768 10 main14_rust.ppm && md5sum main14_rust.ppm
+34.92user 0.00system 0:34.94elapsed 99%CPU (0avgtext+0avgdata 4932maxresident)k
+/usr/bin/time Nim/main14.elf 1024 768 10 main14_nim.ppm && md5sum main14_nim.ppm
+42.10user 0.00system 0:42.13elapsed 99%CPU (0avgtext+0avgdata 4340maxresident)k
+/usr/bin/time C/main14.elf 1024 768 10 main14_c.ppm && md5sum main14_c.ppm
+50.84user 0.00system 0:51.10elapsed 99%CPU (0avgtext+0avgdata 4524maxresident)k
+/usr/bin/time CPP/main14.elf 1024 768 10 main14_cpp.ppm && md5sum main14_cpp.ppm
+57.68user 0.00system 0:57.95elapsed 99%CPU (0avgtext+0avgdata 5860maxresident)k
+/usr/bin/time Odin/main14.elf 1024 768 10 main14_odin.ppm && md5sum main14_odin.ppm
+71.26user 0.01system 1:11.31elapsed 99%CPU (0avgtext+0avgdata 4220maxresident)k
+/usr/bin/time V/main14.elf 1024 768 10 main14_v.ppm && md5sum main14_v.ppm
+73.52user 0.00system 1:13.56elapsed 99%CPU (0avgtext+0avgdata 4620maxresident)k
+/usr/bin/time Go/main14.elf 1024 768 10 main14_go.ppm && md5sum main14_go.ppm
+312.65user 1.38system 5:11.39elapsed 100%CPU (0avgtext+0avgdata 10116maxresident)k
 ```
 
 Conclusion (old) :
