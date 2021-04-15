@@ -1,5 +1,5 @@
 require 'math'
-global Vec3: type = @record{a: array(float32,3)}
+-- global Vec3: type = @record{a: array(float32,3)}
 global Vec3: type = @record{x:float32,y:float32,z:float32}
 
 function Vec3.__add(a: Vec3, b: Vec3): Vec3
@@ -30,8 +30,12 @@ function Vec3.print(self: Vec3)
     print(self.x, self.y, self.z)
 end
 
+function Vec3.squared_length(self: Vec3): float32
+    return self.x * self.x + self.y * self.y + self.z * self.z
+end
+
 function Vec3.length(self: Vec3): float32
-    return math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+    return math.sqrt(self:squared_length())
 end
 
 function Vec3.unit_vector(self: Vec3): Vec3

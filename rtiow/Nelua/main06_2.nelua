@@ -22,9 +22,9 @@ local HSphere: type = @record{
 }
 
 local function hit_sphere(sphere: HSphere, r: Ray, t_min: float32, t_max: float32, rec: *HitRec)
-    local oc = r:origin() - sphere.center
-    local a = Vec3.dot(Ray.direction(r),Ray.direction(r))
-    local b = oc:dot(r:direction())
+    local oc = r.origin - sphere.center
+    local a = dot(r.direction,r.direction)
+    local b = oc:dot(r.direction)
     local c = oc:dot(oc) - sphere.radius*sphere.radius
     local discriminant = b*b - a*c
     if discriminant>0 then
@@ -65,7 +65,7 @@ local function color(r: Ray, world: span(HSphere))
     if hit(world, r, 0, 99999, &rec) then
         return 0.5 * (rec.normal + Vec3{1, 1, 1})
     else
-        local unit_direction = r:direction():unit_vector()
+        local unit_direction = r.direction:unit_vector()
         local t = 0.5 * (unit_direction.y + 1.0)
         return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0}
     end

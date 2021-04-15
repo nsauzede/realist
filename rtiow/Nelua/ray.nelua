@@ -1,14 +1,14 @@
 require 'vec'
-global Ray:type=@record{a:Vec3, b:Vec3}
+global Ray:type=@record{origin:Vec3, direction:Vec3}
 
-function Ray.origin(self: Ray): Vec3
-    return self.a
+function Ray.origin0(self: Ray): Vec3
+    return self.origin
 end
 
-function Ray.direction(self: Ray): Vec3
-    return self.b
+function Ray.direction0(self: Ray): Vec3
+    return self.direction
 end
 
 function Ray.point_at_parameter(self: Ray, t: float32): Vec3
-    return self.a + t * self.b
+    return self.origin + t * self.direction
 end
