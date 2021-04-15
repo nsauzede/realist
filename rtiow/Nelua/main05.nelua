@@ -3,9 +3,9 @@ require 'vec'
 require 'ray'
 
 local function hit_sphere(center: Vec3, radius: float32, r: Ray)
-    local oc = r:origin() - center
-    local a = dot(r:direction(), r:direction())
-    local b = 2.0 * dot(oc, r:direction())
+    local oc = r.origin - center
+    local a = dot(r.direction, r.direction)
+    local b = 2.0 * dot(oc, r.direction)
     local c = dot(oc, oc) - radius*radius
     local discriminant = b*b - 4*a*c
     return discriminant > 0
@@ -15,7 +15,7 @@ local function color(r: Ray)
     if hit_sphere(Vec3{0,0,-1}, 0.5, r) then
         return Vec3{1, 0, 0}
     end
-    local unit_direction = r:direction():unit_vector()
+    local unit_direction = r.direction:unit_vector()
     local t = 0.5 * (unit_direction.y + 1.0)
     return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0}
 end

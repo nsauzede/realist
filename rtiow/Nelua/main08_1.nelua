@@ -3,6 +3,8 @@ require 'vec'
 require 'ray'
 require 'pcg'
 require 'span'
+require 'io'
+require 'string'
 
 ##[[
 local DEBUG=DEBUG or false
@@ -10,6 +12,8 @@ if DEBUG then
 ]]
 print('hello debug')
 ##[[ end ]]
+
+local FLT_MAX = 340282346638528859811704183484516925440.000000_float32
 
 local HitRec: type = @record{
     t: float32,
@@ -29,16 +33,33 @@ local Camera: type = @record{
     vertical: Vec3,
 }
 
+local function random_in_unit_sphere(): Vec3
+    local result: Vec3
+    while true do
+        local r1 = random_f()
+        local r2 = random_f()
+        local r3 = random_f()
+        result = 2.0 * Vec3{r1, r2, r3} - Vec3{1, 1, 1}
+        if result:squared_length() < 1.0 then
+            break
+        end
+    end
+    return result
+end
+
 local function get_ray(cam: Camera, u: float32, v: float32): Ray
     return Ray{cam.origin, cam.lower_left_corner + u*cam.horizontal +
                 v*cam.vertical}
 end
 
-local function hit_sphere(sphere: HSphere, r: Ray, t_min: float32, t_max: float32, rec: *HitRec)
+local function hit_sphere(sphere: HSphere, r: Ray, t_min: float32, t_max: float32, rec: *HitRec): boolean
     local oc = r.origin - sphere.center
+    -- local a = Vec3.dot(Ray.direction(r),Ray.direction(r))
+    -- local a = Ray.direction(r):dot(Ray.direction(r))
+    -- local a = dot(Ray.direction(r),Ray.direction(r))
     local a = dot(r.direction,r.direction)
-    local b = oc:dot(r.direction)
-    local c = oc:dot(oc) - sphere.radius*sphere.radius
+    local b = dot(oc, r.direction)
+    local c = dot(oc, oc) - sphere.radius*sphere.radius
     local discriminant = b*b - a*c
     if discriminant>0 then
         local temp = (-b - math.sqrt(discriminant)) / a
@@ -59,7 +80,7 @@ local function hit_sphere(sphere: HSphere, r: Ray, t_min: float32, t_max: float3
     return false
 end
 
-local function hit(world: span(HSphere), r: Ray, t_min: float32, t_max: float32, rec: *HitRec)
+local function hit(world: span(HSphere), r: Ray, t_min: float32, t_max: float32, rec: *HitRec): boolean
     local hit_anything = false
     local temp_rec = HitRec{}
     local closest_so_far = t_max
@@ -73,15 +94,28 @@ local function hit(world: span(HSphere), r: Ray, t_min: float32, t_max: float32,
     return hit_anything
 end
 
-local function color(r: Ray, world: span(HSphere))
+local function color(r: Ray, world: span(HSphere)): Vec3
     local rec=HitRec{}
-    if hit(world, r, 0, 99999, &rec) then
-        return 0.5 * (rec.normal + Vec3{1, 1, 1})
+    if hit(world, r, 0.001, FLT_MAX, &rec) then
+        local target = rec.normal + random_in_unit_sphere()
+        return 0.5 * color(Ray{rec.p, target}, world)
     else
         local unit_direction = r.direction:unit_vector()
         local t = 0.5 * (unit_direction.y + 1.0)
         return (1.0 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0}
     end
+end
+
+function Vec3:__tostring(): string
+    local u: union{i: array(uint32,3), f: array(float32,3)}
+    u.f[0] = self.x
+    u.f[1] = self.y
+    u.f[2] = self.z
+    return string.format('{%.6f, %.6f, %.6f;%x, %x, %x}', self.x, self.y, self.z, u.i[0], u.i[1], u.i[2])
+end
+
+local function rprint(r: Ray)
+    io.writef('r={%s, %s} \n', r.origin, r.direction)
 end
 
 srand(0)
@@ -100,16 +134,23 @@ local cam = Camera{
 for j=ny-1,0,-1 do
     for i=0,<nx do
         local col = Vec3{0, 0, 0}
+        -- C.printf("j=%ld i=%ld\n", j, i)
         for s=0,<ns do
             local u = (float32(i) + random_f()) / float32(nx)
             local v = (float32(j) + random_f()) / float32(ny)
+            -- C.printf("u=%.6f v=%.6f\n", u, v)
             local r=get_ray(cam, u, v)
+            -- print("r=",r)
+            -- rprint(r)
+            -- print("col=", col)
             col = col + color(r, &world)
+            -- io.writef('col=%s\n', col)
         end
         col = col / float32(ns)
-        local ir = int32(255.99 * col.x)
-        local ig = int32(255.99 * col.y)
-        local ib = int32(255.99 * col.z)
+        -- io.writef('%s\n', col)
+        local ir = int32(255.99_f32 * col.x)
+        local ig = int32(255.99_f32 * col.y)
+        local ib = int32(255.99_f32 * col.z)
         C.printf("%d %d %d\n", ir, ig, ib)
     end
 end
