@@ -239,20 +239,24 @@ proc random_scene(): seq[Hittable] =
     var world: seq[Hittable] = @[
         hsphere(vec3(0, -1000, 0), 1000, lambertian(vec3(0.5, 0.5, 0.5))),
     ]
+    var n = 0
     for a in -11..<11:
         for b in -11..<11:
+            n = n + 1
             var choose_mat = random_f()
             var r1 = random_f()
             var r2 = random_f()
+            n_rand+=2
             var center = vec3(float32(a) + 0.9f * r1, 0.2, float32(b) + 0.9f * r2)
             if length(center - vec3(4, 0.2, 0)) > 0.9:
-                if choose_mat < 0.8: # diffuse
+                if choose_mat < 0.8f: # diffuse
                     var r1 = random_f()
                     var r2 = random_f()
                     var r3 = random_f()
                     var r4 = random_f()
                     var r5 = random_f()
                     var r6 = random_f()
+                    n_rand+=6
                     world.add(hsphere(center, 0.2, lambertian(vec3(r1*r2, r3*r4, r5*r6))))
                 elif choose_mat < 0.95: # metal
                     var r1 = 0.5f * (1f + random_f())
@@ -262,6 +266,7 @@ proc random_scene(): seq[Hittable] =
                     world.add(hsphere(center, 0.2, metal(vec3(r1, r2, r3), r4)))
                 else: # glass
                     world.add(hsphere(center, 0.2, dielectric(1.5)))
+    # stdout.write(&"{n}\n")
     world.add(hsphere(vec3(0, 1, 0), 1, dielectric(1.5)))
     world.add(hsphere(vec3(-4, 1, 0), 1, lambertian(vec3(0.4, 0.2, 0.1))))
     world.add(hsphere(vec3(4, 1, 0), 1, metal(vec3(0.7, 0.6, 0.5), 0)))
@@ -271,6 +276,9 @@ pcg.srand(0)
 var (nx, ny, ns) = (200, 100, 1)
 echo(&"P3\n{nx} {ny}\n255")
 var world = random_scene()
+# for w in world:
+#     vprint(w.sphere.center)
+#     stdout.write("\n")
 var lookfrom = vec3(9, 2, 2.6)
 var lookat = vec3(3, 0.8, 1)
 var dist_to_focus = length(lookfrom - lookat)
