@@ -14,15 +14,19 @@ function Vec3.__mul(t: float32, v: Vec3): Vec3
     return Vec3{t*v.x, t*v.y, t*v.z}
 end
 
+global function vmul(a: Vec3, b: Vec3): Vec3
+    return Vec3{a.x*b.x, a.y*b.y, a.z*b.z}
+end
+
 function Vec3.__div(v: Vec3, t: float32): Vec3
     return Vec3{v.x / t, v.y / t, v.z / t}
 end
 
-global function dot(v1: Vec3, v2: Vec3): float32
+global function vdot(v1: Vec3, v2: Vec3): float32
     return v1.x *v2.x + v1.y * v2.y + v1.z * v2.z
 end
 
-function Vec3.dot(self: Vec3, v2: Vec3): float32
+function Vec3.vdot(self: Vec3, v2: Vec3): float32
     return self.x * v2.x + self.y * v2.y + self.z * v2.z
 end
 
@@ -40,4 +44,12 @@ end
 
 function Vec3.unit_vector(self: Vec3): Vec3
     return self / self:length()
+end
+
+function Vec3.vreflect(self: Vec3, n: Vec3): Vec3
+    return self - 2_f32 * vdot(self, n) * n
+end
+
+global function vreflect(v1: Vec3, v2: Vec3): Vec3
+    return v1:vreflect(v2)
 end

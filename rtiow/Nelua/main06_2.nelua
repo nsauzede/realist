@@ -23,9 +23,9 @@ local HSphere: type = @record{
 
 local function hit_sphere(sphere: HSphere, r: Ray, t_min: float32, t_max: float32, rec: *HitRec)
     local oc = r.origin - sphere.center
-    local a = dot(r.direction,r.direction)
-    local b = oc:dot(r.direction)
-    local c = oc:dot(oc) - sphere.radius*sphere.radius
+    local a = vdot(r.direction,r.direction)
+    local b = oc:vdot(r.direction)
+    local c = oc:vdot(oc) - sphere.radius*sphere.radius
     local discriminant = b*b - a*c
     if discriminant>0 then
         local temp = (-b - math.sqrt(discriminant)) / a

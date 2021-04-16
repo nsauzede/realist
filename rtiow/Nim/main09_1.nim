@@ -24,11 +24,13 @@ type HSphere = object
     radius: float32
     material: Material
 
+var n_rand: uint32 = 0
 proc random_in_unit_sphere(): Vec3 =
     while true:
         var r1 = random_f()
         var r2 = random_f()
         var r3 = random_f()
+        n_rand+=2
         result = 2f * vec3(r1, r2, r3) - vec3(1, 1, 1)
         if result.squared_length() < 1:
             break
@@ -157,15 +159,19 @@ for j in countdown(ny - 1, 0):
         for s in countup(0, ns-1):
             var u = (float32(i) + random_f()) / float32(nx)
             var v = (float32(j) + random_f()) / float32(ny)
-            var r = cam.get_ray(u, v)
+            n_rand+=2
             # stdout.write(&"u={u:.6f} v={v:.6f}\n")
+            # stdout.write(&"u={u:.6f} v={v:.6f} nr={n_rand}\n")
+            var r = cam.get_ray(u, v)
+            # stdout.write(&"r={{{{{r.origin.x:.6f}, {r.origin.y:.6f}, {r.origin.z:.6f};{cast[uint32](r.origin.x):x}, {cast[uint32](r.origin.y):x}, {cast[uint32](r.origin.z):x}}}, {{{r.direction.x:.6f}, {r.direction.y:.6f}, {r.direction.z:.6f};{cast[uint32](r.direction.x):x}, {cast[uint32](r.direction.y):x}, {cast[uint32](r.direction.z):x}}}}} \n")
             col = col + color(r, world, 0)
             # stdout.write(&"col={col}\n")
             # stdout.write(&"col=(x: {col.x:.16f}, y: {col.y:.16f}, z: {col.z:.16f})\n")
+            # stdout.write(&"col={{{col.x:.6f}, {col.y:.6f}, {col.z:.6f};{cast[uint32](col.x):x}, {cast[uint32](col.y):x}, {cast[uint32](col.z):x}}}\n")
         col = col / float32(ns)
         col = vec3(sqrt(col.x), sqrt(col.y), sqrt(col.z))
         # stdout.write(&"col=(x: {col.x:.16f}, y: {col.y:.16f}, z: {col.z:.16f})\n")
-        # stdout.write(&"{{{col.x:.6f}, {col.y:.6f}, {col.z:.6f};{cast[uint32](col.x):x}, {cast[uint32](col.y):x}, {cast[uint32](col.z):x}}}")
+        # stdout.write(&"{{{col.x:.6f}, {col.y:.6f}, {col.z:.6f};{cast[uint32](col.x):x}, {cast[uint32](col.y):x}, {cast[uint32](col.z):x}}}\n")
         var ir = int32(255.99f * col.x)
         var ig = int32(255.99f * col.y)
         var ib = int32(255.99f * col.z)
