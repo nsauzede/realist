@@ -18,6 +18,9 @@ OPT:=-O0 -g
 #NFLAGS+=
 else
 OPT:=-O3
+# OPT:=-Ofast -fno-plt -flto -march=native -DNDEBUG
+# OPT:=-Ofast -fno-plt -flto -DNDEBUG
+# NFLAGS+=-Pnochecks -Pnogc
 endif
 
 #PROF:=1

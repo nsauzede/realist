@@ -11,12 +11,14 @@ check: $(PPM)
 	md5sum *.ppm
 	md5sum *.ppm | md5sum
 
-OPT:=-O3
 #DEBUG:=1
 VFLAGS+=--enable-globals
 #VFLAGS+=-profile profile.txt
 ifdef DEBUG
 VFLAGS+=-d dbg
+else
+OPT:=-O3
+# OPT:=-Ofast -fno-plt -flto -DNDEBUG
 endif
 
 #PROF:=1

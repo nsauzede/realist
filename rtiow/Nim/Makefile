@@ -29,7 +29,9 @@ ifdef OPT
 NIMOPT+=-d:release
 NIMOPT+=-d:danger
 #NIMOPT+=--gc:orc
-#NIMOPT+=--passC:"-march=native"
+NIMOPT+=--passC:"-O3"
+# NIMOPT+=--passC:"-Ofast -fno-plt -flto -march=native -DNDEBUG"
+# NIMOPT+=--passC:"-Ofast -fno-plt -flto -DNDEBUG"
 NIMOPT+=--gc:arc
 NIMOPT+=-d:lto
 endif
