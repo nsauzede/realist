@@ -11,11 +11,13 @@ check: $(PPM)
 	md5sum *.ppm
 	md5sum *.ppm | md5sum
 
-OPT:=-O3
 #DEBUG:=1
 NFLAGS+=-q --no-cache --cache-dir . -c
 ifdef DEBUG
+OPT:=-O0 -g
 #NFLAGS+=
+else
+OPT:=-O3
 endif
 
 #PROF:=1
