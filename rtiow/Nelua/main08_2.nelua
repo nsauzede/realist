@@ -54,12 +54,12 @@ end
 
 local function hit_sphere(sphere: HSphere, r: Ray, t_min: float32, t_max: float32, rec: *HitRec): boolean
     local oc = r.origin - sphere.center
-    -- local a = Vec3.dot(Ray.direction(r),Ray.direction(r))
-    -- local a = Ray.direction(r):dot(Ray.direction(r))
-    -- local a = dot(Ray.direction(r),Ray.direction(r))
-    local a = dot(r.direction,r.direction)
-    local b = dot(oc, r.direction)
-    local c = dot(oc, oc) - sphere.radius*sphere.radius
+    -- local a = Vec3.vdot(Ray.direction(r),Ray.direction(r))
+    -- local a = Ray.direction(r):vdot(Ray.direction(r))
+    -- local a = vdot(Ray.direction(r),Ray.direction(r))
+    local a = vdot(r.direction,r.direction)
+    local b = vdot(oc, r.direction)
+    local c = vdot(oc, oc) - sphere.radius*sphere.radius
     local discriminant = b*b - a*c
     if discriminant>0 then
         local temp = (-b - math.sqrt(discriminant)) / a

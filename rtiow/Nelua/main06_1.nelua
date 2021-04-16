@@ -4,9 +4,9 @@ require 'ray'
 
 local function hit_sphere(center: Vec3, radius: float32, r: Ray)
     local oc = r.origin - center
-    local a = r.direction:dot(r.direction)
-    local b = 2.0 * oc:dot(r.direction)
-    local c = oc:dot(oc) - radius*radius
+    local a = r.direction:vdot(r.direction)
+    local b = 2.0 * oc:vdot(r.direction)
+    local c = oc:vdot(oc) - radius*radius
     local discriminant = b*b - 4*a*c
     if discriminant<0 then
         return -1
