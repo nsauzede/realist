@@ -11,12 +11,16 @@ check: $(PPM)
 	md5sum *.ppm
 	md5sum *.ppm | md5sum
 
-OPT=$(CFLAGS) -O3
+# OPT=$(CFLAGS) -O3
 # OPT+=-march=native
-#OPT=-O0 -g
 #DEBUG:=1
 ifdef DEBUG
+OPT:=-O0 -g
 OPT+=-DDEBUG
+else
+OPT:=-O3
+# OPT:=-Ofast -fno-plt -flto -march=native -DNDEBUG
+# OPT:=-Ofast -fno-plt -flto -DNDEBUG
 endif
 
 #PROF:=1

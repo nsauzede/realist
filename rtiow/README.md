@@ -1,7 +1,7 @@
 # Ray tracing in one weekend
 See here : https://raytracing.github.io
 This repo contains my experiments following the excellent book above,
-implemented in Rust, Nim, C, C++, Odin, V and Go. (sorted by runtime perf)
+implemented in Rust, Nelua, Nim, C, C++, Odin, V and Go. (sorted by runtime perf)
 
 # rtiow
 Benchmark :
@@ -10,54 +10,27 @@ Benchmark :
 
 ```
 /usr/bin/time Rust/main14.elf 1024 768 10 main14_rust.ppm && md5sum main14_rust.ppm
-34.92user 0.00system 0:34.94elapsed 99%CPU (0avgtext+0avgdata 4932maxresident)k
+34.88user 0.01system 0:34.91elapsed 99%CPU (0avgtext+0avgdata 4708maxresident)k
+8b59ffdb7405d4d7b1ad2c64f7d005ec  main14_rust.ppm
+/usr/bin/time Nelua/main14.elf 1024 768 10 main14_nelua.ppm && md5sum main14_nelua.ppm
+35.70user 0.01system 0:35.72elapsed 99%CPU (0avgtext+0avgdata 4528maxresident)k
+8b59ffdb7405d4d7b1ad2c64f7d005ec  main14_nelua.ppm
 /usr/bin/time Nim/main14.elf 1024 768 10 main14_nim.ppm && md5sum main14_nim.ppm
-42.10user 0.00system 0:42.13elapsed 99%CPU (0avgtext+0avgdata 4340maxresident)k
+41.91user 0.00system 0:42.14elapsed 99%CPU (0avgtext+0avgdata 4424maxresident)k
+8b59ffdb7405d4d7b1ad2c64f7d005ec  main14_nim.ppm
 /usr/bin/time C/main14.elf 1024 768 10 main14_c.ppm && md5sum main14_c.ppm
-50.84user 0.00system 0:51.10elapsed 99%CPU (0avgtext+0avgdata 4524maxresident)k
+50.70user 0.00system 0:50.72elapsed 99%CPU (0avgtext+0avgdata 4488maxresident)k
+8b59ffdb7405d4d7b1ad2c64f7d005ec  main14_c.ppm
 /usr/bin/time CPP/main14.elf 1024 768 10 main14_cpp.ppm && md5sum main14_cpp.ppm
-57.68user 0.00system 0:57.95elapsed 99%CPU (0avgtext+0avgdata 5860maxresident)k
+57.31user 0.00system 0:57.33elapsed 99%CPU (0avgtext+0avgdata 5684maxresident)k
+8b59ffdb7405d4d7b1ad2c64f7d005ec  main14_cpp.ppm
 /usr/bin/time Odin/main14.elf 1024 768 10 main14_odin.ppm && md5sum main14_odin.ppm
-71.26user 0.01system 1:11.31elapsed 99%CPU (0avgtext+0avgdata 4220maxresident)k
+70.59user 0.01system 1:10.63elapsed 99%CPU (0avgtext+0avgdata 4340maxresident)k
+8b59ffdb7405d4d7b1ad2c64f7d005ec  main14_odin.ppm
 /usr/bin/time V/main14.elf 1024 768 10 main14_v.ppm && md5sum main14_v.ppm
-73.52user 0.00system 1:13.56elapsed 99%CPU (0avgtext+0avgdata 4620maxresident)k
+73.38user 0.01system 1:13.43elapsed 99%CPU (0avgtext+0avgdata 4516maxresident)k
+38f352c28f5e4b3c2dc06bb100ef9934  main14_v.ppm
 /usr/bin/time Go/main14.elf 1024 768 10 main14_go.ppm && md5sum main14_go.ppm
-312.65user 1.38system 5:11.39elapsed 100%CPU (0avgtext+0avgdata 10116maxresident)k
+337.17user 3.74system 5:40.56elapsed 100%CPU (0avgtext+0avgdata 10648maxresident)k
+73db20b69134a7916e2d94f2291f3a00  main14_go.ppm
 ```
-
-Conclusion (old) :
--------------------
-- V version is slower than C++ (+89%, x1.85)
-- This is both suspect and frustrating
-
-NOTE: current V (AST) is buggy; only v0.1.25 is know to work.
-
-```
-$ /usr/bin/time V/A14 > A14.ppm
-26.43user 0.00system 0:26.46elapsed 99%CPU (0avgtext+0avgdata 3108maxresident)k
-0inputs+488outputs (0major+323minor)pagefaults 0swaps
-$ /usr/bin/time CPP/main14 > main14.ppm
-13.98user 0.00system 0:13.99elapsed 99%CPU (0avgtext+0avgdata 3904maxresident)k
-0inputs+528outputs (0major+149minor)pagefaults 0swaps
-```
-
-Notes :
-2/output an image
--output text PPM image RGB888
--graphics hello world : R:0=>1 LTR, G:0=>1 BTT; G=>Y, B=>R
-
-3/the vec3 class
--vec3 class : color,location,direction,offset,...
--operators : `+,-,[],&[], +=,-=,*=,/=,*=f,/=f`
-
-TODO :
--understand why V version is slower and fix it
-
-# rttnw vs. rttroyl
-Tests revealed that rttnw (brute force) produce more noisy result
-that rttroyl (stochastic)
-
-rttnw   500 500 1000 => 7min lot of noise
-rttroyl 500 500 1000 => 8min less noise
-
-rttnw   500 500 2000 => 15min still more noise
