@@ -46,8 +46,12 @@ function Vec3.squared_length(self: Vec3): float32
     return self.x * self.x + self.y * self.y + self.z * self.z
 end
 
-function Vec3.length(self: Vec3): float32
+global function length(self: Vec3): float32
     return math.sqrt(self:squared_length())
+end
+
+function Vec3.length(self: Vec3): float32
+    return length(self)
 end
 
 global function unit_vector(self: Vec3): Vec3

@@ -1,0 +1,24 @@
+--  PCG random implementation - credits to Cieric for original Odin/C version
+global RAND_MAX <const> = 4294967295_uint32
+global Pcg32RandomT: type = @record{
+    state: uint64,
+    inc: uint64,
+}
+global SEED = Pcg32RandomT{0, 0}
+
+global function srand(val: uint32)
+    SEED.state = val
+    SEED.inc = 0
+end
+
+global function rand(): uint32
+    local oldstate = SEED.state
+    SEED.state = oldstate * uint64(6364136223846793005) + (SEED.inc | 1)
+    local xorshifted = uint32(((oldstate >> 18) ~ oldstate) >> 27)
+    local rot = uint32(oldstate >> 59)
+    return (xorshifted >> rot) | (xorshifted << ((-int32(rot)) & 31))
+end
+
+global function random_f(): float32
+    return float32(rand()) / (float32(RAND_MAX) + 1_float32)
+end
