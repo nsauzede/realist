@@ -1,0 +1,225 @@
+require 'C.stdio'
+require 'vec'
+require 'ray'
+require 'pcg'
+require 'span'
+require 'io'
+require 'string'
+
+##[[
+local DEBUG=DEBUG or false
+if DEBUG then
+]]
+print('hello debug')
+##[[ end ]]
+
+local FLT_MAX = 340282346638528859811704183484516925440.000000_float32
+
+local Lambertian: type = @record{
+    albedo: Vec3,
+}
+local Metal: type = @record{
+    albedo: Vec3,
+    fuzz: float32,
+}
+
+local MATERIALS = @enum {
+    LAMBERTIAN = 0,
+    METAL = 1,
+    -- DIELECTRIC = 2,
+}
+
+local Material = @record {
+    kind: MATERIALS,
+    albedo: Vec3,
+    fuzz: float32,
+}
+
+local HitRec: type = @record{
+    t: float32,
+    p: Vec3,
+    normal: Vec3,
+    mat: *Material,
+}
+
+local HSphere: type = @record{
+    center: Vec3,
+    radius: float32,
+    material: Material,
+}
+
+local HITTABLES = @enum {
+    SPHERE = 0,
+}
+
+local Hittable: type = @record{
+    kind: HITTABLES,
+    center: Vec3,
+    radius: float32,
+    material: Material,
+}
+
+local Camera: type = @record{
+    origin: Vec3,
+    lower_left_corner: Vec3,
+    horizontal: Vec3,
+    vertical: Vec3,
+}
+
+local n_rand: uint32 = 0
+local function random_in_unit_sphere(): Vec3
+    local result: Vec3
+    while true do
+        local r1 = random_f()
+        local r2 = random_f()
+        local r3 = random_f()
+        n_rand = n_rand + 3
+        result = 2.0_f32 * Vec3{r1, r2, r3} - Vec3{1, 1, 1}
+        if result:squared_length() < 1.0_f32 then
+            break
+        end
+    end
+    return result
+end
+
+function Material:lambertian_scatter(ray_in: Ray, rec: HitRec, attenuation: pointer(Vec3), scattered: *Ray): boolean
+    local target = rec.normal + random_in_unit_sphere()
+    $scattered = Ray{rec.p, target}
+    $attenuation = self.albedo
+    return true
+end
+
+function Material:metal_scatter(ray_in: Ray, rec: HitRec, attenuation: pointer(Vec3), scattered: *Ray): boolean
+    local reflected = vreflect(ray_in.direction:unit_vector(), rec.normal)
+    $scattered = Ray{rec.p, reflected + self.fuzz * random_in_unit_sphere()}
+    $attenuation = self.albedo
+    return vdot(scattered.direction, rec.normal) > 0_f32
+end
+
+function Material:scatter(ray_in: Ray, rec: HitRec, attenuation: pointer(Vec3), scattered: *Ray): boolean
+    switch self.kind
+    case MATERIALS.LAMBERTIAN then
+        return self:lambertian_scatter(ray_in, rec, attenuation, scattered)
+    case MATERIALS.METAL then
+        return self:metal_scatter(ray_in, rec, attenuation, scattered)
+    end
+    return false
+end
+
+local function get_ray(cam: Camera, u: float32, v: float32): Ray
+    return Ray{cam.origin, cam.lower_left_corner + u*cam.horizontal +
+                v*cam.vertical}
+end
+
+local function hit_sphere(sphere: pointer(Hittable), r: Ray, t_min: float32, t_max: float32, rec: *HitRec): boolean
+    local oc = r.origin - sphere.center
+    local a = vdot(r.direction,r.direction)
+    local b = vdot(oc, r.direction)
+    local c = vdot(oc, oc) - sphere.radius*sphere.radius
+    local discriminant = b*b - a*c
+    if discriminant>0 then
+        local temp = (-b - math.sqrt(discriminant)) / a
+        if temp < t_max and temp > t_min then
+            rec.t = temp
+            rec.p = r:point_at_parameter(rec.t)
+            rec.normal = (rec.p - sphere.center) / sphere.radius
+            rec.mat = &sphere.material
+            return true
+        end
+        temp = (-b + math.sqrt(discriminant)) / a
+        if temp < t_max and temp > t_min then
+            rec.t = temp
+            rec.p = r:point_at_parameter(rec.t)
+            rec.normal = (rec.p - sphere.center) / sphere.radius
+            rec.mat = &sphere.material
+            return true
+        end
+    end
+    return false
+end
+
+local function hit(world: span(Hittable), r: Ray, t_min: float32, t_max: float32, rec: *HitRec): boolean
+    local hit_anything = false
+    local temp_rec = HitRec{}
+    local closest_so_far = t_max
+    for i=0,<#world do
+        if hit_sphere(&world[i], r, t_min, closest_so_far, &temp_rec) then
+            hit_anything = true
+            closest_so_far = temp_rec.t
+            $rec = temp_rec
+        end
+    end
+    return hit_anything
+end
+
+local function color(r: Ray, world: span(Hittable), depth: int32): Vec3
+    local rec=HitRec{}
+    if hit(world, r, 0.001, FLT_MAX, &rec) then
+        local scattered: Ray
+        local attenuation: Vec3
+        if depth < 50 and rec.mat:scatter(r, rec, attenuation, scattered) then
+            return vmul(attenuation, color(scattered, world, depth + 1))
+        else
+            return Vec3{0, 0, 0}
+        end
+    else
+        local unit_direction = r.direction:unit_vector()
+        local t = 0.5_f32 * (unit_direction.y + 1.0_f32)
+        return (1.0_f32 - t) * Vec3{1.0, 1.0, 1.0} + t * Vec3{0.5, 0.7, 1.0}
+    end
+end
+
+function Vec3:__tostring(): string
+    local u: union{i: array(uint32,3), f: array(float32,3)}
+    u.f[0] = self.x
+    u.f[1] = self.y
+    u.f[2] = self.z
+    return string.format('{%.6f, %.6f, %.6f;%x, %x, %x}', self.x, self.y, self.z, u.i[0], u.i[1], u.i[2])
+end
+
+local function rprint(r: Ray)
+    io.writef('r={%s, %s} \n', r.origin, r.direction)
+end
+
+srand(0)
+local nx, ny, ns = 200_i32, 100_i32, 100_int32
+C.printf("P3\n%d %d\n255\n", nx,ny)
+local world: []Hittable = {
+    {HITTABLES.SPHERE, {0,0,-1}, 0.5, Material{MATERIALS.LAMBERTIAN, Vec3{0.1, 0.2, 0.5}}},
+    {HITTABLES.SPHERE, {0,-100.5, -1}, 100., Material{MATERIALS.LAMBERTIAN, Vec3{0.8, 0.8, 0.0}}},
+    {HITTABLES.SPHERE, {1, 0, -1}, 0.5, Material{MATERIALS.METAL, Vec3{0.8, 0.6, 0.2}, 1}},
+    {HITTABLES.SPHERE, {-1, 0, -1}, 0.5, Material{MATERIALS.METAL, Vec3{0.8, 0.8, 0.8}, 0.3}},
+}
+-- for i=0,<#world do
+--     print(&world[i].material)
+-- end
+local cam = Camera{
+    Vec3{0, 0, 0},
+    Vec3{-2, -1, -1},
+    Vec3{4, 0, 0},
+    Vec3{0, 2, 0},
+}
+for j=ny-1,0,-1 do
+    for i=0,<nx do
+        local col = Vec3{0, 0, 0}
+        -- C.printf("j=%ld i=%ld\n", j, i)
+        for s=0,<ns do
+            local u = (float32(i) + random_f()) / float32(nx)
+            local v = (float32(j) + random_f()) / float32(ny)
+            n_rand = n_rand + 2
+            -- C.printf("u=%.6f v=%.6f\n", u, v)
+            -- C.printf("u=%.6f v=%.6f nr=%d\n", u, v, n_rand)
+            local r=get_ray(cam, u, v)
+            -- rprint(r)
+            col = col + color(r, &world, 0)
+            -- io.writef('col=%s\n', col)
+        end
+        col = col / float32(ns)
+        col = Vec3{math.sqrt(col.x), math.sqrt(col.y), math.sqrt(col.z)}
+        -- io.writef('%s\n', col)
+        local ir = int32(255.99_f32 * col.x)
+        local ig = int32(255.99_f32 * col.y)
+        local ib = int32(255.99_f32 * col.z)
+        C.printf("%d %d %d\n", ir, ig, ib)
+    end
+end
