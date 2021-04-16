@@ -199,6 +199,21 @@ func make_camera(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: float32,
         vertical: 2f * half_height * v,
     )
 
+proc vprint(v: Vec3) =
+    stdout.write(&"{{{v.x:.6f}, {v.y:.6f}, {v.z:.6f};{cast[uint32](v.x):x}, {cast[uint32](v.y):x}, {cast[uint32](v.z):x}}}")
+
+proc cam_print(cam: Camera) =
+    (stdout.write("{\n\tlower_left_corner: "); vprint(cam.lower_left_corner);
+             stdout.write(" "))
+    (stdout.write("\n\thorizontal: "); vprint(cam.horizontal); stdout.write(" "))
+    (stdout.write("\n\tvertical: "); vprint(cam.vertical); stdout.write(" "))
+    (stdout.write("\n\torigin: "); vprint(cam.origin); stdout.write(" "))
+    (stdout.write("\n}\n"))
+    # (stdout.write("\nu: "); vprint(cam.u); )
+    # (stdout.write("\nv: "); vprint(cam.v); )
+    # (stdout.write("\nw: "); vprint(cam.w); )
+    # (stdout.write(&"\nlens_radius={cam.lens_radius:.6f}\n"); )
+
 pcg.srand(0)
 var (nx, ny, ns) = (200, 100, 100)
 echo(&"P3\n{nx} {ny}\n255")
@@ -211,6 +226,8 @@ var world: seq[Hittable] = @[
 ]
 var cam = make_camera(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 90f,
         float32(nx) / float32(ny))
+# cam_print(cam)
+stdout.write("")
 for j in countdown(ny - 1, 0):
     for i in countup(0, nx - 1):
         var col = vec3(0, 0, 0)
@@ -222,6 +239,7 @@ for j in countdown(ny - 1, 0):
             # stdout.write(&"u={u:.6f} v={v:.6f}\n")
             # stdout.write(&"u={u:.6f} v={v:.6f} nr={n_rand}\n")
             var r = cam.get_ray(u, v)
+            # stdout.write(&"r={{{{{r.origin.x:.6f}, {r.origin.y:.6f}, {r.origin.z:.6f};{cast[uint32](r.origin.x):x}, {cast[uint32](r.origin.y):x}, {cast[uint32](r.origin.z):x}}}, {{{r.direction.x:.6f}, {r.direction.y:.6f}, {r.direction.z:.6f};{cast[uint32](r.direction.x):x}, {cast[uint32](r.direction.y):x}, {cast[uint32](r.direction.z):x}}}}}\n")
             col = col + color(r, world, 0)
             # stdout.write(&"col={col}\n")
             # stdout.write(&"col=(x: {col.x:.16f}, y: {col.y:.16f}, z: {col.z:.16f})\n")
