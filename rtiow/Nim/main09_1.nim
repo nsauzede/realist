@@ -30,7 +30,7 @@ proc random_in_unit_sphere(): Vec3 =
         var r1 = random_f()
         var r2 = random_f()
         var r3 = random_f()
-        n_rand+=2
+        n_rand+=3
         result = 2f * vec3(r1, r2, r3) - vec3(1, 1, 1)
         if result.squared_length() < 1:
             break
