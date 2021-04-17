@@ -19,6 +19,6 @@ global function rand(): uint32
     return (xorshifted >> rot) | (xorshifted << ((-int32(rot)) & 31))
 end
 
-global function random_f(): float32
+global function random_f(): float32 <inline>
     return float32(rand()) / (float32(RAND_MAX) + 1_float32)
 end

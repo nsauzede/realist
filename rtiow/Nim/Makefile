@@ -11,6 +11,9 @@ check: $(PPM)
 	md5sum *.ppm
 	md5sum *.ppm | md5sum
 
+bench: main14.elf
+	/usr/bin/time ./main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
+
 NIMOPT:=
 NIMOPT+=--hints:off
 
@@ -29,9 +32,10 @@ ifdef OPT
 NIMOPT+=-d:release
 NIMOPT+=-d:danger
 #NIMOPT+=--gc:orc
-NIMOPT+=--passC:"-O3"
+# NIMOPT+=--passC:"-O3"
 # NIMOPT+=--passC:"-Ofast -fno-plt -flto -march=native -DNDEBUG"
 # NIMOPT+=--passC:"-Ofast -fno-plt -flto -DNDEBUG"
+NIMOPT+=--passC:"-O3 -fno-plt -flto -DNDEBUG"
 NIMOPT+=--gc:arc
 NIMOPT+=-d:lto
 endif

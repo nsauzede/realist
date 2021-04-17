@@ -13,7 +13,7 @@ extern unsigned long riuscnt;
 extern unsigned long riudcnt;
 #define INLINE
 #else
-#define INLINE inline
+#define INLINE static inline
 #endif
 
 /**********************************************
