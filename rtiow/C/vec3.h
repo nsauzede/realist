@@ -9,9 +9,9 @@ typedef float vec3[3];
 #define VEC3(x,y,z) ((vec3){x, y, z})
 
 #define API static inline
-//#define API
+// #define API
 
-API void vprint(const vec3 r) {
+void vprint(const vec3 r) {
 #if 0
 	printf("{%.6f, %.6f, %.6f}", r[0], r[1], r[2]);
 //	printf("{%g, %g, %g}", r[0], r[1], r[2]);

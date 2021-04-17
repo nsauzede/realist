@@ -170,7 +170,7 @@ bool lambertian_scatter(struct material_s *p, const ray *r_in, const hit_record 
 	return true;
 }
 
-void reflect(vec3 l, const vec3 v, const vec3 n) {
+API void reflect(vec3 l, const vec3 v, const vec3 n) {
 	vmul(l, 2.f * vdot(v, n), n);
 	vsub(l, v, l);
 }
@@ -218,7 +218,7 @@ bool refract(const vec3 v, const vec3 n, float ni_over_nt, vec3 refracted) {
 		return false;
 }
 
-float schlick(float cosine, float ref_idx) {
+API float schlick(float cosine, float ref_idx) {
 	float r0 = (1-ref_idx) / (1+ref_idx);
 	r0 = r0*r0;
 	return r0 + (1-r0)*powf((1 - cosine),5);

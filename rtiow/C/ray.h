@@ -15,7 +15,7 @@ typedef struct ray_s {
 	vec3 direction;	// B
 } ray;
 
-API void rprint(const ray *r) {
+void rprint(const ray *r) {
 	printf("{");
 	vprint(r->origin);
 	printf(", ");

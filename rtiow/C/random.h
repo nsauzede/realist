@@ -12,7 +12,7 @@ extern unsigned long riuscnt;
 extern unsigned long riudcnt;
 #define INLINE
 #else
-#define INLINE inline
+#define INLINE static inline
 #endif
 
 /**********************************************
@@ -26,7 +26,7 @@ void pcg_srand(unsigned val) {
 	seed.inc = 0;
 }
 
-uint32_t pcg_rand() {
+INLINE uint32_t pcg_rand() {
 	uint64_t oldstate = seed.state;
 	seed.state = oldstate * 6364136223846793005ULL + (seed.inc|1);
 	uint32_t xorshifted = ((oldstate >> 18u) ^ oldstate) >> 27u;
