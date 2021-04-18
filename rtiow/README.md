@@ -3,7 +3,7 @@ See here : https://raytracing.github.io
 This repo contains my experiments following the excellent book above,
 implemented in Rust, Nelua, Nim, C, C++, Odin, V and Go. (sorted by runtime perf)
 
-Note : the C current perf is poor, probably because it's mostly a dirty port of the C++ design,
+Note : the current C perf is poor, probably because it's mostly a dirty port of the C++ design,
 with vtables to simulates OOP constructs. A rework in underway to try and get decent perfs.
 
 # rtiow
