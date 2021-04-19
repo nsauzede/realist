@@ -35,9 +35,9 @@ mut:
 }
 
 fn (s &Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
-	oc := r.origin() - s.center
-	a := r.direction().dot(r.direction())
-	b := oc.dot(r.direction())
+	oc := r.origin - s.center
+	a := r.direction.dot(r.direction)
+	b := oc.dot(r.direction)
 	c := oc.dot(oc) - s.radius * s.radius
 	discriminant := b * b - a * c
 	// eprintln('mat type &${s.material}')
@@ -122,13 +122,13 @@ fn (m &Material) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut
 			return true
 		}
 		Metal {
-			reflected := r_in.direction().unit_vector().reflect(rec.normal)
+			reflected := r_in.direction.unit_vector().reflect(rec.normal)
 			unsafe {
 				*scattered = ray.Ray{rec.p, reflected}
 				*attenuation = m.albedo
 			}
 			// eprintln('Hello !!!!!!! non-lambertian ${m.metal.mtype}')
-			return scattered.direction().dot(rec.normal) > 0
+			return scattered.direction.dot(rec.normal) > 0
 		}
 	}
 }
@@ -147,7 +147,7 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 			return vec.Vec3{0, 0, 0}
 		}
 	} else {
-		unit_direction := r.direction().unit_vector()
+		unit_direction := r.direction.unit_vector()
 		t := .5 * (unit_direction.y + 1.0)
 		return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 	}

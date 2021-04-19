@@ -99,6 +99,7 @@ pub fn div(v Vec3, k f32) Vec3 {
 	}
 }
 
+[inline]
 pub fn (v Vec3) reflect(n Vec3) Vec3 {
 	return v - mult(2.0 * v.dot(n), n)
 }
@@ -125,11 +126,13 @@ pub fn (v Vec3) squared_length() f32 {
 	return v.x * v.x + v.y * v.y + v.z * v.z
 }
 
+[inline]
 pub fn (v Vec3) length() f32 {
 //	return math.sqrtf(v.x * v.x + v.y * v.y + v.z * v.z)
 	return math.sqrtf(v.squared_length())
 }
 
+[inline]
 pub fn (v Vec3) unit_vector() Vec3 {
 	return div(v, v.length())
 }

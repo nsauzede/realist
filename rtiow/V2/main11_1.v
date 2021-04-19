@@ -65,9 +65,9 @@ pub fn (s &Sphere) str() string {
 }
 
 fn (s &Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
-	oc := r.origin() - s.center
-	a := r.direction().dot(r.direction())
-	b := oc.dot(r.direction())
+	oc := r.origin - s.center
+	a := r.direction.dot(r.direction)
+	b := oc.dot(r.direction)
 	c := oc.dot(oc) - s.radius * s.radius
 	discriminant := b * b - a * c
 	if discriminant > 0 {
@@ -124,12 +124,12 @@ fn (l &Lambertian) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, m
 }
 
 fn (m &Metal) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
-	reflected := r_in.direction().unit_vector().reflect(rec.normal)
+	reflected := r_in.direction.unit_vector().reflect(rec.normal)
 	unsafe {
 		*scattered = ray.Ray{rec.p, reflected + vec.mult(m.fuzz, random_in_unit_sphere())}
 		*attenuation = m.albedo
 	}
-	return scattered.direction().dot(rec.normal) > 0
+	return scattered.direction.dot(rec.normal) > 0
 }
 
 [inline]
@@ -141,7 +141,7 @@ fn schlick(cosine f32, ref_idx f32) f32 {
 
 fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	mut outward_normal := vec.Vec3{}
-	reflected := r_in.direction().reflect(rec.normal)
+	reflected := r_in.direction.reflect(rec.normal)
 	mut ni_over_nt := f32(0)
 	unsafe {
 		*attenuation = vec.Vec3{1, 1, 1}
@@ -149,8 +149,8 @@ fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, m
 	mut refracted := vec.Vec3{}
 	mut reflect_prob := f32(1)
 	mut cosine := f32(0)
-	dot := r_in.direction().dot(rec.normal)
-	len := r_in.direction().length()
+	dot := r_in.direction.dot(rec.normal)
+	len := r_in.direction.length()
 	if dot > 0 {
 		outward_normal = vec.mult(-1, rec.normal)
 		ni_over_nt = d.ref_idx
@@ -160,7 +160,7 @@ fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, m
 		ni_over_nt = 1.0 / d.ref_idx
 		cosine = -dot / len
 	}
-	if r_in.direction().refract(outward_normal, ni_over_nt, mut refracted) {
+	if r_in.direction.refract(outward_normal, ni_over_nt, mut refracted) {
 		reflect_prob = schlick(cosine, d.ref_idx)
 	}
 	if random_f() < reflect_prob {
@@ -208,7 +208,7 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 		}
 	} else {
 		// println('NOT HIT')
-		unit_direction := r.direction().unit_vector()
+		unit_direction := r.direction.unit_vector()
 		t := .5 * (unit_direction.y + 1.0)
 		return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 	}

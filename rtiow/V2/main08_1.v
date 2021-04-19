@@ -20,9 +20,9 @@ mut:
 }
 
 fn (s Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
-	oc := r.origin() - s.center
-	a := r.direction().dot(r.direction())
-	b := oc.dot(r.direction())
+	oc := r.origin - s.center
+	a := r.direction.dot(r.direction)
+	b := oc.dot(r.direction)
 	// c := oc.dot(oc) - s.radius * s.radius
 	ra := s.radius * s.radius
 	c := oc.dot(oc) - ra
@@ -107,7 +107,7 @@ fn (world []Hittable) color(r ray.Ray) vec.Vec3 {
 		return vec.mult(0.5, world.color(ray.Ray{rec.p, target}))
 	} else {
 		// println('NOT HIT')
-		unit_direction := r.direction().unit_vector()
+		unit_direction := r.direction.unit_vector()
 		t := .5 * (unit_direction.y + 1.0)
 		return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 	}

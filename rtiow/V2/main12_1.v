@@ -82,9 +82,9 @@ pub fn (s &Sphere) str() string {
 }
 
 fn (s &Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
-	oc := r.origin() - s.center
-	a := r.direction().dot(r.direction())
-	b := oc.dot(r.direction())
+	oc := r.origin - s.center
+	a := r.direction.dot(r.direction)
+	b := oc.dot(r.direction)
 	c := oc.dot(oc) - s.radius * s.radius
 	discriminant := b * b - a * c
 	if discriminant > 0 {
@@ -150,12 +150,12 @@ pub fn (m &Metal) str() string {
 }
 
 fn (m &Metal) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
-	reflected := r_in.direction().unit_vector().reflect(rec.normal)
+	reflected := r_in.direction.unit_vector().reflect(rec.normal)
 	unsafe {
 		*scattered = ray.Ray{rec.p, reflected + vec.mult(m.fuzz, random_in_unit_sphere())}
 		*attenuation = m.albedo
 	}
-	return scattered.direction().dot(rec.normal) > 0
+	return scattered.direction.dot(rec.normal) > 0
 }
 
 [inline]
@@ -172,7 +172,7 @@ fn cb_str_dielectric(obj voidptr) string {
 
 fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	mut outward_normal := vec.Vec3{}
-	reflected := r_in.direction().reflect(rec.normal)
+	reflected := r_in.direction.reflect(rec.normal)
 	mut ni_over_nt := f32(0)
 	unsafe {
 		*attenuation = vec.Vec3{1, 1, 1}
@@ -180,8 +180,8 @@ fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, m
 	mut refracted := vec.Vec3{}
 	mut reflect_prob := f32(0)
 	mut cosine := f32(0)
-	dot := r_in.direction().dot(rec.normal)
-	len := r_in.direction().length()
+	dot := r_in.direction.dot(rec.normal)
+	len := r_in.direction.length()
 	if dot > 0 {
 		outward_normal = vec.mult(-1, rec.normal)
 		ni_over_nt = d.ref_idx
@@ -194,8 +194,8 @@ fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, m
 	// dln := vec.Vec3{dot, len, ni_over_nt}
 	// println('dln=$dln')
 	// println('outnorm=$outward_normal')
-	// println('rindir=$r_in.direction()')
-	if r_in.direction().refract(outward_normal, ni_over_nt, mut refracted) {
+	// println('rindir=$r_in.direction')
+	if r_in.direction.refract(outward_normal, ni_over_nt, mut refracted) {
 		// println('SCHLICK')
 		reflect_prob = schlick(cosine, d.ref_idx)
 	} else {
@@ -265,10 +265,10 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 			return vec.Vec3{0, 0, 0}
 		}
 	} else {
-		unit_direction := r.direction().unit_vector()
+		unit_direction := r.direction.unit_vector()
 		$if dbg ? {
 			// println('NOT HIT')
-			println('NOT HIT dir=${r.direction()}ud=$unit_direction')
+			println('NOT HIT dir=${r.direction}ud=$unit_direction')
 		}
 		t := .5 * (unit_direction.y + 1.0)
 		// return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
