@@ -81,14 +81,15 @@ pub fn (s &Sphere) str() string {
 	return '{HS:$s.center,$s.radius,${s.material.str()}}'
 }
 
-fn (s &Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
-	oc := r.origin() - s.center
-	a := r.direction().dot(r.direction())
-	b := oc.dot(r.direction())
-	c := oc.dot(oc) - s.radius * s.radius
+fn (s &Sphere) hit(r &ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
+	oc := r.origin - s.center
+	a := r.direction.squared_length()
+	b := oc.dot(r.direction)
+	c := oc.squared_length() - s.radius * s.radius
 	discriminant := b * b - a * c
 	if discriminant > 0 {
-		mut temp := (-b - math.sqrtf(discriminant)) / a
+		root := math.sqrtf(discriminant)
+		mut temp := (-b - root) / a
 		if temp < t_max && temp > t_min {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
@@ -96,7 +97,7 @@ fn (s &Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 			rec.mat = &s.material
 			return true
 		}
-		temp = (-b + math.sqrtf(discriminant)) / a
+		temp = (-b + root) / a
 		if temp < t_max && temp > t_min {
 			rec.t = temp
 			rec.p = r.point_at_parameter(rec.t)
@@ -108,7 +109,7 @@ fn (s &Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	return false
 }
 
-fn (h &Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
+fn (h &Hittable) hit(r &ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	match h {
 		Sphere {
 			return h.hit(r, t_min, t_max, mut rec)
@@ -118,7 +119,7 @@ fn (h &Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	return false
 }
 
-fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
+fn (hh []Hittable) hit(r &ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	mut hit_anything := false
 	mut closest_so_far := t_max
 	for h in hh {
@@ -134,7 +135,7 @@ fn (l &Lambertian) str() string {
 	return '{ML:$l.albedo}'
 }
 
-fn (l &Lambertian) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (l &Lambertian) scatter(r_in &ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	target := rec.normal + random_in_unit_sphere()
 	unsafe {
 		*scattered = ray.Ray{rec.p, target}
@@ -147,13 +148,13 @@ fn (m &Metal) str() string {
 	return '{MM:$m.albedo,$m.fuzz}'
 }
 
-fn (m &Metal) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
-	reflected := r_in.direction().unit_vector().reflect(rec.normal)
+fn (m &Metal) scatter(r_in &ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+	reflected := r_in.direction.unit_vector().reflect(rec.normal)
 	unsafe {
 		*scattered = ray.Ray{rec.p, reflected + vec.mult(m.fuzz, random_in_unit_sphere())}
 		*attenuation = m.albedo
 	}
-	return scattered.direction().dot(rec.normal) > 0
+	return scattered.direction.dot(rec.normal) > 0
 }
 
 [inline]
@@ -167,9 +168,9 @@ fn (d &Dielectric) str() string {
 	return '{MD:$d.ref_idx}'
 }
 
-fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (d &Dielectric) scatter(r_in &ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	mut outward_normal := vec.Vec3{}
-	reflected := r_in.direction().reflect(rec.normal)
+	reflected := r_in.direction.reflect(rec.normal)
 	mut ni_over_nt := f32(0)
 	unsafe {
 		*attenuation = vec.Vec3{1, 1, 1}
@@ -177,8 +178,8 @@ fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, m
 	mut refracted := vec.Vec3{}
 	mut reflect_prob := f32(0)
 	mut cosine := f32(0)
-	dot := r_in.direction().dot(rec.normal)
-	len := r_in.direction().length()
+	dot := r_in.direction.dot(rec.normal)
+	len := r_in.direction.length()
 	if dot > 0 {
 		outward_normal = vec.mult(-1, rec.normal)
 		ni_over_nt = d.ref_idx
@@ -191,8 +192,8 @@ fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, m
 	// dln := vec.Vec3{dot, len, ni_over_nt}
 	// println('dln=$dln')
 	// println('outnorm=$outward_normal')
-	// println('rindir=$r_in.direction()')
-	if r_in.direction().refract(outward_normal, ni_over_nt, mut refracted) {
+	// println('rindir=$r_in.direction')
+	if r_in.direction.refract(outward_normal, ni_over_nt, mut refracted) {
 		// println('SCHLICK')
 		reflect_prob = schlick(cosine, d.ref_idx)
 	} else {
@@ -213,7 +214,7 @@ fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, m
 	return true
 }
 
-fn (m &Material) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (m &Material) scatter(r_in &ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	match m {
 		Lambertian {
 			return m.scatter(r_in, rec, mut attenuation, mut scattered)
@@ -228,7 +229,7 @@ fn (m &Material) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut
 	return false
 }
 
-fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
+fn (world []Hittable) color(r &ray.Ray, depth int) vec.Vec3 {
 	$if dbg ? {
 		println(r)
 	}
@@ -255,11 +256,11 @@ fn (world []Hittable) color(r ray.Ray, depth int) vec.Vec3 {
 			return vec.Vec3{0, 0, 0}
 		}
 	} else {
-		unit_direction := r.direction().unit_vector()
+		unit_direction := r.direction.unit_vector()
 		$if dbg ? {
 			println('NOT HIT')
 		}
-		// println('NOT HIT dir=$r.direction()ud=$unit_direction')
+		// println('NOT HIT dir=${r.direction}ud=$unit_direction')
 		t := .5 * (unit_direction.y + 1.0)
 		// return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 		col0 := vec.mult(1.0 - t, vec.Vec3{1, 1, 1})
@@ -306,13 +307,13 @@ fn (mut cam Camera) make(lookfrom vec.Vec3, lookat vec.Vec3, vup vec.Vec3, vfov 
 	cam.w = w
 }
 
-fn (c &Camera) get_ray(s f32, t f32) ray.Ray {
+fn (c &Camera) get_ray(s f32, t f32) &ray.Ray {
 	$if dbg ? {
 		// println('s=$s t=$t')
 	}
 	rd := vec.mult(c.lens_radius, random_in_unit_disk())
 	offset := vec.mult(rd.x, c.u) + vec.mult(rd.y, c.v)
-	return ray.Ray{c.origin + offset, c.lower_left_corner + vec.mult(s, c.horizontal) + vec.mult(t, c.vertical) -
+	return &ray.Ray{c.origin + offset, c.lower_left_corner + vec.mult(s, c.horizontal) + vec.mult(t, c.vertical) -
 		c.origin - offset}
 }
 
