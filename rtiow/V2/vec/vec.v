@@ -42,7 +42,7 @@ unsafe{
 		p3 = '0'
 	}
 }
-	return '{$a.x, $a.y, $a.z;$p1, $p2, $p3}'
+	return '{${a.x:.6f}, ${a.y:.6f}, ${a.z:.6f};$p1, $p2, $p3}'
 }
 
 [inline]

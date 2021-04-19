@@ -13,6 +13,7 @@ mut:
 	mat &Material=voidptr(0) // hittable at hit point (material, etc..)
 }
 
+[inline]
 fn random_f() f32 {
 	$if dbg ? {
 		rfcnt++
@@ -76,11 +77,11 @@ struct Sphere {
 struct NullHittable{}
 type Hittable = Sphere | NullHittable
 
-pub fn (s Sphere) str() string {
+pub fn (s &Sphere) str() string {
 	return '{HS:$s.center,$s.radius,${s.material.str()}}'
 }
 
-fn (s Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
+fn (s &Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	oc := r.origin() - s.center
 	a := r.direction().dot(r.direction())
 	b := oc.dot(r.direction())
@@ -108,7 +109,7 @@ fn (s Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 }
 
 [inline]
-fn (h Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
+fn (h &Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	match h {
 		Sphere {
 			return h.hit(r, t_min, t_max, mut rec)
@@ -130,11 +131,11 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	return hit_anything
 }
 
-fn (l Lambertian) str() string {
+fn (l &Lambertian) str() string {
 	return '{ML:$l.albedo}'
 }
 
-fn (l Lambertian) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (l &Lambertian) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	target := rec.normal + random_in_unit_sphere()
 	unsafe {
 		*scattered = ray.Ray{rec.p, target}
@@ -143,11 +144,11 @@ fn (l Lambertian) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mu
 	return true
 }
 
-fn (m Metal) str() string {
+fn (m &Metal) str() string {
 	return '{MM:$m.albedo,$m.fuzz}'
 }
 
-fn (m Metal) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (m &Metal) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	reflected := r_in.direction().unit_vector().reflect(rec.normal)
 	unsafe {
 		*scattered = ray.Ray{rec.p, reflected + vec.mult(m.fuzz, random_in_unit_sphere())}
@@ -163,11 +164,11 @@ fn schlick(cosine f32, ref_idx f32) f32 {
 	return r0 + (1.0 - r0) * math.powf(1.0 - cosine, 5)
 }
 
-fn (d Dielectric) str() string {
+fn (d &Dielectric) str() string {
 	return '{MD:$d.ref_idx}'
 }
 
-fn (d Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (d &Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	mut outward_normal := vec.Vec3{}
 	reflected := r_in.direction().reflect(rec.normal)
 	mut ni_over_nt := f32(0)
@@ -214,7 +215,7 @@ fn (d Dielectric) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mu
 }
 
 [inline]
-fn (m Material) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (m &Material) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	match m {
 		Lambertian {
 			return m.scatter(r_in, rec, mut attenuation, mut scattered)
@@ -281,7 +282,7 @@ mut:
 	lens_radius       f32
 }
 
-pub fn (c Camera) str() string {
+pub fn (c &Camera) str() string {
 	return '{origin = $c.origin, lower_left_corner = $c.lower_left_corner,
 	horizontal = $c.horizontal, vertical = $c.vertical,
 	u = $c.u, v = $c.v, w = $c.w,
@@ -307,7 +308,8 @@ fn (mut cam Camera) make(lookfrom vec.Vec3, lookat vec.Vec3, vup vec.Vec3, vfov 
 	cam.w = w
 }
 
-fn (c Camera) get_ray(s f32, t f32) ray.Ray {
+[inline]
+fn (c &Camera) get_ray(s f32, t f32) ray.Ray {
 	$if dbg ? {
 		// println('s=$s t=$t')
 	}
@@ -317,7 +319,7 @@ fn (c Camera) get_ray(s f32, t f32) ray.Ray {
 		c.origin - offset}
 }
 
-pub fn (h Hittable) str() string {
+pub fn (h &Hittable) str() string {
 	match h {
 		Sphere {
 			return h.str()

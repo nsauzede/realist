@@ -55,11 +55,11 @@ struct Sphere {
 struct NullHittable{}
 type Hittable = Sphere | NullHittable
 
-pub fn (s Sphere) str() string {
+pub fn (s &Sphere) str() string {
 	return '{S:$s.center,$s.radius}'
 }
 
-fn (s Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
+fn (s &Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	oc := r.origin() - s.center
 	a := r.direction().dot(r.direction())
 	b := oc.dot(r.direction())
@@ -87,7 +87,7 @@ fn (s Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 }
 
 [inline]
-fn (h Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
+fn (h &Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	match h {
 		Sphere {
 			return h.hit(r, t_min, t_max, mut rec)
@@ -109,7 +109,7 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	return hit_anything
 }
 
-fn (l Lambertian) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (l &Lambertian) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	target := rec.normal + random_in_unit_sphere()
 	unsafe {
 		*scattered = ray.Ray{rec.p, target}
@@ -118,7 +118,7 @@ fn (l Lambertian) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mu
 	return true
 }
 
-fn (m Metal) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (m &Metal) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	reflected := r_in.direction().unit_vector().reflect(rec.normal)
 	unsafe {
 		*scattered = ray.Ray{rec.p, reflected + vec.mult(m.fuzz, random_in_unit_sphere())}
@@ -128,7 +128,7 @@ fn (m Metal) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut sca
 }
 
 [inline]
-fn (m Material) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
+fn (m &Material) scatter(r_in ray.Ray, rec HitRec, mut attenuation vec.Vec3, mut scattered ray.Ray) bool {
 	match m {
 		Lambertian {
 			return m.scatter(r_in, rec, mut attenuation, mut scattered)
@@ -170,7 +170,8 @@ struct Camera {
 	origin            vec.Vec3
 }
 
-fn (c Camera) get_ray(u f32, v f32) ray.Ray {
+[inline]
+fn (c &Camera) get_ray(u f32, v f32) ray.Ray {
 	return ray.Ray{c.origin, c.lower_left_corner + vec.mult(u, c.horizontal) + vec.mult(v, c.vertical) -
 		c.origin}
 }
