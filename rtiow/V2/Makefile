@@ -1,6 +1,8 @@
-SRC:=$(wildcard main*.cpp)
-EXE:=$(patsubst %.cpp,%.elf,$(SRC))
-PPM:=$(patsubst %.cpp,%.ppm,$(SRC))
+SRC:=$(wildcard main*.v)
+EXE:=$(patsubst %.v,%.elf,$(SRC))
+PPM:=$(patsubst %.v,%.ppm,$(SRC))
+
+V:=v
 
 all: $(EXE)
 	du -sh .
@@ -12,12 +14,13 @@ check: $(PPM)
 bench: main14.elf
 	time ./main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
 
+VFLAGS+=--enable-globals
+#DEBUG:=1
 ifdef DEBUG
-OPT:=-O0 -g
-OPT+=-DDEBUG
+VFLAGS+=-d dbg
+#VFLAGS+=-profile profile.txt
 else
 # OPT:=-O3
-# OPT:=-Ofast -fno-plt -flto -march=native -DNDEBUG
 # OPT:=-Ofast -fno-plt -flto -DNDEBUG
 OPT:=-O3 -fno-plt -flto -DNDEBUG
 endif
@@ -27,11 +30,14 @@ ifdef PROF
 OPT+=-pg
 endif
 
-%.elf: %.cpp
-	$(CXX) -o $@ $^ $(OPT) -lm
+%_v.c: %.v
+	$(V) $(VFLAGS) -o $@ $^
+
+%.elf: %_v.c
+	$(CC) -o $@ $^ $(OPT) -lm
 
 %.ppm: %.elf
-	./$^ $(ARGS) > $@
+	./$^ > $@
 
 clean:
-	$(RM) *.elf *.ppm
+	$(RM) *_v.c *.elf *.ppm
