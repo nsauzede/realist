@@ -331,14 +331,12 @@ if a<=#arg then
 end
 local bytes: span(byte)
 local nbytes = 0
-if fnameout == "" then
-    fout:write("P3\n")
-else
+if fnameout ~= "" then
     fout = io.open(fnameout, "wb")
-    fout:write("P6\n")
-    nbytes = 3 * ny * nx
-    bytes = allocator:spanalloc(byte, nbytes)
 end
+fout:write("P6\n")
+nbytes = 3 * ny * nx
+bytes = allocator:spanalloc(byte, nbytes)
 fout:write(string.format("%d %d\n255\n", nx, ny))
 local world = random_scene()
 -- for i=0,<#world do
@@ -374,19 +372,14 @@ for j=ny-1,0,-1 do
         local ir = int32(255.99_f32 * col.x)
         local ig = int32(255.99_f32 * col.y)
         local ib = int32(255.99_f32 * col.z)
-        if fnameout == "" then
-            fout:write(string.format("%d %d %d  ", ir, ig, ib))
-        else
-            bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir
-            bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig
-            bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib
-        end
-    end
-    if fnameout == "" then
-        fout:write("\n")
+        bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir
+        bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig
+        bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib
     end
 end
+local s: string = {data=&bytes[0], size=nbytes}
+fout:write(s)
 if fnameout ~= "" then
-    local s: string = {data=&bytes[0], size=nbytes}
-    fout:write(s)
+    fout:close()
 end
+allocator:spandealloc(bytes)

@@ -3,10 +3,10 @@ DIRS+=Rust
 DIRS+=Nelua
 DIRS+=Nim
 DIRS+=C
-DIRS+=V2
+DIRS+=V
 DIRS+=CPP
 DIRS+=Odin
-DIRS+=V
+#DIRS+=V_old
 DIRS+=Go
 TARGETS:=$(patsubst %,%/main14.elf,$(DIRS))
 
@@ -28,4 +28,4 @@ mrproper: clobber
 	$(RM) *.ppm
 	for d in $(DIRS); do make -C $$d clean; done
 	make -C C2 clean
-	make -C V2 clean
+	make -C V_old clean

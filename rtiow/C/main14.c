@@ -500,12 +500,10 @@ int main(int argc, char *argv[]) {
 	size_t nbytes = 0;
 	if (fnameout) {
 		fout = fopen(fnameout, "wb");
-		fprintf(fout, "P6\n");
-		nbytes = 3 * ny * nx;
-		bytes = (unsigned char *)malloc(nbytes);
-	} else {
-		fprintf(fout, "P3\n");
 	}
+	nbytes = 3 * ny * nx;
+	bytes = (unsigned char *)malloc(nbytes);
+	fprintf(fout, "P6\n");
 	fprintf(fout, "%d %d\n", nx, ny);
 	fprintf(fout, "255\n");
 	hittable_t *world = random_scene();
@@ -563,22 +561,15 @@ int main(int argc, char *argv[]) {
 			int ir = (int)(255.99f*col[0]);
 			int ig = (int)(255.99f*col[1]);
 			int ib = (int)(255.99f*col[2]);
-			if (fnameout) {
-				bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir;
-				bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig;
-				bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib;
-			} else {
-				fprintf(fout, "%d %d %d  ", ir, ig, ib);
-			}
-		}
-		if (!fnameout) {
-			fprintf(fout, "\n");
+			bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir;
+			bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig;
+			bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib;
 		}
 	}
+	fwrite(bytes, nbytes, 1, fout);
 	if (fnameout) {
-		fwrite(bytes, nbytes, 1, fout);
 		fclose(fout);
-		free(bytes);
 	}
+	free(bytes);
 	return 0;
 }

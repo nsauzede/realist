@@ -520,21 +520,19 @@ fn main() {
 			}
 		}
 	}
-	let foutopt = if fnameout != "" {
-		Some(File::create(fnameout).expect("Can't create file"))
+	let mut stdout;
+	let mut file;
+	let fout: &mut dyn Write = if fnameout != "" {
+		file = File::create(fnameout).expect("Can't create file");
+		&mut file
 	} else {
-		None
+		stdout = std::io::stdout();
+		&mut stdout
 	};
-	let mut bytes = if fnameout != "" {
-		vec![0u8; 3 * ny * nx]
-	} else {
-		vec![0u8; 0]
-	};
-	if fnameout == "" {
-		println!("P3");
-		println!("{} {}", nx, ny);
-		println!("255");
-	}
+	let mut bytes = vec![0u8; 3 * ny * nx];
+	writeln!(fout, "P6").expect("Can't write");
+	writeln!(fout, "{} {}", nx, ny).expect("Can't write");
+	writeln!(fout, "255").expect("Can't write");
 	let world = random_scene();
 	let lookfrom = vec3! {9., 2., 2.6};
 	let lookat = vec3! {3., 0.8, 1.};
@@ -565,25 +563,10 @@ if cfg!(DEBUG) {
 			let ir = (255.99*col.x) as u8;
 			let ig = (255.99*col.y) as u8;
 			let ib = (255.99*col.z) as u8;
-			if fnameout != "" {
-				bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir;
-				bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig;
-				bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib;
-			} else {
-				print!("{} {} {}  ", ir, ig, ib);
-			}
-		}
-		if fnameout == "" {
-			println!();
+			bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir;
+			bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig;
+			bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib;
 		}
 	}
-	match foutopt {
-		Some(mut fout) => {
-			writeln!(fout, "P6").expect("Can't write");
-			writeln!(fout, "{} {}", nx, ny).expect("Can't write");
-			writeln!(fout, "255").expect("Can't write");
-			fout.write(&bytes).expect("Can't write");
-		}
-		None => {}
-	}
+	fout.write(&bytes).expect("Can't write");
 }

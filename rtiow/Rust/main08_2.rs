@@ -84,7 +84,7 @@ unsafe {
 		union MyUnion {
 			f: [f32; 3],
 			i: [u32; 3]
-		};
+		}
 		let u = MyUnion{f:self.0};
 		write!(f, "{{{:.6}, {:.6}, {:.6};{:x}, {:x}, {:x}}}",
 			self.0[0], self.0[1], self.0[2],

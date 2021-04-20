@@ -5,16 +5,31 @@ import ray
 import math
 import pcg
 
-struct Sphere {
+enum HType {
+	sphere
+}
+
+struct HSphere {
 	center vec.Vec3
 	radius f32
 }
 
-pub fn (s Sphere) str() string {
-	return '{$s.center, $s.radius}'
+union HData {
+	sphere HSphere
 }
-struct NullHittable{}
-type Hittable = Sphere | NullHittable
+
+pub fn (hs HSphere) str() string {
+	return '{$hs.center, $hs.radius}'
+}
+
+pub fn (hd HData) str() string {
+	return hd.sphere.str()
+}
+
+struct Hittable {
+	htype HType
+	data  HData
+}
 
 struct HitRec {
 mut:
@@ -23,10 +38,10 @@ mut:
 	normal vec.Vec3 // normal at hit point
 }
 
-fn (s Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
-	oc := r.origin - s.center
-	a := r.direction.dot(r.direction)
-	b := oc.dot(r.direction)
+fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
+	oc := r.origin() - s.center
+	a := r.direction().dot(r.direction())
+	b := oc.dot(r.direction())
 	c := oc.dot(oc) - s.radius * s.radius
 	discriminant := b * b - a * c
 	if discriminant > 0 {
@@ -48,13 +63,9 @@ fn (s Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	return false
 }
 
-[inline]
 fn (h Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
-	match h {
-		Sphere {
-			return h.hit(r, t_min, t_max, mut rec)
-		}
-		NullHittable{}
+	if h.htype == .sphere {
+		return h.data.sphere.hit(r, t_min, t_max, mut rec)
 	}
 	return false
 }
@@ -71,12 +82,21 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	return hit_anything
 }
 
+fn (s HSphere) make() Hittable {
+	return Hittable{
+		htype: .sphere
+		data: HData{
+			sphere: s
+		}
+	}
+}
+
 fn color(r ray.Ray, world []Hittable) vec.Vec3 {
 	mut rec := HitRec{}
 	if world.hit(r, 0, math.max_f32, mut rec) {
 		return vec.mult(0.5, rec.normal + vec.Vec3{1, 1, 1})
 	} else {
-		unit_direction := r.direction.unit_vector()
+		unit_direction := r.direction().unit_vector()
 		// println('ud=$unit_direction')
 		t := .5 * (unit_direction.y + 1)
 		// tv := vec.Vec3{t, 0, 0}
@@ -124,15 +144,14 @@ fn main() {
 		origin: vec.Vec3{0, 0, 0}
 	}
 	world := [
-		Hittable(
-			 Sphere{
+		HSphere{
 			center: vec.Vec3{0, 0, -1}
 			radius: .5
-		}),
-		Sphere{
+		}.make(),
+		HSphere{
 			center: vec.Vec3{0, -100.5, -1}
 			radius: 100
-		},
+		}.make(),
 	]
 	// println('world=$world')
 	// println('cam=$cam')
@@ -143,7 +162,7 @@ fn main() {
 				u := f32(f64(i) + random_f()) / f32(nx)
 				v := f32(f64(j) + random_f()) / f32(ny)
 				// println('u=$u v=$v')
-				// uv := vec.Vec3{u, v, 0}
+				uv := vec.Vec3{u, v, 0}
 				// println('uv=$uv')
 				r := cam.get_ray(u, v)
 				// println('r=$r')

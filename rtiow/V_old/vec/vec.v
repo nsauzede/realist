@@ -22,16 +22,12 @@ struct S0 {
 pub fn (a Vec3) str() string {
 //	return '{$a.x, $a.y, $a.z}'
 	mut u0 := U0{}
-	mut p1 := ''
-	mut p2 := ''
-	mut p3 := ''
-unsafe{
 	u0.v[0] = a.x
 	u0.v[1] = a.y
 	u0.v[2] = a.z
-	p1 = u0.i[0].hex()
-	p2 = u0.i[1].hex()
-	p3 = u0.i[2].hex()
+	mut p1 := u0.i[0].hex()
+	mut p2 := u0.i[1].hex()
+	mut p3 := u0.i[2].hex()
 	if u0.i[0] == 0 {
 		p1 = '0'
 	}
@@ -41,8 +37,7 @@ unsafe{
 	if u0.i[2] == 0 {
 		p3 = '0'
 	}
-}
-	return '{${a.x:.6f}, ${a.y:.6f}, ${a.z:.6f};$p1, $p2, $p3}'
+	return '{$a.x, $a.y, $a.z;$p1, $p2, $p3}'
 }
 
 [inline]
@@ -99,7 +94,6 @@ pub fn div(v Vec3, k f32) Vec3 {
 	}
 }
 
-[inline]
 pub fn (v Vec3) reflect(n Vec3) Vec3 {
 	return v - mult(2.0 * v.dot(n), n)
 }
@@ -126,13 +120,11 @@ pub fn (v Vec3) squared_length() f32 {
 	return v.x * v.x + v.y * v.y + v.z * v.z
 }
 
-[inline]
 pub fn (v Vec3) length() f32 {
 //	return math.sqrtf(v.x * v.x + v.y * v.y + v.z * v.z)
 	return math.sqrtf(v.squared_length())
 }
 
-[inline]
 pub fn (v Vec3) unit_vector() Vec3 {
 	return div(v, v.length())
 }

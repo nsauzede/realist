@@ -5,7 +5,7 @@ import ray
 
 fn color(r ray.Ray) vec.Vec3 {
 	// println('r=$r')
-	unit_direction := r.direction().unit_vector()
+	unit_direction := r.direction.unit_vector()
 	// println('ud=$unit_direction')
 	t := .5 * (unit_direction.y + 1.0)
 	// println('t=$t')
