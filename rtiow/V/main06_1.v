@@ -5,9 +5,9 @@ import ray
 import math
 
 fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) f32 {
-	oc := r.origin() - center
-	a := r.direction().dot(r.direction())
-	b := 2.0 * oc.dot(r.direction())
+	oc := r.origin - center
+	a := r.direction.dot(r.direction)
+	b := 2.0 * oc.dot(r.direction)
 	c := oc.dot(oc) - radius * radius
 	discriminant := b * b - 4.0 * a * c
 	// println('a=$a b=$b c=$c d=$discriminant')
@@ -25,7 +25,7 @@ fn color(r ray.Ray) vec.Vec3 {
 		n := (r.point_at_parameter(t) - vec.Vec3{0, 0, -1}).unit_vector()
 		return vec.mult(.5, n + vec.Vec3{1, 1, 1})
 	}
-	unit_direction := r.direction().unit_vector()
+	unit_direction := r.direction.unit_vector()
 	t = .5 * (unit_direction.y + 1.0)
 	return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 }

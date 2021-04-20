@@ -435,16 +435,13 @@ func main() {
 			panic(err)
 		}
 		defer fout.Close()
-		nbytes = 3 * nx * ny
-		bytes = make([]byte, nbytes)
 	}
-	if fnameout != "" {
-//		fmt.Printf("P6\n")
-	} else {
-		fmt.Printf("P3\n")
-		fmt.Printf("%d %d\n", nx, ny)
-		fmt.Printf("%d\n", 255)
-	}
+	nbytes = 3 * nx * ny
+	bytes = make([]byte, nbytes)
+	buf := bufio.NewWriter(fout)
+	fmt.Fprintf(buf,"P6\n")
+	fmt.Fprintf(buf,"%d %d\n", nx, ny)
+	fmt.Fprintf(buf,"%d\n", 255)
 	world := random_scene()
 	lookfrom := Vec3{9, 2, 2.6}
 	lookat := Vec3{3, .8, 1}
@@ -470,26 +467,11 @@ func main() {
 			ir := int(255.99 * col[0])
 			ig := int(255.99 * col[1])
 			ib := int(255.99 * col[2])
-			if fnameout != "" {
-				bytes[(j * nx + i) * 3 + 0] = byte(ir)
-				bytes[(j * nx + i) * 3 + 1] = byte(ig)
-				bytes[(j * nx + i) * 3 + 2] = byte(ib)
-			} else {
-//				fmt.Fprintf(buf, "%d %d %d  ", ir, ig, ib)
-				fmt.Printf("%d %d %d  ", ir, ig, ib)
-			}
-		}
-		if fnameout == "" {
-//			fmt.Fprintf(buf, "\n")
-			fmt.Printf("\n")
+			bytes[((ny - 1 - j) * nx + i) * 3 + 0] = byte(ir)
+			bytes[((ny - 1 - j) * nx + i) * 3 + 1] = byte(ig)
+			bytes[((ny - 1 - j) * nx + i) * 3 + 2] = byte(ib)
 		}
 	}
-	if fnameout != "" {
-		buf := bufio.NewWriter(fout)
-		fmt.Fprintf(buf, "P6\n")
-		fmt.Fprintf(buf, "%d %d\n", nx, ny)
-		fmt.Fprintf(buf, "%d\n", 255)
-		buf.Write(bytes)
-	}
+	buf.Write(bytes)
 //	buf.Flush()
 }

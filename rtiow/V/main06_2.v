@@ -4,35 +4,26 @@ import vec
 import ray
 import math
 
-enum HType {
-	sphere
-}
-
-struct HSphere {
+struct Sphere {
 	center vec.Vec3
 	radius f32
 }
 
-union HData {
-	sphere HSphere
-}
+struct NullHittable {}
 
-struct Hittable {
-	htype HType
-	data  HData
-}
+type Hittable = NullHittable | Sphere
 
 struct HitRec {
 mut:
-	t      f32 // hit time
+	t      f32      // hit time
 	p      vec.Vec3 // hit point coords
 	normal vec.Vec3 // normal at hit point
 }
 
-fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
-	oc := r.origin() - s.center
-	a := r.direction().dot(r.direction())
-	b := oc.dot(r.direction())
+fn (s Sphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
+	oc := r.origin - s.center
+	a := r.direction.dot(r.direction)
+	b := oc.dot(r.direction)
 	c := oc.dot(oc) - s.radius * s.radius
 	discriminant := b * b - a * c
 	if discriminant > 0 {
@@ -54,9 +45,13 @@ fn (s HSphere) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 	return false
 }
 
+[inline]
 fn (h Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
-	if h.htype == .sphere {
-		return h.data.sphere.hit(r, t_min, t_max, mut rec)
+	match h {
+		Sphere {
+			return h.hit(r, t_min, t_max, mut rec)
+		}
+		NullHittable {}
 	}
 	return false
 }
@@ -77,30 +72,20 @@ fn (hh []Hittable) hit(r ray.Ray, t_min f32, t_max f32, mut rec HitRec) bool {
 fn color(r ray.Ray) vec.Vec3 {
 	mut rec := HitRec{}
 	hittables := [
-		Hittable{
-			htype: .sphere
-			data: HData{
-				sphere: HSphere{
-					center: vec.Vec3{0, 0, -1}
-					radius: .5
-				}
-			}
-		},
-		Hittable{
-			htype: .sphere
-			data: HData{
-				sphere: HSphere{
-					center: vec.Vec3{0, -100.5, -1}
-					radius: 100
-				}
-			}
+		Hittable(Sphere{
+			center: vec.Vec3{0, 0, -1}
+			radius: .5
+		}),
+		Sphere{
+			center: vec.Vec3{0, -100.5, -1}
+			radius: 100
 		},
 	]
 	if hittables.hit(r, 0, 99999, mut rec) {
 		// println('t=$rec.t')
 		return vec.mult(0.5, rec.normal + vec.Vec3{1, 1, 1})
 	} else {
-		unit_direction := r.direction().unit_vector()
+		unit_direction := r.direction.unit_vector()
 		t := .5 * (unit_direction.y + 1.0)
 		return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 	}

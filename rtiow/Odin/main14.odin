@@ -571,12 +571,10 @@ when ODIN_OS == "windows" {
 			fmt.printf("File open error\n");
 			os.exit(1);
 		}
-		os.write_string(fout, "P6\n");
-		nbytes := 3 * ny * nx;
-		bytes = make([]byte, nbytes);
-	} else {
-		fmt.fprintf(fout, "P3\n");
 	}
+	os.write_string(fout, "P6\n");
+	nbytes := 3 * ny * nx;
+	bytes = make([]byte, nbytes);
 	fmt.fprintf(fout, "%d %d\n", nx, ny);
 	fmt.fprintf(fout, "%d\n", 255);
 	world := random_scene();
@@ -600,22 +598,15 @@ when ODIN_OS == "windows" {
 			ir := int(255.99 * col[0]);
 			ig := int(255.99 * col[1]);
 			ib := int(255.99 * col[2]);
-			if fnameout != "" {
-				bytes[((ny -1 - j) * nx + i) * 3 + 0] = u8(ir);
-				bytes[((ny -1 - j) * nx + i) * 3 + 1] = u8(ig);
-				bytes[((ny -1 - j) * nx + i) * 3 + 2] = u8(ib);
-			} else {
-				fmt.fprintf(fout, "%d %d %d  ", ir, ig, ib);
-			}
-		}
-		if fnameout == "" {
-			fmt.fprintf(fout, "\n");
+			bytes[((ny -1 - j) * nx + i) * 3 + 0] = u8(ir);
+			bytes[((ny -1 - j) * nx + i) * 3 + 1] = u8(ig);
+			bytes[((ny -1 - j) * nx + i) * 3 + 2] = u8(ib);
 		}
 	}
+	os.write(fout, bytes);
 	if fnameout != "" {
-		os.write(fout, bytes);
 		os.close(fout);
-		delete(bytes);
 	}
+	delete(bytes);
 	delete(world);
 }

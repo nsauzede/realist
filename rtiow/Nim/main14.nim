@@ -289,13 +289,11 @@ if arg <= argc:
 
 var bytes: seq[byte]
 var nbytes = 0
-if fnameout == "":
-    fout.write("P3\n")
-else:
+if fnameout != "":
     fout = open(fnameout, fmWrite)
-    fout.write("P6\n")
-    nbytes = 3 * ny * nx
-    bytes.newSeq(nbytes)
+fout.write("P6\n")
+nbytes = 3 * ny * nx
+bytes.newSeq(nbytes)
 
 fout.write(&"{nx} {ny}\n255\n")
 
@@ -331,14 +329,10 @@ for j in countdown(ny - 1, 0):
         var ir = uint8(255.99f * col.x)
         var ig = uint8(255.99f * col.y)
         var ib = uint8(255.99f * col.z)
-        if fnameout == "":
-            fout.write(&"{ir} {ig} {ib}  ")
-        else:
-            bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir
-            bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig
-            bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib
-    if fnameout == "":
-        echo ""
+        bytes[((ny - 1 - j) * nx + i) * 3 + 0] = ir
+        bytes[((ny - 1 - j) * nx + i) * 3 + 1] = ig
+        bytes[((ny - 1 - j) * nx + i) * 3 + 2] = ib
+if fout.writeBuffer(addr bytes[0], nbytes) != nbytes:
+    echo("Can't write")
 if fnameout != "":
-    if fout.writeBuffer(addr bytes[0], nbytes) != nbytes:
-        echo("Can't write")
+    fout.close()

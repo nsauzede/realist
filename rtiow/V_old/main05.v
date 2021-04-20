@@ -2,31 +2,27 @@ module main
 
 import vec
 import ray
-import math
 
-fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) f32 {
-	oc := r.origin - center
-	a := r.direction.dot(r.direction)
-	b := 2.0 * oc.dot(r.direction)
+fn hit_sphere(center vec.Vec3, radius f32, r ray.Ray) bool {
+	oc := r.origin() - center
+	// println('oc=$oc')
+	a := r.direction().dot(r.direction())
+	b := 2.0 * oc.dot(r.direction())
 	c := oc.dot(oc) - radius * radius
 	discriminant := b * b - 4.0 * a * c
 	// println('a=$a b=$b c=$c d=$discriminant')
-	if discriminant < 0 {
-		return -1.0
-	} else {
-		return (-b - math.sqrtf(discriminant)) / (2.0 * a)
-	}
+	return discriminant > 0
 }
 
 fn color(r ray.Ray) vec.Vec3 {
-	mut t := hit_sphere(vec.Vec3{0, 0, -1}, .5, r)
-	if t > 0 {
-		// println('t=$t')
-		n := (r.point_at_parameter(t) - vec.Vec3{0, 0, -1}).unit_vector()
-		return vec.mult(.5, n + vec.Vec3{1, 1, 1})
+	// next 2 lines to workaround buggy AST v2 compiler
+	x := vec.Vec3{0, 0, -1}
+	if hit_sphere(x, 0.5, r) {
+		// if hit_sphere(vec.Vec3{0, 0, -1}, 0.5, r) {
+		return vec.Vec3{1, 0, 0}
 	}
-	unit_direction := r.direction.unit_vector()
-	t = .5 * (unit_direction.y + 1.0)
+	unit_direction := r.direction().unit_vector()
+	t := .5 * (unit_direction.y + 1.0)
 	return vec.mult(1.0 - t, vec.Vec3{1, 1, 1}) + vec.mult(t, vec.Vec3{.5, .7, 1})
 }
 

@@ -14,11 +14,11 @@ check: $(PPM)
 bench: main14.elf
 	time ./main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
 
-VFLAGS+=--enable-globals
 #DEBUG:=1
+VFLAGS+=--enable-globals
+#VFLAGS+=-profile profile.txt
 ifdef DEBUG
 VFLAGS+=-d dbg
-#VFLAGS+=-profile profile.txt
 else
 # OPT:=-O3
 # OPT:=-Ofast -fno-plt -flto -DNDEBUG
