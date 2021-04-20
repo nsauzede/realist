@@ -104,6 +104,18 @@ function Material:scatter(ray_in: Ray, rec: HitRec, attenuation: pointer(Vec3), 
     return false
 end
 
+function Material:__tostring(): string
+    switch self.kind
+        case MATERIALS.LAMBERTIAN then
+            return string.format('&Material(Lambertian{\n    albedo: %s\n})', self.albedo)
+        case MATERIALS.METAL then
+            return string.format('&Material(Metal{\n    albedo: %s\n})', self.albedo)
+        -- case MATERIALS.DI then
+        --     return string.format('&Material(Metal{\n\talbedo: %s})', self.albedo)
+    end
+    return ""
+end
+
 local function get_ray(cam: Camera, u: float32, v: float32): Ray
     return Ray{cam.origin, cam.lower_left_corner + u*cam.horizontal +
                 v*cam.vertical}
@@ -122,6 +134,8 @@ local function hit_sphere(sphere: pointer(Hittable), r: Ray, t_min: float32, t_m
             rec.p = r:point_at_parameter(rec.t)
             rec.normal = (rec.p - sphere.center) / sphere.radius
             rec.mat = &sphere.material
+            -- io.writef('mat type %s ptr %p\n', sphere.material, rec.mat)
+            -- io.writef('mat type %s\n', sphere.material)
             return true
         end
         temp = (-b + math.sqrt(discriminant)) / a
@@ -130,6 +144,8 @@ local function hit_sphere(sphere: pointer(Hittable), r: Ray, t_min: float32, t_m
             rec.p = r:point_at_parameter(rec.t)
             rec.normal = (rec.p - sphere.center) / sphere.radius
             rec.mat = &sphere.material
+            -- io.writef('mat type %s ptr %p\n', sphere.material, rec.mat)
+            -- io.writef('mat type %s\n', sphere.material)
             return true
         end
     end
@@ -155,6 +171,7 @@ local function color(r: Ray, world: span(Hittable), depth: int32): Vec3
     if hit(world, r, 0.001, FLT_MAX, &rec) then
         local scattered: Ray
         local attenuation: Vec3
+        -- io.writef('%s\n', $rec.mat)
         if depth < 50 and rec.mat:scatter(r, rec, attenuation, scattered) then
             return vmul(attenuation, color(scattered, world, depth + 1))
         else
@@ -189,7 +206,8 @@ local world: []Hittable = {
     {HITTABLES.SPHERE, {-1, 0, -1}, 0.5, Material{MATERIALS.METAL, Vec3{0.8, 0.8, 0.8}}},
 }
 -- for i=0,<#world do
---     print(&world[i].material)
+    -- print(&world[i].material)
+    -- print(world[i])
 -- end
 local cam = Camera{
     Vec3{0, 0, 0},

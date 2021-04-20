@@ -19,14 +19,6 @@ print('hello debug')
 
 local FLT_MAX <const> = 340282346638528859811704183484516925440.000000_float32
 
-local Lambertian: type = @record{
-    albedo: Vec3,
-}
-local Metal: type = @record{
-    albedo: Vec3,
-    fuzz: float32,
-}
-
 local MATERIALS = @enum {
     LAMBERTIAN = 0,
     METAL = 1,
@@ -45,12 +37,6 @@ local HitRec: type = @record{
     p: Vec3,
     normal: Vec3,
     mat: *Material,
-}
-
-local HSphere: type = @record{
-    center: Vec3,
-    radius: float32,
-    material: Material,
 }
 
 local HITTABLES = @enum {
