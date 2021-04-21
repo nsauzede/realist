@@ -7,7 +7,7 @@ DIRS+=V
 DIRS+=CPP
 DIRS+=Odin
 #DIRS+=V_old
-DIRS+=Go
+#DIRS+=Go
 TARGETS:=$(patsubst %,%/main14.elf,$(DIRS))
 
 all: $(TARGETS)
@@ -17,6 +17,17 @@ all: $(TARGETS)
 
 bench: all
 	for d in $(DIRS); do make -C $$d bench; done
+
+#./main14.elf 1024 768 10 main14.ppm
+#HYP:=$(patsubst %,'cd %;./main14.elf 1024 768 10 main14.ppm',$(DIRS))
+HYP:=$(patsubst %,'cd %;./main14.elf 800 600 8 main14.ppm',$(DIRS))
+#HYP:=$(patsubst %,'cd %;./main14.elf 640 480 10 main14.ppm',$(DIRS))
+#HYP:='echo 1' 'echo 2' 'echo 3'
+bench2: all
+	echo "HYP=$(HYP)"
+#	for c in "$(HYP)"; do echo "c=$$c"; done
+#	hyperfine --warmup 2 $(HYP)
+	hyperfine $(HYP)
 
 clean:
 	$(RM) $(TARGETS)
