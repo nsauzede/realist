@@ -1,10 +1,18 @@
 SRC:=$(wildcard main*.zig)
+EXE:=$(patsubst %.zig,%.elf,$(SRC))
 PPM:=$(patsubst %.zig,%.ppm,$(SRC))
 
 ZIG=zig
 
-all: $(PPM)
+all: $(EXE)
+	du -sh .
+
+check: $(PPM)
 	md5sum *.ppm
+	md5sum *.ppm | md5sum
+
+bench: main14.elf
+	time ./main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
 
 #OPT=-O
 #OPT=-O0 -g

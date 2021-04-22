@@ -1,10 +1,13 @@
 # Ray tracing in one weekend
 See here : https://raytracing.github.io
 This repo contains my experiments following the excellent book above,
-implemented in Rust, Nelua, Nim, C, V, C++, Odin and Go. (sorted by runtime perf)
+implemented in Rust, Nelua, Nim, C, V, C++, Odin ~~and Go~~. (sorted by runtime perf)
 
 Note : the current C perf is poor, probably because it's mostly a dirty port of the C++ design,
 with vtables to simulates OOP constructs. A rework in underway to try and get decent perfs.
+
+Note : now that I added superfine support and its 10 runs, I removed Go from the benchmark as it
+takes 5x longer than the other slowest lang, until I (or someone) can fix its impl to get decent speed.
 
 # rtiow
 Benchmark :
