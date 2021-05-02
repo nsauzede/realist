@@ -38,6 +38,7 @@ clobber: clean
 mrproper: clobber
 	$(RM) *.ppm
 	for d in $(DIRS); do make -C $$d clean; done
+	make -C Forth clean
 	make -C C2 clean
 	make -C V_old clean
 	make -C Go clean
