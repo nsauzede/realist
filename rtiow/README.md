@@ -40,3 +40,8 @@ make[1]: Entering directory '/home/nico/perso/git/realist/rtiow/Go'
 time ./main14.elf 1024 768 10 main14.ppm && md5sum main14.ppm
 329.23user 2.03system 5:28.69elapsed 100%CPU (0avgtext+0avgdata 10104maxresident)k
 ```
+
+It can help to first do:
+```
+sudo cpupower frequency-set -g performance
+```

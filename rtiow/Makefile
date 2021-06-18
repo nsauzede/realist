@@ -1,7 +1,7 @@
 DIRS:=
 DIRS+=Rust
 DIRS+=Nelua
-DIRS+=Nim
+#DIRS+=Nim
 DIRS+=C
 DIRS+=V
 DIRS+=CPP
