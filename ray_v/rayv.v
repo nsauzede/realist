@@ -32,7 +32,7 @@ const (
 
 fn solve_tri(a f64, b f64, c f64, mut t [2]f64) int {
 	mut sol := 0
-	d := b * b - f64(4.) * a * c
+	d := b * b - f64(4.0) * a * c
 	if d > 0 {
 		sd := math.sqrt(d)
 		t[0] = (-b - sd) / 2 / a
@@ -51,7 +51,7 @@ fn intersec(s &f64, o vec.Vector, v vec.Vector) f64 {
 	rad := unsafe { s[3] }
 	vt := o.sub(center)
 	a := v.dot(v)
-	b := f64(2.) * v.dot(vt)
+	b := f64(2.0) * v.dot(vt)
 	c := vt.dot(vt) - rad * rad
 	mut t12 := [2]f64{}
 	sol := solve_tri(a, b, c, mut t12)
