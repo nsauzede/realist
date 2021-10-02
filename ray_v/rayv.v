@@ -74,7 +74,7 @@ fn trace(scene &Scene, o vec.Vector, v vec.Vector) RgbColor {
 		t := intersec(&f64(s.points), o, v)
 		if t > 0 && t < tmin {
 			tmin = t
-			unsafe { C.memcpy(omin, s.points, sizeof(omin)) }
+			unsafe { C.memcpy(voidptr(omin), voidptr(s.points), sizeof(omin)) }
 		}
 	}
 	if tmin < huge_val {
@@ -146,7 +146,7 @@ fn render(w int, h int, fnameout string) ? {
 					bytes[(j * w + i) * 3 + 2] = byte(bb)
 				}
 			} else {
-				picture_string.write('${rr:2d} ${gg:2d} ${bb:2d}   ')
+				picture_string.write_string('${rr:2d} ${gg:2d} ${bb:2d}   ')
 			}
 		}
 		if fnameout == '' {
@@ -156,7 +156,7 @@ fn render(w int, h int, fnameout string) ? {
 	if fnameout == '' {
 		print(picture_string.str())
 	} else {
-		fout.write_bytes(bytes, nbytes)
+		fout.write_ptr(bytes, nbytes)
 		fout.close()
 		unsafe {
 			free(bytes)
