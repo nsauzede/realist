@@ -32,7 +32,7 @@ const (
 
 fn solve_tri(a f64, b f64, c f64, mut t [2]f64) int {
 	mut sol := 0
-	d := b * b - f64(4.) * a * c
+	d := b * b - f64(4.0) * a * c
 	if d > 0 {
 		sd := math.sqrt(d)
 		t[0] = (-b - sd) / 2 / a
@@ -51,7 +51,7 @@ fn intersec(s &f64, o vec.Vector, v vec.Vector) f64 {
 	rad := unsafe { s[3] }
 	vt := o.sub(center)
 	a := v.dot(v)
-	b := f64(2.) * v.dot(vt)
+	b := f64(2.0) * v.dot(vt)
 	c := vt.dot(vt) - rad * rad
 	mut t12 := [2]f64{}
 	sol := solve_tri(a, b, c, mut t12)
@@ -71,10 +71,10 @@ fn trace(scene &Scene, o vec.Vector, v vec.Vector) RgbColor {
 	mut tmin := huge_val
 	mut omin := [7]f64{}
 	for s in scene.objects {
-		t := intersec(&f64(s.points), o, v)
+		t := intersec(&s.points[0], o, v)
 		if t > 0 && t < tmin {
 			tmin = t
-			unsafe { C.memcpy(omin, s.points, sizeof(omin)) }
+			unsafe { C.memcpy(&omin[0], &s.points[0], sizeof(omin)) }
 		}
 	}
 	if tmin < huge_val {
@@ -121,7 +121,7 @@ fn render(w int, h int, fnameout string) ? {
 	if fnameout != '' {
 		fout.writeln('P6') ?
 		nbytes = 3 * h * w
-		bytes = malloc(nbytes)
+		bytes = unsafe{malloc(nbytes)}
 		fout.writeln('$w $h') ?
 		fout.writeln('$max') ?
 	} else {
@@ -146,7 +146,7 @@ fn render(w int, h int, fnameout string) ? {
 					bytes[(j * w + i) * 3 + 2] = byte(bb)
 				}
 			} else {
-				picture_string.write('${rr:2d} ${gg:2d} ${bb:2d}   ')
+				picture_string.write_string('${rr:2d} ${gg:2d} ${bb:2d}   ')
 			}
 		}
 		if fnameout == '' {
@@ -156,13 +156,13 @@ fn render(w int, h int, fnameout string) ? {
 	if fnameout == '' {
 		print(picture_string.str())
 	} else {
-		fout.write_bytes(bytes, nbytes)
+		unsafe{fout.write_ptr(bytes, nbytes)}
 		fout.close()
 		unsafe {
 			free(bytes)
 		}
 	}
-	picture_string.free()
+	unsafe{picture_string.free()}
 }
 
 fn main() {
