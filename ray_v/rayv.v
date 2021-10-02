@@ -71,10 +71,10 @@ fn trace(scene &Scene, o vec.Vector, v vec.Vector) RgbColor {
 	mut tmin := huge_val
 	mut omin := [7]f64{}
 	for s in scene.objects {
-		t := intersec(&f64(s.points), o, v)
+		t := intersec(&s.points[0], o, v)
 		if t > 0 && t < tmin {
 			tmin = t
-			unsafe { C.memcpy(voidptr(omin), voidptr(s.points), sizeof(omin)) }
+			unsafe { C.memcpy(&omin[0], &s.points[0], sizeof(omin)) }
 		}
 	}
 	if tmin < huge_val {
@@ -121,7 +121,7 @@ fn render(w int, h int, fnameout string) ? {
 	if fnameout != '' {
 		fout.writeln('P6') ?
 		nbytes = 3 * h * w
-		bytes = malloc(nbytes)
+		bytes = unsafe{malloc(nbytes)}
 		fout.writeln('$w $h') ?
 		fout.writeln('$max') ?
 	} else {
@@ -156,13 +156,13 @@ fn render(w int, h int, fnameout string) ? {
 	if fnameout == '' {
 		print(picture_string.str())
 	} else {
-		fout.write_ptr(bytes, nbytes)
+		unsafe{fout.write_ptr(bytes, nbytes)}
 		fout.close()
 		unsafe {
 			free(bytes)
 		}
 	}
-	picture_string.free()
+	unsafe{picture_string.free()}
 }
 
 fn main() {
