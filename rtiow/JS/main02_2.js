@@ -18,5 +18,6 @@ function main02_2() {
             }
         }
         ctx.putImageData(image, 0, 0);
+        println(`Done.`);
     }
 }
