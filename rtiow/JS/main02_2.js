@@ -1,6 +1,7 @@
 function main02_2() {
+    const func = arguments.callee.name || "anonymous";
     cls();
-    println(`main02_2`);
+    println(`${func}`);
     var canvas = document.getElementById('canvas');
     const w = canvas.width;
     const h = canvas.height;
@@ -18,6 +19,6 @@ function main02_2() {
             }
         }
         ctx.putImageData(image, 0, 0);
-        println(`Done.`);
+        println(`Done. ${func}`);
     }
 }
