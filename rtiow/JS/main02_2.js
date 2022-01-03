@@ -1,5 +1,6 @@
 function main02_2() {
     cls();
+    println(`main02_2`);
     var canvas = document.getElementById('canvas');
     const w = canvas.width;
     const h = canvas.height;

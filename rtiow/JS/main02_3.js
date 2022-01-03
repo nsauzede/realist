@@ -1,11 +1,12 @@
 function main02_3() {
+    cls();
+    println(`main02_2`);
     var canvas = document.getElementById('canvas');
     const w = canvas.width;
     const h = canvas.height;
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d', { alpha: false });
         image = ctx.getImageData(0, 0, w, h);
-        cls();
         for (let j = 0; j < h; j++) {
             println(`Scanlines remaining: ${h - j}`);
             for (let i = 0; i < w; i++) {
