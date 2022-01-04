@@ -20,6 +20,7 @@ function setup() {
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d', { alpha: false });
         var zctx = zcanvas.getContext('2d', { alpha: false });
+        zctx.imageSmoothingEnabled = false;
         image = ctx.getImageData(0, 0, w, h);
         for (let j = 0; j < (h - 1); j++) {
             for (let i = 0; i < (w - 1); i++) {
@@ -49,11 +50,13 @@ function setup() {
             const rect = event.target.getBoundingClientRect();
             var x = event.layerX - rect.left;
             var y = event.layerY - rect.top;
-            const ww = w / 4;
-            const hh = h / 4;
-            if (x + ww > zw) x = w - ww;
-            if (y + hh > zh) y = h - hh;
-            zctx.drawImage(canvas, x, y, ww, hh, 0, 0, zw, zh);
+            const ww = w / 5;
+            const hh = h / 5;
+            if (x - ww / 2 < 0) x = ww / 2;
+            if (y - hh / 2 < 0) y = hh / 2;
+            if (x + ww / 2 > zw) x = zw - ww / 2;
+            if (y + hh / 2 > zh) y = zh - hh / 2;
+            zctx.drawImage(canvas, x - ww / 2, y - hh / 2, ww, hh, 0, 0, zw, zh);
         }
         canvas.addEventListener('mousemove', function (event) {
             pick(event, hoveredColor);
