@@ -1,3 +1,4 @@
+const infinity = Number.POSITIVE_INFINITY;
 function cls(s) {
     document.getElementById('log').textContent = "";
 }
@@ -11,10 +12,14 @@ function print(s) {
 function setup() {
     document.getElementById('log').textContent = "Ready.";
     var canvas = document.getElementById('canvas');
+    var zcanvas = document.getElementById('zcanvas');
     const w = canvas.width;
     const h = canvas.height;
+    const zw = zcanvas.width;
+    const zh = zcanvas.height;
     if (canvas.getContext) {
         var ctx = canvas.getContext('2d', { alpha: false });
+        var zctx = zcanvas.getContext('2d', { alpha: false });
         image = ctx.getImageData(0, 0, w, h);
         for (let j = 0; j < (h - 1); j++) {
             for (let i = 0; i < (w - 1); i++) {
@@ -40,8 +45,19 @@ function setup() {
             destination.style.background = rgba;
             destination.textContent = `${x} ${y} ${rgba}`;
         }
+        function zoom(event) {
+            const rect = event.target.getBoundingClientRect();
+            var x = event.layerX - rect.left;
+            var y = event.layerY - rect.top;
+            const ww = w / 4;
+            const hh = h / 4;
+            if (x + ww > zw) x = w - ww;
+            if (y + hh > zh) y = h - hh;
+            zctx.drawImage(canvas, x, y, ww, hh, 0, 0, zw, zh);
+        }
         canvas.addEventListener('mousemove', function (event) {
             pick(event, hoveredColor);
+            zoom(event);
         });
         canvas.addEventListener('click', function (event) {
             pick(event, selectedColor);

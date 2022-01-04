@@ -1,29 +1,37 @@
 function main06_7() {
-    function hit_sphere(d, r) {
+    function hit_sphere(d, r, tmin, tmax, rec) {
         const center = d[0], radius = d[1];
         const oc = vsub(r.orig, center);
         const a = dot(r.dir, r.dir);
         const hb = dot(oc, r.dir);
         const c = dot(oc, oc) - radius * radius;
         const discriminant = hb * hb - a * c;
-        if (discriminant < 0) {
-            return -1.0;
-        } else {
-            return (-hb - Math.sqrt(discriminant)) / a;
+        if (discriminant < 0) return false;
+        const sqrtd = Math.sqrt(discriminant);
+        var root = (-hb - sqrtd) / a;
+        if (root < tmin || root > tmax) {
+            root = (-hb + sqrtd) / a;
+            if (root < tmin || root > tmax) {
+                return false;
+            }
         }
+        rec.t = root;
+        rec.p = rat(r, rec.t);
+        rec.normal = vdiv(vsub(rec.p, center), radius);
+        return true;
     }
     function ray_color(r, world) {
         var ret = 0;
         for (const h of world) {
             if (h.t === 'sphere') {
                 // println(`hitting sphere ${h}`)
-                var t = hit_sphere(h.d, r);
-                if (t > 0.0) {
-                    const N = unit_vector(vsub(rat(r, t), new Float32Array([0, 0, -1])));
-                    return vmul(0.5, vadd(N, new Float32Array([1, 1, 1])));
+                var temp_rec = {};
+                if (hit_sphere(h.d, r, 0, infinity, temp_rec)) {
+                    return vmul(0.5, vadd(temp_rec.normal, new Float32Array([1, 1, 1])));
                 }
             }
         }
+
         const unit_direction = unit_vector(r.dir);
         t = 0.5 * (unit_direction[1] + 1.0);
         return new Float32Array([1.0 - t + 0.5 * t, 1.0 - t + 0.7 * t, 1.0]);
