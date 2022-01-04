@@ -6,15 +6,15 @@ function hit_sphere(center, radius, r) {
     const discriminant = b * b - 4 * a * c;
     return discriminant > 0.0;
 }
-function ray_color(r) {
-    if (hit_sphere(new Float32Array([0, 0, -1]), 0.5, r)) {
-        return new Float32Array([1, 0, 0]);
-    }
-    const unit_direction = unit_vector(r.dir);
-    const t = 0.5 * (unit_direction[1] + 1.0);
-    return new Float32Array([1.0 - t + 0.5 * t, 1.0 - t + 0.7 * t, 1.0]);
-}
 function main05_2() {
+    function ray_color(r) {
+        if (hit_sphere(new Float32Array([0, 0, -1]), 0.5, r)) {
+            return new Float32Array([1, 0, 0]);
+        }
+        const unit_direction = unit_vector(r.dir);
+        const t = 0.5 * (unit_direction[1] + 1.0);
+        return new Float32Array([1.0 - t + 0.5 * t, 1.0 - t + 0.7 * t, 1.0]);
+    }
     const func = arguments.callee.name || "anonymous";
     cls();
     println(`${func}`);
@@ -34,12 +34,8 @@ function main05_2() {
         const horizontal = new Float32Array([viewport_width, 0, 0]);
         const vertical = new Float32Array([0, viewport_height, 0]);
         const lower_left_corner = vsub(vsub(vsub(origin, vdiv(horizontal, 2.0)), vdiv(vertical, 2.0)), new Float32Array([0, 0, focal_length]));
-        println(`origin=${origin}`)
-        println(`horizontal=${horizontal}`)
-        println(`vertical=${vertical}`)
-        println(`lower_left_corner=${lower_left_corner}`)
         for (let j = 0; j < h; j++) {
-            // println(`Scanlines remaining: ${h - j - 1}`);
+            println(`Scanlines remaining: ${h - j - 1}`);
             for (let i = 0; i < w; i++) {
                 const u = parseFloat(i) / (w - 1);
                 const v = parseFloat(h - 1 - j) / (h - 1);

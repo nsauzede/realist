@@ -1,14 +1,14 @@
-function main06_1() {
+function main06_7() {
     function hit_sphere(center, radius, r) {
         const oc = vsub(r.orig, center);
         const a = dot(r.dir, r.dir);
-        const b = 2.0 * dot(oc, r.dir);
+        const hb = dot(oc, r.dir);
         const c = dot(oc, oc) - radius * radius;
-        const discriminant = b * b - 4 * a * c;
+        const discriminant = hb * hb - a * c;
         if (discriminant < 0) {
             return -1.0;
         } else {
-            return (-b - Math.sqrt(discriminant)) / (2.0 * a);
+            return (-hb - Math.sqrt(discriminant)) / a;
         }
     }
     function ray_color(r) {

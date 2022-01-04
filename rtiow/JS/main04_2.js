@@ -1,10 +1,9 @@
-function ray_color(r) {
-    const unit_direction = unit_vector(r.dir);
-    const t = 0.5 * (unit_direction[1] + 1.0);
-    // return (1.0-t)*
-    return new Float32Array([1.0 - t + 0.5 * t, 1.0 - t + 0.7 * t, 1.0]);
-}
 function main04_2() {
+    function ray_color(r) {
+        const unit_direction = unit_vector(r.dir);
+        const t = 0.5 * (unit_direction[1] + 1.0);
+        return new Float32Array([1.0 - t + 0.5 * t, 1.0 - t + 0.7 * t, 1.0]);
+    }
     const func = arguments.callee.name || "anonymous";
     cls();
     println(`${func}`);
