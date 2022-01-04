@@ -1,4 +1,4 @@
-function main07_2() {
+function main08_2() {
     function hit_sphere(d, r, tmin, tmax, rec) {
         const center = d[0], radius = d[1];
         const oc = vsub(r.orig, center);
@@ -20,13 +20,15 @@ function main07_2() {
         rec.normal = vdiv(vsub(rec.p, center), radius);
         return true;
     }
-    function ray_color(r, world) {
+    function ray_color(r, world, depth) {
+        if (depth <= 0) return new Float32Array([0, 0, 0]);
         var ret = 0;
         for (const h of world) {
             if (h.t === 'sphere') {
-                var temp_rec = {};
-                if (hit_sphere(h.d, r, 0, infinity, temp_rec)) {
-                    return vmul(0.5, vadd(temp_rec.normal, new Float32Array([1, 1, 1])));
+                var rec = {};
+                if (hit_sphere(h.d, r, 0, infinity, rec)) {
+                    const target = vadd(rec.p, vadd(rec.normal, random_in_unit_sphere()));
+                    return vmul(0.5, ray_color({ orig: rec.p, dir: vsub(target, rec.p) }, world, depth - 1));
                 }
             }
         }
@@ -48,7 +50,8 @@ function main07_2() {
         const image_width = w;
         const image_height = h;
         const samples_per_pixel = document.getElementById('spp').value;
-        println(`using ${samples_per_pixel} SPP`);
+        const max_depth = document.getElementById('max_depth').value;
+        println(`using ${samples_per_pixel} SPP, ${max_depth} max depth`);
         const sppscale = 1.0 / samples_per_pixel;
         // world
         const world = [{ t: 'sphere', d: [[0, 0, -1], 0.5] }, { t: 'sphere', d: [[0, -100.5, -1], 100] }];
@@ -68,7 +71,7 @@ function main07_2() {
                     const u = (parseFloat(i) + random_double()) / (w - 1);
                     const v = (parseFloat(h - 1 - j) + random_double()) / (h - 1);
                     const r = { orig: origin, dir: vsub(vadd(vadd(lower_left_corner, vmul(u, horizontal)), vmul(v, vertical)), origin) };
-                    pixel_color = vadd(pixel_color, ray_color(r, world));
+                    pixel_color = vadd(pixel_color, ray_color(r, world, max_depth));
                 }
                 image.data[(j * w + i) * 4 + 0] = 255.999 * pixel_color[0] * sppscale;
                 image.data[(j * w + i) * 4 + 1] = 255.999 * pixel_color[1] * sppscale;

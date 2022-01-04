@@ -1,13 +1,15 @@
 const infinity = Number.POSITIVE_INFINITY;
 function cls(s) {
-    document.getElementById('log').textContent = "";
+    // document.getElementById('log').textContent = "";
 }
 function println(s) {
     // document.getElementById('log').textContent += s + `\r\n`;
-    document.getElementById('log').textContent = s + `\r\n` + document.getElementById('log').textContent;
+    // document.getElementById('log').textContent = s + `\r\n` + document.getElementById('log').textContent;
+    console.log(s);
 }
 function print(s) {
-    document.getElementById('log').textContent += s;
+    // document.getElementById('log').textContent += s;
+    console.log(s);
 }
 function setup() {
     document.getElementById('log').textContent = "Ready.";
