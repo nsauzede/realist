@@ -49,6 +49,9 @@ function main07_2() {
         const aspect_ratio = 16.0 / 9.0;
         const image_width = w;
         const image_height = h;
+        const samples_per_pixel = document.getElementById('spp').value;
+        println(`using ${samples_per_pixel} SPP`);
+        const sppscale = 1.0 / samples_per_pixel;
         // world
         const world = [{ t: 'sphere', d: [[0, 0, -1], 0.5] }, { t: 'sphere', d: [[0, -100.5, -1], 100] }];
         // camera
@@ -60,15 +63,18 @@ function main07_2() {
         const vertical = new Float32Array([0, viewport_height, 0]);
         const lower_left_corner = vsub(vsub(vsub(origin, vdiv(horizontal, 2.0)), vdiv(vertical, 2.0)), new Float32Array([0, 0, focal_length]));
         for (let j = 0; j < h; j++) {
-            println(`Scanlines remaining: ${h - j - 1}`);
+            // println(`Scanlines remaining: ${h - j - 1}`);
             for (let i = 0; i < w; i++) {
-                const u = parseFloat(i) / (w - 1);
-                const v = parseFloat(h - 1 - j) / (h - 1);
-                const r = { orig: origin, dir: vsub(vadd(vadd(lower_left_corner, vmul(u, horizontal)), vmul(v, vertical)), origin) };
-                const pixel_color = ray_color(r, world);
-                image.data[(j * w + i) * 4 + 0] = 255.999 * pixel_color[0];
-                image.data[(j * w + i) * 4 + 1] = 255.999 * pixel_color[1];
-                image.data[(j * w + i) * 4 + 2] = 255.999 * pixel_color[2];
+                var pixel_color = new Float32Array([0, 0, 0]);
+                for (let s = 0; s < samples_per_pixel; s++) {
+                    const u = (parseFloat(i) + random_double()) / (w - 1);
+                    const v = (parseFloat(h - 1 - j) + random_double()) / (h - 1);
+                    const r = { orig: origin, dir: vsub(vadd(vadd(lower_left_corner, vmul(u, horizontal)), vmul(v, vertical)), origin) };
+                    pixel_color = vadd(pixel_color, ray_color(r, world));
+                }
+                image.data[(j * w + i) * 4 + 0] = 255.999 * pixel_color[0] * sppscale;
+                image.data[(j * w + i) * 4 + 1] = 255.999 * pixel_color[1] * sppscale;
+                image.data[(j * w + i) * 4 + 2] = 255.999 * pixel_color[2] * sppscale;
             }
         }
         ctx.putImageData(image, 0, 0);
