@@ -1,7 +1,7 @@
 # rtiow
 This is my implementation of the excellent [RTIOW ray tracing book](https://raytracing.github.io/) in :
 Rust, Nelua, Nim, C, C++, Odin, V and Go.
-NEW! An interactive Javascript version can be [explored here](https://nsauzede.github.io/realist/) (WIP)
+NEW! An interactive RTIOW Javascript version can be [explored here](https://nsauzede.github.io/realist/) (WIP, code is [here](rtiow/JS))
 
 ![C RTIOW screenshot](main14.png)
 
