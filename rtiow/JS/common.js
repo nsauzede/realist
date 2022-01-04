@@ -22,8 +22,8 @@ function setup() {
         var zctx = zcanvas.getContext('2d', { alpha: false });
         zctx.imageSmoothingEnabled = false;
         image = ctx.getImageData(0, 0, w, h);
-        for (let j = 0; j < (h - 1); j++) {
-            for (let i = 0; i < (w - 1); i++) {
+        for (let j = 0; j < h; j++) {
+            for (let i = 0; i < w; i++) {
                 const r = parseFloat(i) / (w - 1);
                 const g = parseFloat(h - 1 - j) / (h - 1);
                 const b = 0.25;
@@ -48,15 +48,38 @@ function setup() {
         }
         function zoom(event) {
             const rect = event.target.getBoundingClientRect();
-            var x = event.layerX - rect.left;
-            var y = event.layerY - rect.top;
+            var x = event.layerX - rect.left, cx = x;
+            var y = event.layerY - rect.top, cy = y;
             const ww = w / 5;
             const hh = h / 5;
-            if (x - ww / 2 < 0) x = ww / 2;
-            if (y - hh / 2 < 0) y = hh / 2;
-            if (x + ww / 2 > zw) x = zw - ww / 2;
-            if (y + hh / 2 > zh) y = zh - hh / 2;
-            zctx.drawImage(canvas, x - ww / 2, y - hh / 2, ww, hh, 0, 0, zw, zh);
+            if (x - ww / 2 < 0) {
+                x = ww / 2;
+            } else if (x + ww / 2 > zw) {
+                cx = parseInt(ww - (w - x));
+                x = zw - ww / 2;
+            } else {
+                cx = parseInt(ww / 2);
+            }
+            if (y - hh / 2 < 0) {
+                y = hh / 2;
+            } else if (y + hh / 2 > zh) {
+                cy = parseInt(hh - (zh - y));
+                y = zh - hh / 2;
+            } else {
+                cy = parseInt(hh / 2);
+            }
+
+            var imageData = ctx.getImageData(x - ww / 2, y - hh / 2, ww, hh);
+            var newCanvas = document.createElement("canvas");
+            newCanvas.id = "cursor";
+            newCanvas.width = imageData.width;
+            newCanvas.height = imageData.height;
+            imageData.data[(cy * imageData.width + cx) * 4 + 0] = 255.999 * 1;
+            imageData.data[(cy * imageData.width + cx) * 4 + 1] = 255.999 * 1;
+            imageData.data[(cy * imageData.width + cx) * 4 + 2] = 255.999 * 1;
+            newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+
+            zctx.drawImage(newCanvas, 0, 0, ww, hh, 0, 0, zw, zh);
         }
         canvas.addEventListener('mousemove', function (event) {
             pick(event, hoveredColor);

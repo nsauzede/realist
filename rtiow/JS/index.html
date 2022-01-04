@@ -5,7 +5,7 @@
     <title>RTIOW</title>
     <style>
         canvas {
-            border: 1px solid blueviolet;
+            border: 0px solid blueviolet;
         }
 
         .color-cell {
@@ -23,15 +23,16 @@
 <script src="ray.js"></script>
 <script src="main06_1.js"></script>
 <script src="main06_7.js"></script>
+<script src="main07_2.js"></script>
 
 <body onload="setup();">
     <table>
         <thead>
             <tr>
                 <th>Canvas</th>
+                <th>Zoomed</th>
                 <th width="150">Hovered color</th>
                 <th width="150">Selected color</th>
-                <th>Zoom</th>
             </tr>
         </thead>
         <tbody>
@@ -39,11 +40,11 @@
                 <td>
                     <canvas id="canvas" width="400" height="225">Canvas not supported!</canvas>
                 </td>
-                <td align="center" class="color-cell" id="hovered-color"></td>
-                <td align="center" class="color-cell" id="selected-color"></td>
                 <td>
                     <canvas id="zcanvas" width="400" height="225">Canvas not supported!</canvas>
                 </td>
+                <td align="center" class="color-cell" id="hovered-color"></td>
+                <td align="center" class="color-cell" id="selected-color"></td>
             </tr>
         </tbody>
     </table>
@@ -57,6 +58,7 @@
                 <td><button onclick="main05_2();">main05_2</button></td>
                 <td><button onclick="main06_1();">main06_1</button></td>
                 <td><button onclick="main06_7();">main06_7</button></td>
+                <td><button onclick="main07_2();">main07_2</button></td>
             </tr>
         </tbody>
     </table>
