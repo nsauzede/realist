@@ -26,7 +26,7 @@ function main08_3() {
         for (const h of world) {
             if (h.t === 'sphere') {
                 var rec = {};
-                if (hit_sphere(h.d, r, 0, infinity, rec)) {
+                if (hit_sphere(h.d, r, 0.001, infinity, rec)) {
                     const target = vadd(rec.p, vadd(rec.normal, random_in_unit_sphere()));
                     return vmul(0.5, ray_color({ orig: rec.p, dir: vsub(target, rec.p) }, world, depth - 1));
                 }
