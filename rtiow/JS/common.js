@@ -12,7 +12,7 @@ function print(s) {
     console.log(s);
 }
 function setup() {
-    document.getElementById('log').textContent = "Ready.";
+    document.getElementById('log').textContent = "Beware, some tests take some time to finish (main07+)";
     var canvas = document.getElementById('canvas');
     var zcanvas = document.getElementById('zcanvas');
     const w = canvas.width;
