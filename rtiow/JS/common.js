@@ -1,18 +1,22 @@
 const infinity = Number.POSITIVE_INFINITY;
-function cls(s) {
-    // document.getElementById('log').textContent = "";
-}
-function println(s) {
-    // document.getElementById('log').textContent += s + `\r\n`;
-    // document.getElementById('log').textContent = s + `\r\n` + document.getElementById('log').textContent;
+function log(s) {
     console.log(s);
 }
 function print(s) {
-    // document.getElementById('log').textContent += s;
-    console.log(s);
+    document.getElementById('status').textContent = s;
 }
 function setup() {
-    document.getElementById('log').textContent = "Beware, some tests take some time to finish (main07+)";
+    print("Beware, some tests take some time to finish (main07+)");
+    const c = 0.;
+    print(`c=${c} ${typeof (c)}`);
+    // const a = [0];
+    // const a = new Float32Array([0]);
+    const a = new Float32Array([1]);
+    function foo(v) {
+        v[0] = 12;
+    }
+    foo(a)
+    print(`a=${a[0]} ${typeof (a[0])}`);
     var canvas = document.getElementById('canvas');
     var zcanvas = document.getElementById('zcanvas');
     const w = canvas.width;

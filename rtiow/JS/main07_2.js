@@ -26,17 +26,16 @@ function main07_2() {
             if (h.t === 'sphere') {
                 var temp_rec = {};
                 if (hit_sphere(h.d, r, 0, infinity, temp_rec)) {
-                    return vmul(0.5, vadd(temp_rec.normal, new Float32Array([1, 1, 1])));
+                    return vmul(0.5, vadd(temp_rec.normal, [1, 1, 1]));
                 }
             }
         }
         const unit_direction = unit_vector(r.dir);
         t = 0.5 * (unit_direction[1] + 1.0);
-        return new Float32Array([1.0 - t + 0.5 * t, 1.0 - t + 0.7 * t, 1.0]);
+        return [1.0 - t + 0.5 * t, 1.0 - t + 0.7 * t, 1.0];
     }
     const func = arguments.callee.name || "anonymous";
-    cls();
-    println(`${func}`);
+    print(`${func}`);
     var canvas = document.getElementById('canvas');
     const w = canvas.width;
     const h = canvas.height;
@@ -48,7 +47,7 @@ function main07_2() {
         const image_width = w;
         const image_height = h;
         const samples_per_pixel = document.getElementById('spp').value;
-        println(`using ${samples_per_pixel} SPP`);
+        log(`using ${samples_per_pixel} SPP`);
         const sppscale = 1.0 / samples_per_pixel;
         // world
         const world = [{ t: 'sphere', d: [[0, 0, -1], 0.5] }, { t: 'sphere', d: [[0, -100.5, -1], 100] }];
@@ -56,14 +55,14 @@ function main07_2() {
         const viewport_height = 2.0;
         const viewport_width = aspect_ratio * viewport_height;
         const focal_length = 1.0;
-        const origin = new Float32Array([0, 0, 0]);
-        const horizontal = new Float32Array([viewport_width, 0, 0]);
-        const vertical = new Float32Array([0, viewport_height, 0]);
-        const lower_left_corner = vsub(vsub(vsub(origin, vdiv(horizontal, 2.0)), vdiv(vertical, 2.0)), new Float32Array([0, 0, focal_length]));
+        const origin = [0, 0, 0];
+        const horizontal = [viewport_width, 0, 0];
+        const vertical = [0, viewport_height, 0];
+        const lower_left_corner = vsub(vsub(vsub(origin, vdiv(horizontal, 2.0)), vdiv(vertical, 2.0)), [0, 0, focal_length]);
         for (let j = 0; j < h; j++) {
-            println(`Scanlines remaining: ${h - j - 1}`);
+            log(`Scanlines remaining: ${h - j - 1}`);
             for (let i = 0; i < w; i++) {
-                var pixel_color = new Float32Array([0, 0, 0]);
+                var pixel_color = [0, 0, 0];
                 for (let s = 0; s < samples_per_pixel; s++) {
                     const u = (parseFloat(i) + random_double()) / (w - 1);
                     const v = (parseFloat(h - 1 - j) + random_double()) / (h - 1);
@@ -76,6 +75,6 @@ function main07_2() {
             }
         }
         ctx.putImageData(image, 0, 0);
-        println(`Done. ${func}`);
+        print(`Done. ${func}`);
     }
 }

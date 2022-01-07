@@ -292,7 +292,7 @@ void color(vec3 col, const ray *r, hittable_t *world, int depth) {
 		ray scattered;
 		vec3 attenuation;
 		hittable_t *h = rec.h_ptr;
-		if (depth < 50 && h->mat.scatter(&h->mat, r, &rec, attenuation, &scattered)) {
+		if (depth < 5 && h->mat.scatter(&h->mat, r, &rec, attenuation, &scattered)) {
 #ifdef DEBUG
 /*
 			printf("ATT\n");
@@ -480,9 +480,9 @@ int main(int argc, char *argv[]) {
 	pcg_srand(0);
 	char *fnameout = 0;
 	FILE *fout = stdout;
-	int nx = 200;
-	int ny = 100;
-	int ns = 1;
+	int nx = 400;
+	int ny = 255;
+	int ns = 10;
 	int arg = 1;
 	if (arg < argc) {
 		sscanf(argv[arg++], "%d", &nx);

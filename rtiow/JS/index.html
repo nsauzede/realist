@@ -27,6 +27,7 @@
 <script src="main07_2.js"></script>
 <script src="main08_2.js"></script>
 <script src="main08_3.js"></script>
+<script src="main09_5.js"></script>
 
 <body onload="setup();">
     <table>
@@ -64,12 +65,17 @@
                 <td><button onclick="main07_2();">main07_2</button></td>
                 <td><button onclick="main08_2();">main08_2</button></td>
                 <td><button onclick="main08_3();">main08_3</button></td>
-                <td>SPP<input id="spp" type="number" value="10" size="2"></td>
-                <td>Depth<input id="max_depth" type="number" value="5" size="2"></td>
+            </tr>
+            <tr>
+                <td><button onclick="main09_5();">main09_5</button></td>
+            </tr>
+            <tr>
+                <td>SPP<input id="spp" type="number" value="100" size="2"></td>
+                <td>Depth<input id="max_depth" type="number" value="50" size="2"></td>
             </tr>
         </tbody>
     </table>
-    <textarea id="log" cols='120' rows='4'>Log</textarea>
+    <span id="status">Ready</span>
 </body>
 
 </html>

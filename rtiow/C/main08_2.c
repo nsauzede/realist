@@ -123,9 +123,9 @@ void get_ray(camera *cam, ray *r, float u, float v) {
 
 int main() {
 	pcg_srand(0);
-	int nx = 200;
-	int ny = 100;
-	int ns = 100;
+	int nx = 400;
+	int ny = 225;
+	int ns = 10;
 	printf("P3\n"); printf("%d %d\n", nx, ny); printf("255\n");
 	hittable world[] = {
 		HSTART,

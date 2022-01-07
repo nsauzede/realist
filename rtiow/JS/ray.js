@@ -1,3 +1,6 @@
 function rat(r, t) {
-    return vadd(r.orig, vmul(t, r.dir));
+    var at = r.dir.slice(0);
+    vadd(at, r.orig);
+    vmul(t, at);
+    return at;
 }
