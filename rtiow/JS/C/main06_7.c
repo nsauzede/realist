@@ -130,8 +130,8 @@ void main06_7(conf_t c) {
     // printf("Scanlines remaining: %d\n", j);
     for (int i = 0; i < image_width; ++i) {
       vec3 pixel_color;
-      scalar u = (scalar)i / (image_width - 1);
-      scalar v = (scalar)j / (image_height - 1);
+      scalar u = (scalar)i / (image_width);
+      scalar v = (scalar)j / (image_height);
       vec3 direction, direction0;
       vsub(direction, lower_left_corner, origin);
       vmul(direction0, u, horizontal);
@@ -145,9 +145,9 @@ void main06_7(conf_t c) {
       // if (pixel_color[0] < 0.0 || pixel_color[0] >= 1.0) {
       //   printf("col0=%f\n", pixel_color[0]);
       // }
-      int ir = 255.999 * pixel_color[0];
-      int ig = 255.999 * pixel_color[1];
-      int ib = 255.999 * pixel_color[2];
+      int ir = 255.99 * pixel_color[0];
+      int ig = 255.99 * pixel_color[1];
+      int ib = 255.99 * pixel_color[2];
       *p++ = ir;
       *p++ = ig;
       *p++ = ib;

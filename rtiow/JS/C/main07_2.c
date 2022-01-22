@@ -114,7 +114,8 @@ static inline scalar clamp(scalar x, scalar min, scalar max) {
 }
 
 static inline void make_camera(camera *cam) {
-  const scalar aspect_ratio = 16.0 / 9.0;
+  // const scalar aspect_ratio = 16.0 / 9.0;
+  const scalar aspect_ratio = 2.0;
   const scalar viewport_height = 2.0;
   const scalar viewport_width = aspect_ratio * viewport_height;
   const scalar focal_length = 1.0;
@@ -151,6 +152,10 @@ void main07_2(conf_t c) {
   // Camera
   camera cam;
   make_camera(&cam);
+  // camera cam = {.lower_left_corner = {-2.0, -1.0, -1.0},
+  //               .horizontal = {4.0, 0.0, 0.0},
+  //               .vertical = {0.0, 2.0, 0.0},
+  //               .origin = {0.0, 0.0, 0.0}};
   // World
   const hittable world[] = {
       HSPHERE(0, 0, -1, 0.5),
@@ -164,19 +169,22 @@ void main07_2(conf_t c) {
     for (int i = 0; i < image_width; ++i) {
       vec3 pixel_color = {0.0, 0.0, 0.0};
       for (int s = 0; s < samples_per_pixel; s++) {
-        scalar u = (i + random_s()) / (image_width - 1);
-        scalar v = (j + random_s()) / (image_height - 1);
+        scalar u = (i + random_s()) / (image_width);
+        scalar v = (j + random_s()) / (image_height);
+        // printf("j=%d i=%d u=%f v=%f\n", j, i, u, v);
         ray r;
         get_ray(&r, &cam, u, v);
-        // printf("j=%d i=%d u=%f v=%f\n", j, i, u, v);
+        // rprint(&r);
+        // printf("\n");
         vec3 rcolor;
         ray_color(rcolor, &r, world, worldlen);
         vadd(pixel_color, pixel_color, rcolor);
       }
       vmul(pixel_color, scale, pixel_color);
-      int ir = 255.999 * clamp(pixel_color[0], 0.0, 0.999);
-      int ig = 255.999 * clamp(pixel_color[1], 0.0, 0.999);
-      int ib = 255.999 * clamp(pixel_color[2], 0.0, 0.999);
+      int ir = 255.99 * clamp(pixel_color[0], 0.0, 0.999);
+      int ig = 255.99 * clamp(pixel_color[1], 0.0, 0.999);
+      int ib = 255.99 * clamp(pixel_color[2], 0.0, 0.999);
+      // printf("%d %d %d\n", ir, ig, ib);
       *p++ = ir;
       *p++ = ig;
       *p++ = ib;

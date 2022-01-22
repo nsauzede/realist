@@ -67,9 +67,9 @@ void main04_2(conf_t c) {
       // printf("j=%d i=%d u=%f v=%f\n", j, i, u, v);
       vec3 direction, direction0;
       vsub(direction, lower_left_corner, origin);
-      vmul(direction0, u, horizontal);
-      vadd(direction, direction, direction0);
       vmul(direction0, v, vertical);
+      vadd(direction, direction, direction0);
+      vmul(direction0, u, horizontal);
       vadd(direction, direction, direction0);
       ray r;
       rmake(&r, origin, direction);
@@ -77,9 +77,9 @@ void main04_2(conf_t c) {
       // direction[2]);
       ray_color(pixel_color, r);
       // printf("%f %f %f\n", pixel_color[0], pixel_color[1], pixel_color[2]);
-      int ir = 255.999 * pixel_color[0];
-      int ig = 255.999 * pixel_color[1];
-      int ib = 255.999 * pixel_color[2];
+      int ir = 255.99 * pixel_color[0];
+      int ig = 255.99 * pixel_color[1];
+      int ib = 255.99 * pixel_color[2];
       // printf("%d %d %d\n", ir, ig, ib);
       *p++ = ir;
       *p++ = ig;
