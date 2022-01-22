@@ -1,22 +1,29 @@
-#include <stdio.h>
-int main() {
-    // Image
-    const int image_width = 400;
-    const int image_height = 225;
-    // Render
-    printf("P3\n%d %d\n255\n", image_width, image_height);
-    for (int j = image_height-1; j >= 0; --j) {
-        fprintf(stderr, "Scanlines remaining: %d\n", j);
-        for (int i = 0; i < image_width; ++i) {
-            double r = (double)i / (image_width-1);
-            double g = (double)j / (image_height-1);
-            double b = 0.25;
+#include "conf.h"
+// #include <stdio.h>
+void main02_3(conf_t c) {
+  // Image
+  const int image_width = IMG_WIDTH(c);
+  const int image_height = IMG_HEIGHT(c);
+  // Render
+  uint8_t *p = PIXELS(c);
+  for (int j = image_height - 1; j >= 0; --j) {
+    // fprintf(stderr, "Scanlines remaining: %d\n", j);
+    for (int i = 0; i < image_width; ++i) {
+      // double r = (double)i / (image_width - 1);
+      // double g = (double)j / (image_height - 1);
+      double r = (double)i / (image_width);
+      double g = (double)j / (image_height);
+      // double b = 0.25;
+      double b = 0.2;
 
-            int ir = 255.999 * r;
-            int ig = 255.999 * g;
-            int ib = 255.999 * b;
+      int ir = 255.999 * r;
+      int ig = 255.999 * g;
+      int ib = 255.999 * b;
+      *p++ = ir;
+      *p++ = ig;
+      *p++ = ib;
 
-            printf("%d %d %d\n", ir, ig, ib);
-        }
+      //   printf("%d %d %d\n", ir, ig, ib);
     }
+  }
 }
