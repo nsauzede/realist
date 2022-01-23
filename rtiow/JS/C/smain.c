@@ -11,7 +11,7 @@
 
 SDL_Surface *screen = 0;
 int quit = 0;
-int cur = 0, last = -1;
+int cur = napis - 1, last = -1;
 conf_t c;
 void loop() {
   SDL_Event e;
@@ -54,7 +54,7 @@ void loop() {
     uint8_t *p = PIXELS(c);
     if (SDL_MUSTLOCK(screen))
       SDL_LockSurface(screen);
-    for (int j = image_height - 1; j >= 0; --j) {
+    for (int j = 0; j < image_height; j++) {
       for (int i = 0; i < image_width; ++i) {
         int r = *p++;
         int g = *p++;

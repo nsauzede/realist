@@ -12,10 +12,12 @@
 typedef double scalar;
 #define ssqrt sqrt
 #define sabs fabs
+#define spow pow
 #else
 typedef float scalar;
 #define ssqrt sqrtf
 #define sabs fabsf
+#define spow powf
 #endif
 
 typedef scalar vec3[3];
@@ -23,6 +25,13 @@ typedef scalar vec3[3];
 
 #define API static inline
 // #define API
+
+static inline scalar smin(scalar x, scalar y) {
+  if (x < y)
+    return x;
+  else
+    return y;
+}
 
 static inline void vprint(const vec3 r) {
 #if 0

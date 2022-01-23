@@ -23,13 +23,13 @@ SDL2_LDLIBS+=`sdl2-config --libs`
 
 all:$(TARGET)
 MAINS:=$(wildcard main*_*.c)
-main: main.c $(MAINS)
+main: main.c $(MAINS) conf.h
 smain:CFLAGS+=$(SDL_CFLAGS)
 smain:LDLIBS+=$(SDL_LDLIBS)
 s2main:CFLAGS+=$(SDL2_CFLAGS)
 s2main:LDLIBS+=$(SDL2_LDLIBS)
-smain: smain.c $(MAINS)
-s2main: s2main.c $(MAINS)
+smain: smain.c $(MAINS) conf.h
+s2main: s2main.c $(MAINS) conf.h
 s2main.html:EMFLAGS=-s USE_SDL=2
 
 SRC:=$(wildcard main*_*.c)
