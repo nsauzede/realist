@@ -18,6 +18,10 @@ void main05_2(conf_t c);
 void main06_1(conf_t c);
 void main06_7(conf_t c);
 void main07_2(conf_t c);
+void main08_2(conf_t c);
+void main08_3(conf_t c);
+void main09_5(conf_t c);
+void main09_6(conf_t c);
 typedef struct {
   apicb_t cb;
   const char *name;
@@ -28,6 +32,7 @@ typedef struct {
 api_t apis[] = {
     DECL(main02_2), DECL(main02_3), DECL(main03_3), DECL(main04_2),
     DECL(main05_2), DECL(main06_1), DECL(main06_7), DECL(main07_2),
+    DECL(main08_2), DECL(main08_3), DECL(main09_5), DECL(main09_6),
 };
 const int napis = sizeof(apis) / sizeof(apis[0]);
 #endif /*CONF_IMPL*/

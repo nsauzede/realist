@@ -11,7 +11,8 @@ TARGET+=s2main.html
 ifdef DBG
 CFLAGS:=-g -O0
 else
-CFLAGS:=-O2
+#CFLAGS:=-O2
+CFLAGS:=-O3 -fno-plt -flto -DNDEBUG
 endif
 LDLIBS:=-lm
 

@@ -1,6 +1,7 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include <float.h>
 #include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
@@ -10,9 +11,11 @@
 #ifdef USE_DOUBLE
 typedef double scalar;
 #define ssqrt sqrt
+#define sabs fabs
 #else
 typedef float scalar;
 #define ssqrt sqrtf
+#define sabs fabsf
 #endif
 
 typedef scalar vec3[3];
@@ -105,5 +108,10 @@ API scalar vdot(const vec3 r1, const vec3 r2) {
 }
 
 API void unit_vector(vec3 l, const vec3 r) { vdiv(l, r, vlen(r)); }
+
+API int near_zero(const vec3 r) {
+  const scalar s = 1e-8;
+  return sabs(r[0]) < s && sabs(r[1]) < s && sabs(r[2]) < s;
+}
 
 #endif /*VEC3_H*/

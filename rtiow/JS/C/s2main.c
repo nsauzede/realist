@@ -92,7 +92,8 @@ int main(int argc, char *argv[]) {
   // Image
 #if 1
   const int image_width = 400;
-  double aspect_ratio = 16.0 / 9.0;
+  // double aspect_ratio = 16.0 / 9.0;
+  double aspect_ratio = 2.0;
   // const int image_height = 225;
   const int image_height = image_width / aspect_ratio;
 #else
